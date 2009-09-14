@@ -6,7 +6,7 @@ When /^I create an empty "([^\"]*)"$/ do |resource_name|
   Dupe.create resource_name.to_sym
 end
 
-Then /^Dupe should mock the response to "([^\"]*)" with$/ do |url, response|
+Then /^Dupe should mock the response to "([^\"]*)" with(?:\:)?$/ do |url, response|
   @conn = ActiveResource::Connection.new('http://localhost')
   @conn.get(url).should == eval(response)
 end

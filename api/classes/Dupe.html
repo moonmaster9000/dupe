@@ -1,0 +1,725 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: Dupe [RDoc Documentation]</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }<\/style>" )
+
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">Dupe</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+
+
+                <a href="../files/lib/dupe/attribute_rb.html">
+
+                lib/dupe/attribute.rb
+
+                </a>
+
+
+        <br />
+
+
+                <a href="../files/lib/dupe/configuration_rb.html">
+
+                lib/dupe/configuration.rb
+
+                </a>
+
+
+        <br />
+
+
+                <a href="../files/lib/dupe/dupe_rb.html">
+
+                lib/dupe/dupe.rb
+
+                </a>
+
+
+        <br />
+
+
+                <a href="../files/lib/dupe/mock_service_response_rb.html">
+
+                lib/dupe/mock_service_response.rb
+
+                </a>
+
+
+        <br />
+
+
+                <a href="../files/lib/dupe/record_rb.html">
+
+                lib/dupe/record.rb
+
+                </a>
+
+
+        <br />
+
+
+                <a href="../files/lib/dupe/sequence_rb.html">
+
+                lib/dupe/sequence.rb
+
+                </a>
+
+
+        <br />
+
+            </td>
+        </tr>
+
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+
+                Object
+
+            </td>
+        </tr>
+
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+  <div id="contextContent">
+
+    <div id="description">
+      <table>
+<tr><td valign="top">Author:</td><td>Matt Parker (<a
+href="mailto:moonmaster9000@gmail.com">moonmaster9000@gmail.com</a>)
+
+</td></tr>
+<tr><td valign="top">License:</td><td>Distributes under the same terms as Ruby
+
+</td></tr>
+</table>
+
+    </div>
+
+   </div>
+
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+
+        <a href="#M000004">configure</a>&nbsp;&nbsp;
+
+        <a href="#M000002">create</a>&nbsp;&nbsp;
+
+        <a href="#M000001">define</a>&nbsp;&nbsp;
+
+        <a href="#M000005">define_mocks</a>&nbsp;&nbsp;
+
+        <a href="#M000006">find</a>&nbsp;&nbsp;
+
+        <a href="#M000003">stub</a>&nbsp;&nbsp;
+
+      </div>
+    </div>
+
+  </div>
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+    <!-- if method_list -->
+
+    <div id="methods">
+
+      <h3 class="section-bar">Public Class methods</h3>
+
+
+      <div id="method-M000004" class="method-detail">
+        <a name="M000004"></a>
+
+        <div class="method-heading">
+
+          <a href="Dupe.src/M000004.html" target="Code" class="method-signature"
+            onclick="popupCode('Dupe.src/M000004.html');return false;">
+
+          <span class="method-name">configure</span><span class="method-args">(factory) {|configure| ...}</span>
+
+          </a>
+
+        </div>
+
+        <div class="method-description">
+
+          <p>
+This allows you to override the array record identifiers for your resources
+([:id], by default)
+</p>
+<p>
+For example, suppose the RESTful application your trying to consume
+supports lookups by both a textual &#8216;label&#8217; and a numeric
+&#8216;id&#8217;, and that it contains an author service where the author
+with id &#8216;1&#8217; has the label &#8216;arthur-c-clarke&#8217;. Your
+application should expect the same response whether or not you call
+<tt>Author.find(1)</tt> or <tt>Author.find('arthur-c-clarke')</tt>.
+</p>
+<p>
+Thus, to ensure that <a href="Dupe.html">Dupe</a> mocks both, do the
+following:
+</p>
+<pre>
+  Dupe.configure :author do |configure|
+    configure.record_identifiers :id, :label
+  end
+</pre>
+<p>
+With this configuration, a <tt><a href="Dupe.html#M000002">Dupe.create</a>
+:author, :name =&gt; 'Arthur C. Clarke', :label =&gt;
+'arthur-c-clarke'</tt> will result in the following mocked service calls:
+</p>
+<p>
+<tt>Author.find(1) --&gt; (GET /authors/1.xml)</tt>
+</p>
+<pre>
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;author&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+    &lt;label&gt;arthur-c-clarke&lt;/label&gt;
+  &lt;/author&gt;
+</pre>
+<p>
+<tt>Author.find('arthur-c-clarke') --&gt; (GET
+/authors/arthur-c-clarke.xml)</tt>
+</p>
+<pre>
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;author&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+    &lt;label&gt;arthur-c-clarke&lt;/label&gt;
+  &lt;/author&gt;
+</pre>
+
+        </div>
+      </div>
+
+
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
+
+        <div class="method-heading">
+
+          <a href="Dupe.src/M000002.html" target="Code" class="method-signature"
+            onclick="popupCode('Dupe.src/M000002.html');return false;">
+
+          <span class="method-name">create</span><span class="method-args">(factory, records={})</span>
+
+          </a>
+
+        </div>
+
+        <div class="method-description">
+
+          <p>
+This method will cause <a href="Dupe.html">Dupe</a> to mock resources for
+the record(s) provided. The &#8220;records&#8221; value may be either a
+hash or an array of hashes. For example, suppose you&#8217;d like to mock a
+single author ActiveResource object:
+</p>
+<pre>
+  Dupe.create :author, :name =&gt; 'Arthur C. Clarke'
+</pre>
+<p>
+This will translate into the following two mocked resource calls:
+</p>
+<pre>
+  # Author.find(:all) --&gt; GET /authors.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;authors&gt;
+    &lt;author&gt;
+      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+      &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+    &lt;/author&gt;
+  &lt;/authors&gt;
+
+  # Author.find(1) --&gt; GET /authors/1.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;author&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+  &lt;/author&gt;
+</pre>
+<p>
+However, suppose you wanted to mock two or more authors.
+</p>
+<pre>
+  Dupe.create :author, [{:name =&gt; 'Arthur C. Clarke'}, {:name =&gt; 'Robert Heinlein'}]
+</pre>
+<p>
+This will translate into the following three mocked resource calls:
+</p>
+<pre>
+  # Author.find(:all) --&gt; GET /authors.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;authors&gt;
+    &lt;author&gt;
+      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+      &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+    &lt;/author&gt;
+    &lt;author&gt;
+      &lt;id type=&quot;integer&quot;&gt;2&lt;/id&gt;
+      &lt;name&gt;Robert Heinlein&lt;/name&gt;
+    &lt;/author&gt;
+  &lt;/authors&gt;
+
+  # Author.find(1) --&gt; GET /authors/1.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;author&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+  &lt;/author&gt;
+
+  # Author.find(2) --&gt; GET /authors/2.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;author&gt;
+    &lt;id type=&quot;integer&quot;&gt;2&lt;/id&gt;
+    &lt;name&gt;Robert Heinlein&lt;/name&gt;
+  &lt;/author&gt;
+</pre>
+
+        </div>
+      </div>
+
+
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
+
+        <div class="method-heading">
+
+          <a href="Dupe.src/M000001.html" target="Code" class="method-signature"
+            onclick="popupCode('Dupe.src/M000001.html');return false;">
+
+          <span class="method-name">define</span><span class="method-args">(factory) {|define| ...}</span>
+
+          </a>
+
+        </div>
+
+        <div class="method-description">
+
+          <p>
+Create data definitions for your resources. This allows you to setup
+default values for columns and even provide data transformations.
+</p>
+<p>
+For example, suppose you had the following cucumber scenario:
+</p>
+<pre>
+  # RAILS_ROOT/features/library/find_book.feature
+  Feature: Find a book
+    As a reader
+    I want to find books in my library
+    So that I can read them
+
+  Scenario: Browsing books
+    Given the following author:
+    | name             | date_of_birth |
+    | Arthur C. Clarke | 1917-12-16    |
+
+    And the following book:
+    | name                  | author            |
+    | 2001: A Space Odyssey | Arthur C. Clarke  |
+
+    When....
+</pre>
+<p>
+We can use <a href="Dupe.html#M000001">Dupe.define</a> to
+</p>
+<ul>
+<li>Transform data (e.g., turn the string &#8216;1917-12-16&#8217; into a Date
+object)
+
+</li>
+<li>Provide default values for attributes (e.g., give all author&#8217;s a
+default biography)
+
+</li>
+<li>Associate records (e.g., given an author name, return the author record
+associated with that name)
+
+</li>
+</ul>
+<p>
+To accomplish the afore mentioned definitions:
+</p>
+<pre>
+  # RAILS_ROOT/features/dupe_definitions/book.rb
+
+  Dupe.define :author do |define|
+    define.bio 'Lorem ipsum delor.'
+    define.date_of_birth do |d|
+      Date.parse(t)
+    end
+  end
+
+  Dupe.define :book do |define|
+    define.author do |author_name|
+      Dupe.find(:author) {|a| a.name == author_name}
+    end
+  end
+
+  -----------------------------------------------------------------------------------------------------------------
+
+  # RAILS_ROOT/features/step_definitions/library/find_book_steps.rb
+
+  Given /^the following author:$/ do |author_table|
+    Dupe.create(:author, author_table.hashes)
+  end
+
+  Given /^the following book:$/ do |book_table|
+    Dupe.create(:book, book_table.hashes)
+  end
+</pre>
+<p>
+When cucumber encounters the &#8220;Given the following author:&#8221;
+line, the corresponding step definition will ask <a
+href="Dupe.html">Dupe</a> to mock ActiveResource responses to find(:all)
+and find(:id) with the data specified in the cucumber hash table
+immediately following the &#8220;Given the following author:&#8221; line.
+Since we didn&#8217;t specify a &#8216;bio&#8217; value in our cucumber
+hash table, <a href="Dupe.html">Dupe</a> will give it the default value
+&#8216;Bio stub.&#8217;. Also, it will transform the
+&#8216;date_of_birth&#8217; value we provided in the hash table into a time
+object.
+</p>
+<p>
+Similarly, for the :book cucumber hash table, <a href="Dupe.html">Dupe</a>
+will transform the author name we provided into the author object we had
+already specified in the :author table.
+</p>
+<p>
+In terms of mocked responses, we could expect something like:
+</p>
+<pre>
+  # Author.find(1) --&gt; GET /authors/1.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;author&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+    &lt;bio&gt;Bio stub.&lt;/bio&gt;
+    &lt;date_of_birth&gt;1917-12-16T00:00:00Z&lt;/date_of_birth&gt;
+  &lt;/author&gt;
+
+  # Book.find(1) --&gt; GET /books/1.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;book&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;name&gt;2001: A Space Odyssey&lt;/name&gt;
+    &lt;author&gt;
+      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+      &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+      &lt;bio&gt;Bio stub.&lt;/bio&gt;
+      &lt;date_of_birth&gt;1917-12-16T00:00:00Z&lt;/date_of_birth&gt;
+    &lt;/author&gt;
+  &lt;/book&gt;
+</pre>
+
+        </div>
+      </div>
+
+
+      <div id="method-M000005" class="method-detail">
+        <a name="M000005"></a>
+
+        <div class="method-heading">
+
+          <a href="Dupe.src/M000005.html" target="Code" class="method-signature"
+            onclick="popupCode('Dupe.src/M000005.html');return false;">
+
+          <span class="method-name">define_mocks</span><span class="method-args">(factory) {|define| ...}</span>
+
+          </a>
+
+        </div>
+
+        <div class="method-description">
+
+          <p>
+By default, <a href="Dupe.html">Dupe</a> will mock responses to
+ActiveResource <tt>find(:all)</tt> and <tt>find(id)</tt>. However,
+it&#8217;s likely that your cucumber scenarios will eventually fire off an
+ActiveResource request that&#8217;s something other than these basic
+lookups.
+</p>
+<p>
+<a href="Dupe.html#M000005">Dupe.define_mocks</a> allows you to add new
+resource mocks and override the built-in resource mocks.
+</p>
+<p>
+For example, suppose you had a Book ActiveResource model, and you want to
+use it to get the :count of all Books in the back end system your
+consuming. <tt>Book.get(:count)</tt> would fire off an HTTP request to the
+backend service like <tt>&quot;GET /books/count.xml&quot;</tt>, and
+assuming the service is set up to respond to that request, you might expect
+to get something back like:
+</p>
+<pre>
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;hash&gt;
+    &lt;count type=&quot;integer&quot;&gt;3&lt;/count&gt;
+  &lt;/hash&gt;
+</pre>
+<p>
+To mock this for the purposes of cuking, you could do the following:
+</p>
+<pre>
+  Dupe.define_mocks :book do |define|
+    define.count do |mock, records|
+      mock.get &quot;/books/count.xml&quot;, {}, {:count =&gt; records.size}.to_xml
+    end
+  end
+</pre>
+<p>
+The <tt>mock</tt> object is the ActiveResource::HttpMock object. Please see
+the documentation for that if you would like to know more about
+what&#8217;s possible with it.
+</p>
+
+        </div>
+      </div>
+
+
+      <div id="method-M000006" class="method-detail">
+        <a name="M000006"></a>
+
+        <div class="method-heading">
+
+          <a href="Dupe.src/M000006.html" target="Code" class="method-signature"
+            onclick="popupCode('Dupe.src/M000006.html');return false;">
+
+          <span class="method-name">find</span><span class="method-args">(*args) {|record| ...}</span>
+
+          </a>
+
+        </div>
+
+        <div class="method-description">
+
+          <p>
+Search for a resource. This works a bit differently from both
+ActiveRecord&#8217;s find and ActiveResource&#8217;s find. This is most
+often used for defining associations between objects (<a
+href="Dupe.html#M000001">Dupe.define</a>). It will return a hash
+representation of the resource (or an array of hashes if we asked for
+multiple records).
+</p>
+<p>
+For example, suppose we have an author resource, and a book resource with a
+nested author attribute (in ActiveRecord parlance, Book belongs_to Author,
+Author has_many Book).
+</p>
+<p>
+Now suppose we&#8217;ve created the following cucumber scenario:
+</p>
+<pre>
+  Scenario: Browsing books
+    Given the following author:
+    | name             | date_of_birth |
+    | Arthur C. Clarke | 1917-12-16    |
+
+    And the following books:
+    | name                  | author           | published | genre    |
+    | 2001: A Space Odyssey | Arthur C. Clarke | 1968      | sci-fi   |
+    | A Fall of Moondust    | Arthur C. Clarke | 1961      | fantasy  |
+    | Rendezvous with Rama  | Arthur C. Clarke | 1972      | sci-fi   |
+
+    When....
+</pre>
+<p>
+To link up the book and author, we could create the following book
+definition
+</p>
+<pre>
+  Dupe.define :book do |book|
+    book.author {|name| Dupe.find(:author) {|a| a.name == name}}
+  end
+</pre>
+<p>
+The line <tt><a href="Dupe.html#M000006">Dupe.find</a>(:author) {|a| a.name
+== name}</tt> could be translated as &#8220;find the first author record
+where the author&#8217;s name equals `name`&#8221;.
+</p>
+<p>
+<a href="Dupe.html">Dupe</a> decided to return only a single record because
+we specified <tt>find(:author)</tt>. Had we instead specified
+<tt>find(:authors)</tt>, resource factory would have instead returned an
+array of results.
+</p>
+<p>
+More examples:
+</p>
+<pre>
+  # find all books written in the 1960's
+  Dupe.find(:books) {|b| b.published &gt;= 1960 and b.published &lt;= 1969}
+
+  # return the first book found that was written by Arthur C. Clarke (nested resources example)
+  Dupe.find(:book) {|b| b.author.name == 'Arthur C. Clarke'}
+
+  # find all sci-fi and fantasy books
+  Dupe.find(:books) {|b| b.genre == 'sci-fi' or b.genre == 'fantasy'}
+
+  # find all books written by people named 'Arthur'
+  Dupe.find(:books) {|b| b.author.name.match /Arthur/}
+</pre>
+<p>
+Also, if you have the need to explicitly specify :all or :first instead of
+relying on specifying the singular v. plural version of your resource name
+(perhaps the singular and plural version of your resource are exactly the
+same):
+</p>
+<pre>
+  Dupe.find(:all, :deer) {|d| d.type == 'doe'}
+  Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
+</pre>
+
+        </div>
+      </div>
+
+
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
+
+        <div class="method-heading">
+
+          <a href="Dupe.src/M000003.html" target="Code" class="method-signature"
+            onclick="popupCode('Dupe.src/M000003.html');return false;">
+
+          <span class="method-name">stub</span><span class="method-args">(factory, options)</span>
+
+          </a>
+
+        </div>
+
+        <div class="method-description">
+
+          <p>
+You can use this method to quickly stub out a large number of resources.
+For example:
+</p>
+<pre>
+  Dupe.stub(
+    :author,
+    :template =&gt; {:name =&gt; 'author'},
+    :count    =&gt; 20
+  )
+</pre>
+<p>
+would generate 20 author records like:
+</p>
+<pre>
+  {:name =&gt; 'author 1', :id =&gt; 1}
+  ....
+  {:name =&gt; 'author 20', :id =&gt; 20}
+</pre>
+<p>
+and it would also mock find(id) and find(:all) responses for these records
+(along with any other custom mocks you&#8217;ve setup via <a
+href="Dupe.html#M000005">Dupe.define_mocks</a>).
+</p>
+<p>
+You may override both the sequence starting value and the attribute to
+sequence:
+</p>
+<pre>
+  Dupe.stub(
+    :book,
+    :template =&gt; {:author =&gt; 'Arthur C. Clarke', :title =&gt; 'moonmaster'},
+    :count    =&gt; 20,
+    :sequence_start_value =&gt; 9000,
+    :sequence =&gt; :title
+  )
+</pre>
+<p>
+This would generate 20 book records like:
+</p>
+<pre>
+  {:id =&gt; 1, :author =&gt; 'Arthur C. Clarke', :title =&gt; 'moonmaster 9000'}
+  ....
+  {:id =&gt; 20, :author =&gt; 'Arthur C. Clarke', :title =&gt; 'moonmaster 9019'}
+</pre>
+<p>
+Naturally, stub will consult the <a
+href="Dupe.html#M000001">Dupe.define</a> definitions for anything
+it&#8217;s attempting to stub and will honor those definitions (default
+values, transformations) as you would expect.
+</p>
+
+        </div>
+      </div>
+
+
+
+    </div>
+
+
+
+
+  </div>
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

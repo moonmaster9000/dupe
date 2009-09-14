@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>stub (Dupe)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/dupe/dupe.rb, line 285</span>
+    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">stub</span>(<span class="ruby-identifier">factory</span>, <span class="ruby-identifier">options</span>)
+      <span class="ruby-identifier">setup_factory</span>(<span class="ruby-identifier">factory</span>)
+      <span class="ruby-ivar">@factories</span>[<span class="ruby-identifier">factory</span>].<span class="ruby-identifier">stub_services_with</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:template</span>], <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:count</span>].<span class="ruby-identifier">to_i</span>, (<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:sequence_start_value</span>] <span class="ruby-operator">||</span> <span class="ruby-value">1</span>), <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:sequence</span>])
+    <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

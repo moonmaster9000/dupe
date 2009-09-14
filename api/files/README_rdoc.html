@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: README.rdoc [RDoc Documentation]</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }<\/style>" )
+
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+  <div id="fileHeader">
+    <h1>README.rdoc</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>README.rdoc
+
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>2009-09-14 16:07:58 -0400</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+  <div id="contextContent">
+
+    <div id="description">
+      <h1><a href="../classes/Dupe.html">Dupe</a></h1>
+<p>
+There are lots of great tools out there to ease the burden of prototyping
+ActiveRecord objects while cuking your application (e.g.,
+thoughtbot&#8217;s &#8220;Factory <a
+href="http://www.thoughtbot.com/projects/factory_girl">Girl"</a>). But what
+about prototyping ActiveResource records? That&#8217;s where <a
+href="../classes/Dupe.html">Dupe</a> steps in.
+</p>
+<h2>Installation</h2>
+<pre>
+  # gem install moonmaster9000-dupe
+</pre>
+<h2>Example</h2>
+<p>
+Let&#8217;s suppose your cuking a book search application for a library
+that consumes a RESTFUL book datastore service via ActiveResource. You
+might start by writing the following feature in
+<em>RAILS_ROOT/features/library/find_book.feature</em>:
+</p>
+<pre>
+  Feature: find a book
+    As a reader
+    I want to search for books
+    so that I can check them out and read them.
+
+  Scenario: search by author
+    Given an author &quot;Arthur C. Clarke&quot;
+    And a book &quot;2001: A Space Odyssey&quot; by &quot;Arthur C. Clarke&quot;
+    When I search for &quot;Arthur C. Clarke&quot;
+    I should see &quot;2001: A Space Odyssey&quot;
+</pre>
+<p>
+To get this to pass, you might first create <a
+href="http://api.rubyonrails.org/classes/ActiveResource/Base.html">ActiveResource</a>
+models for Books and Authors that connect to the Library service:
+</p>
+<pre>
+  class Book &lt; ActiveResource::Base
+    self.site = 'http://bookservice.domain'
+  end
+
+  class Author &lt; ActiveResource::Base
+    self.site = 'http://bookservice.domain'
+  end
+</pre>
+<p>
+Then you might create the following resource definition via <a
+href="../classes/Dupe.html#M000001">Dupe.define</a> (put it in a file with
+a .rb extension and place it in RAILS_ROOT/features/support/):
+</p>
+<pre>
+  Dupe.define :book do |book|
+    book.author do |author_name|
+      Dupe.find(:author) {|a| a.name == author_name}
+    end
+  end
+</pre>
+<p>
+and the following cucumber step definitions (utilizing <a
+href="../classes/Dupe.html#M000002">Dupe.create</a>):
+</p>
+<pre>
+  Given /^an author &quot;([^\&quot;]*)&quot;$/ do |author|
+    Dupe.create :author, :name =&gt; author
+  end
+
+  Given /^a book &quot;([^\&quot;]*)&quot; by &quot;([^\&quot;]*)&quot;$/ do |book, author|
+    Dupe.create :book, :title =&gt; book, :author =&gt; author
+  end
+</pre>
+<p>
+<a href="../classes/Dupe.html#M000002">Dupe.create</a> will in turn mock
+two service responses for each resource. For example, for the Book
+resource, it will mock:
+</p>
+<pre>
+  # Book.find(:all) --&gt; GET /books.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;books type=&quot;array&quot;&gt;
+    &lt;book&gt;
+      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+      &lt;title&gt;2001: A Space Odyssey&lt;/title&gt;
+      &lt;author&gt;
+        &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+        &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+      &lt;/author&gt;
+    &lt;/book&gt;
+  &lt;/books&gt;
+
+  # Book.find(1) --&gt; GET /books/1.xml
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;book&gt;
+    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+    &lt;title&gt;2001: A Space Odyssey&lt;/title&gt;
+    &lt;author&gt;
+      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+      &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
+    &lt;/author&gt;
+  &lt;/book&gt;
+</pre>
+<p>
+From here, you could start scaffolding your controllers, with the
+assumption that <a href="../classes/Dupe.html">Dupe</a> will mock the
+responses to Book.find(<id or :all>) and Author.find(<id or :all>).
+</p>
+<h2>More</h2>
+<p>
+<a href="../classes/Dupe.html">Dupe</a> supports attribute defaults,
+attribute transoformations, stubbing, resource associations, custom
+resource mocks, and more. Want to learn more? Consult the API documentation
+at <a
+href="http://moonmaster9000.github.com/dupe/api/">moonmaster9000.github.com/dupe/api/</a>
+</p>
+
+    </div>
+
+   </div>
+
+
+  </div>
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+    <!-- if method_list -->
+
+
+
+
+  </div>
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

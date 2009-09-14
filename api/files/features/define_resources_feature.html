@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: define_resources.feature [RDoc Documentation]</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }<\/style>" )
+
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+  <div id="fileHeader">
+    <h1>define_resources.feature</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>features/define_resources.feature
+
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>2009-09-14 16:07:58 -0400</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+Feature: defining and creating resources
+</p>
+<pre>
+  As a behavior-driven developer
+  I want to create resource definitions
+  So that I can mock service responses
+</pre>
+<p>
+Scenario: no resource definition required
+</p>
+<pre>
+  Given I have no resource definition for &quot;book&quot;
+  When I mock a simple book resource
+  Then Dupe should contain that resource record exactly as I specified it
+</pre>
+<p>
+Scenario: resource definition with default values for attributes
+</p>
+<pre>
+  Given I have a book resource definition with author defaulted to &quot;Anonymous&quot;
+  When I mock a book titled &quot;Bible&quot;
+  Then Dupe should set the author of &quot;Bible&quot; to &quot;Anonymous&quot;
+</pre>
+<p>
+Scenario: resource definition with attribute association
+</p>
+<pre>
+  Given I have an author definition with name defaulted to &quot;Anonymous&quot;
+  And a book definition where author associates to the author record
+  When I create an author
+  And When I create a book associated with that author
+  Then Dupe should contain a book record with the author record embedded
+</pre>
+<p>
+Scenario: resource definition with attribute transformation
+</p>
+<pre>
+  Given I have an author definition with name transformed to &quot;transformed name&quot;
+  When I create an author named &quot;this will get changed&quot;
+  Then Dupe should contain an author record with the name &quot;transformed name&quot;
+</pre>
+<p>
+Scenario: sequential ids
+</p>
+<pre>
+  When I create &quot;5&quot; books
+  Then the books factory should contain &quot;5&quot; records with the ids &quot;1&quot; through &quot;5&quot;
+  When I create &quot;5&quot; more books
+  Then the books factory should contain &quot;10&quot; records with the ids &quot;1&quot; through &quot;10&quot;
+</pre>
+
+    </div>
+
+   </div>
+
+
+  </div>
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+    <!-- if method_list -->
+
+
+
+
+  </div>
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

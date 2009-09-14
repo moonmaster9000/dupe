@@ -112,3 +112,33 @@ Scenario: finding all records
   """
   {:id => 1, :first_name => "Jo", :last_name => "Joneses"}
   """
+
+
+Scenario: find a resource with explicit :all or :first
+  Given 2 "buck" deer 
+  And a "doe" deer named "bambi"
+  When I search for "all" "deer"
+  Then I should find:
+  """
+  [{:id => 1, :name => "buck1", :type => "buck"}, {:id => 2, :name => "buck2", :type => "buck"}, {:id => 3, :name => "bambi", :type => "doe"}]
+  """
+  When I search for "first" "deer"
+  Then I should find:
+  """
+  {:id => 1, :name => "buck1", :type => "buck"}
+  """
+  When I search for "all" "deer" with name like "buck"
+  Then I should find: 
+  """
+  [{:id => 1, :name => "buck1", :type => "buck"}, {:id => 2, :name => "buck2", :type => "buck"}]
+  """
+  When I search for "first" "deer" with name like "bambi"
+  Then I should find:
+  """
+  {:id => 3, :name => "bambi", :type => "doe"}
+  """
+  When I search for "all" "deer" with type "doe"
+  Then I should find:
+  """
+  [{:id => 3, :name => "bambi", :type => "doe"}]
+  """

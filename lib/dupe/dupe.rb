@@ -261,6 +261,8 @@ class Dupe
     #   ....
     #   {:name => 'author 20', :id => 20}
     #
+    # and it would also mock find(id) and find(:all) responses for these records (along with any other custom mocks you've
+    # setup via Dupe.define_mocks).
     #
     # You may override both the sequence starting value and the attribute to sequence:
     #
@@ -282,7 +284,7 @@ class Dupe
     # and will honor those definitions (default values, transformations) as you would expect. 
     def stub(factory, options)
       setup_factory(factory)
-      @factories[factory].stub_services_with(options[:template], options[:count], options[:sequence_start_value], options[:sequence])
+      @factories[factory].stub_services_with(options[:template], options[:count].to_i, (options[:sequence_start_value] || 1), options[:sequence])
     end
 
     # This allows you to override the array record identifiers for your resources ([:id], by default)
@@ -391,10 +393,10 @@ class Dupe
     # More examples: 
     #   
     #   # find all books written in the 1960's
-    #   Dupe.find(:books) {|b| b.year >= 1960 and b.year <= 1969}
+    #   Dupe.find(:books) {|b| b.published >= 1960 and b.published <= 1969}
     #
-    #   # find all books written in the 1960's AND written by Arthur C. Clarke (nested resources example)
-    #   Dupe.find(:books) {|b| b.year >= 1960 and b.year <= 1969 and b.author.name == 'Arthur C. Clarke'}
+    #   # return the first book found that was written by Arthur C. Clarke (nested resources example)
+    #   Dupe.find(:book) {|b| b.author.name == 'Arthur C. Clarke'}
     #
     #   # find all sci-fi and fantasy books
     #   Dupe.find(:books) {|b| b.genre == 'sci-fi' or b.genre == 'fantasy'}
@@ -406,22 +408,16 @@ class Dupe
     # version of your resource name (perhaps the singular and plural version of your resource are exactly the same):
     # 
     #   Dupe.find(:all, :deer) {|d| d.type == 'doe'}
-    #   Dupe.find(:first, :deer) {|d| d.type == 'buck'}
-    def find(all_or_first=nil, factory_name, &block) # yield: record
-      match        = block ? block : proc {true}
-      all_or_first = ((factory_name.to_s.pluralize == factory_name.to_s) ? :all : :first)
+    #   Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
+    def find(*args, &block) # yield: record
+      all_or_first, factory_name = args[-2], args[-1]
+      match         = block ? block : proc {true}
+      all_or_first  = ((factory_name.to_s.pluralize == factory_name.to_s) ? :all : :first) unless all_or_first
       factory_name  = factory_name.to_s.singularize.to_sym
       verify_factory_exists factory_name
       result        = factories[factory_name].find_records_like match
       all_or_first  == :all ? result : result.first
     end
-
-    #def find(*args)
-    #  factory_name, all_or_first, match = parse_find_args args  
-    #  verify_factory_exists factory_name
-    #  result = factories[factory_name.to_sym].find_records_like(match)
-    #  all_or_first == :all ? result : result.first
-    #end
 
     def get_factory(factory) #:nodoc:
       setup_factory(factory)
@@ -442,19 +438,6 @@ class Dupe
 
     private
     
-    # for ruby -v < 1.9
-    #def parse_find_args(args)
-    #  raise "too many arguments passed to find" if args.size > 3 || args.size == 0
-    #  factory_name = (args.size == 3 ? args[1] : args[0]).to_s.singularize.to_sym
-    #  if args.size == 3
-    #    all_or_first = args[0] 
-    #  elsif args.size <= 2
-    #    all_or_first = ((args[0].to_s.pluralize == args[0].to_s) ? :all : :first)
-    #  end
-    #  match = args.size == 1 ? {} : args[-1] 
-    #  return factory_name, all_or_first, match
-    #end
-
     def setup_factory(factory)
       factories[factory] = Dupe.new(factory) unless factories[factory]
     end
@@ -505,15 +488,15 @@ class Dupe
   end
 
   private
-  def define_attribute(name, default_value=nil, prock=nil) #:nodoc:
+  def define_attribute(name, default_value=nil, prock=nil) 
     @attributes[name] = Attribute.new(name, default_value, prock)
   end
 
-  def process_records(records) #:nodoc:
+  def process_records(records)
     records.map {|r| generate_record({:id => sequence}.merge(r))}
   end
 
-  def generate_record(overrides={}) #:nodoc:
+  def generate_record(overrides={})
     define_missing_attributes(overrides.keys)
     record = {}
     @attributes.each do |attr_key, attr_class|
@@ -524,15 +507,15 @@ class Dupe
     record
   end
 
-  def sequence #:nodoc:
+  def sequence
     (@sequence ||= Sequence.new).next
   end
 
-  def define_missing_attributes(keys) #:nodoc:
+  def define_missing_attributes(keys)
     keys.each {|k| define_attribute(k.to_sym) unless @attributes[k.to_sym]}
   end
 
-  def stub_records(record_template, count, starting_value, sequence_attribute) #:nodoc:
+  def stub_records(record_template, count, starting_value, sequence_attribute)
     overrides = record_template.merge({sequence_attribute => (record_template[sequence_attribute].to_s + starting_value.to_s), :id => sequence})
     return [generate_record(overrides)] if count <= 1
     [generate_record(overrides)] + stub_records(record_template, count-1, starting_value+1, sequence_attribute)

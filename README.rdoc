@@ -1,11 +1,7 @@
 = Dupe 
 
-Dupe allows you to define resources, create a pool of resources, 
-extend those resources with your own custom response mocks, and even override the default 
-mocks Dupe provides (<em>find(:all)</em> and <em>find(id)</em>). 
-
-Dupe is ideally suited for working with Cucumber[http://cukes.info]. It also relies on ActiveResource::HttpMock[http://api.rubyonrails.org/classes/ActiveResource/HttpMock.html] for mocking
-resource responses. 
+There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's "Factory Girl"[http://www.thoughtbot.com/projects/factory_girl]).
+But what about prototyping ActiveResource records? That's where Dupe steps in.  
 
 == Installation
 
@@ -26,8 +22,7 @@ You might start by writing the following feature in <em>RAILS_ROOT/features/libr
     When I search for "Arthur C. Clarke"
     I should see "2001: A Space Odyssey"
 
-To get this to pass, you might first create an ActiveResource[http://api.rubyonrails.org/classes/ActiveResource/Base.html] model for a Book and an Author that will connect
-to the RESTful book service:
+To get this to pass, you might first create ActiveResource[http://api.rubyonrails.org/classes/ActiveResource/Base.html] models for Books and Authors that connect to the Library service:
 
   class Book < ActiveResource::Base
     self.site = 'http://bookservice.domain'
@@ -39,8 +34,8 @@ to the RESTful book service:
 
 Then you might create the following resource definition via Dupe.define (put it in a file with a .rb extension and place it in RAILS_ROOT/features/support/):
   
-  Dupe.define :book do |define|
-    define.author do |author_name|
+  Dupe.define :book do |book|
+    book.author do |author_name|
       Dupe.find(:author) {|a| a.name == author_name}
     end
   end
@@ -82,4 +77,5 @@ for the Book resource, it will mock:
     </author>
   </book>
 
-
+== More
+Dupe supports resource attribute defaults, stubbing, resource associations, custom resource mocks, and more. Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/

@@ -1,4 +1,4 @@
-class ResourceFactory
+class Dupe
   class Sequence  #:nodoc:
     def initialize(start=0)
       @sequence_value = start

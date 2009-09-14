@@ -1,8 +1,8 @@
-# ResourceFactory allows you to define resources, create a pool of resources, 
+# Dupe allows you to define resources, create a pool of resources, 
 # extend those resources with your own custom response mocks, and even override the default 
-# mocks ResourceFactory provides (<em>find(:all)</em> and <em>find(id)</em>). 
+# mocks Dupe provides (<em>find(:all)</em> and <em>find(id)</em>). 
 #
-# ResourceFactory is ideally suited for working with Cucumber[http://cukes.info]. It also relies on ActiveResource::HttpMock[http://api.rubyonrails.org/classes/ActiveResource/HttpMock.html] for mocking
+# Dupe is ideally suited for working with Cucumber[http://cukes.info]. It also relies on ActiveResource::HttpMock[http://api.rubyonrails.org/classes/ActiveResource/HttpMock.html] for mocking
 # resource responses. 
 #
 # Let's suppose your cuking a book search application for a library that consumes a RESTFUL book datastore service via ActiveResource.
@@ -30,25 +30,25 @@
 #     self.site = 'http://bookservice.domain'
 #   end
 #
-# Then you might create the following resource definition via ResourceFactory.define (put it in a file with a .rb extension and place it in RAILS_ROOT/features/support/):
+# Then you might create the following resource definition via Dupe.define (put it in a file with a .rb extension and place it in RAILS_ROOT/features/support/):
 #   
-#   ResourceFactory.define :book do |define|
+#   Dupe.define :book do |define|
 #     define.author do |author_name|
-#       ResourceFactory.find(:author) {|a| a.name == author_name}
+#       Dupe.find(:author) {|a| a.name == author_name}
 #     end
 #   end
 #
-# and the following cucumber step definitions (utilizing ResourceFactory.create):
+# and the following cucumber step definitions (utilizing Dupe.create):
 #   
 #   Given /^an author "([^\"]*)"$/ do |author|
-#     ResourceFactory.create :author, :name => author
+#     Dupe.create :author, :name => author
 #   end
 #
 #   Given /^a book "([^\"]*)" by "([^\"]*)"$/ do |book, author|
-#     ResourceFactory.create :book, :title => book, :author => author 
+#     Dupe.create :book, :title => book, :author => author 
 #   end
 #
-# ResourceFactory.create will in turn mock two service responses for each resource. For example,
+# Dupe.create will in turn mock two service responses for each resource. For example,
 # for the Book resource, it will mock:
 #
 #   # Book.find(:all) --> GET /books.xml
@@ -78,7 +78,7 @@
 # Author::    Matt Parker  (mailto:moonmaster9000@gmail.com)
 # License::   Distributes under the same terms as Ruby
 
-class ResourceFactory
+class Dupe
   attr_reader :factory_name   #:nodoc:
   attr_reader :configuration  #:nodoc:
   attr_reader :attributes     #:nodoc:
@@ -112,25 +112,25 @@ class ResourceFactory
     #     When....
     #
     #
-    # We can use ResourceFactory.define to
+    # We can use Dupe.define to
     # * Transform data (e.g., turn the string '1917-12-16' into a Date object)
     # * Provide default values for attributes (e.g., give all author's a default biography)
     # * Associate records (e.g., given an author name, return the author record associated with that name)
     #
     # To accomplish the afore mentioned definitions:
     #
-    #   # RAILS_ROOT/features/resource_factory_definitions/book.rb
+    #   # RAILS_ROOT/features/dupe_definitions/book.rb
     #
-    #   ResourceFactory.define :author do |define|
+    #   Dupe.define :author do |define|
     #     define.bio 'Lorem ipsum delor.'
     #     define.date_of_birth do |d|
     #       Date.parse(t)
     #     end
     #   end
     #   
-    #   ResourceFactory.define :book do |define|
+    #   Dupe.define :book do |define|
     #     define.author do |author_name|
-    #       ResourceFactory.find(:author) {|a| a.name == author_name}
+    #       Dupe.find(:author) {|a| a.name == author_name}
     #     end
     #   end
     #
@@ -139,21 +139,21 @@ class ResourceFactory
     #   # RAILS_ROOT/features/step_definitions/library/find_book_steps.rb
     #
     #   Given /^the following author:$/ do |author_table|
-    #     ResourceFactory.create(:author, author_table.hashes)
+    #     Dupe.create(:author, author_table.hashes)
     #   end
     #
     #   Given /^the following book:$/ do |book_table|
-    #     ResourceFactory.create(:book, book_table.hashes)
+    #     Dupe.create(:book, book_table.hashes)
     #   end
     #
     # When cucumber encounters the "Given the following author:" line, the corresponding step definition
-    # will ask ResourceFactory to mock ActiveResource responses to find(:all) and find(:id) with the data
+    # will ask Dupe to mock ActiveResource responses to find(:all) and find(:id) with the data
     # specified in the cucumber hash table immediately following the "Given the following author:" line. 
-    # Since we didn't specify a 'bio' value in our cucumber hash table, ResourceFactory will give it the 
+    # Since we didn't specify a 'bio' value in our cucumber hash table, Dupe will give it the 
     # default value 'Bio stub.'. Also, it will transform the 'date_of_birth' value we provided in the hash 
     # table into a time object.
     #
-    # Similarly, for the :book cucumber hash table, ResourceFactory will transform the author name we provided
+    # Similarly, for the :book cucumber hash table, Dupe will transform the author name we provided
     # into the author object we had already specified in the :author table. 
     #
     # In terms of mocked responses, we could expect something like: 
@@ -184,11 +184,11 @@ class ResourceFactory
       yield @factories[factory]
     end
    
-    # This method will cause ResourceFactory to mock resources for the record(s) provided. 
+    # This method will cause Dupe to mock resources for the record(s) provided. 
     # The "records" value may be either a hash or an array of hashes. 
     # For example, suppose you'd like to mock a single author ActiveResource object: 
     #
-    #   ResourceFactory.create :author, :name => 'Arthur C. Clarke'
+    #   Dupe.create :author, :name => 'Arthur C. Clarke'
     #
     # This will translate into the following two mocked resource calls:
     #
@@ -210,7 +210,7 @@ class ResourceFactory
     #
     # However, suppose you wanted to mock two or more authors. 
     #
-    #   ResourceFactory.create :author, [{:name => 'Arthur C. Clarke'}, {:name => 'Robert Heinlein'}]
+    #   Dupe.create :author, [{:name => 'Arthur C. Clarke'}, {:name => 'Robert Heinlein'}]
     #
     # This will translate into the following three mocked resource calls: 
     #
@@ -249,7 +249,7 @@ class ResourceFactory
 
     # You can use this method to quickly stub out a large number of resources. For example: 
     #
-    #   ResourceFactory.stub(
+    #   Dupe.stub(
     #     :author,
     #     :template => {:name => 'author'},
     #     :count    => 20
@@ -264,7 +264,7 @@ class ResourceFactory
     #
     # You may override both the sequence starting value and the attribute to sequence:
     #
-    #   ResourceFactory.stub(
+    #   Dupe.stub(
     #     :book,
     #     :template => {:author => 'Arthur C. Clarke', :title => 'moonmaster'},
     #     :count    => 20,
@@ -278,7 +278,7 @@ class ResourceFactory
     #   ....
     #   {:id => 20, :author => 'Arthur C. Clarke', :title => 'moonmaster 9019'}
     #
-    # Naturally, stub will consult the ResourceFactory.define definitions for anything it's attempting to stub
+    # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 
     def stub(factory, options)
       setup_factory(factory)
@@ -291,12 +291,12 @@ class ResourceFactory
     # and a numeric 'id', and that it contains an author service where the author with id '1' has the label 'arthur-c-clarke'.
     # Your application should expect the same response whether or not you call <tt>Author.find(1)</tt> or <tt>Author.find('arthur-c-clarke')</tt>.
     # 
-    # Thus, to ensure that ResourceFactory mocks both, do the following:
-    #   ResourceFactory.configure :author do |configure|
+    # Thus, to ensure that Dupe mocks both, do the following:
+    #   Dupe.configure :author do |configure|
     #     configure.record_identifiers :id, :label
     #   end
     #
-    # With this configuration, a <tt>ResourceFactory.create :author, :name => 'Arthur C. Clarke', :label => 'arthur-c-clarke'</tt>
+    # With this configuration, a <tt>Dupe.create :author, :name => 'Arthur C. Clarke', :label => 'arthur-c-clarke'</tt>
     # will result in the following mocked service calls: 
     #
     # <tt>Author.find(1) --> (GET /authors/1.xml)</tt>
@@ -322,11 +322,11 @@ class ResourceFactory
       yield @factories[factory].config
     end
     
-    # By default, ResourceFactory will mock responses to ActiveResource <tt>find(:all)</tt> and <tt>find(id)</tt>. 
+    # By default, Dupe will mock responses to ActiveResource <tt>find(:all)</tt> and <tt>find(id)</tt>. 
     # However, it's likely that your cucumber scenarios will eventually fire off an ActiveResource request that's
     # something other than these basic lookups.
     #
-    # ResourceFactory.define_mocks allows you to add new resource mocks and override the built-in resource mocks. 
+    # Dupe.define_mocks allows you to add new resource mocks and override the built-in resource mocks. 
     #
     # For example, suppose you had a Book ActiveResource model, and you want to use it to get the :count of all 
     # Books in the back end system your consuming. <tt>Book.get(:count)</tt> would fire off an HTTP request to the 
@@ -340,7 +340,7 @@ class ResourceFactory
     #
     # To mock this for the purposes of cuking, you could do the following:
     # 
-    #   ResourceFactory.define_mocks :book do |define|
+    #   Dupe.define_mocks :book do |define|
     #     define.count do |mock, records|
     #       mock.get "/books/count.xml", {}, {:count => records.size}.to_xml 
     #     end
@@ -355,7 +355,7 @@ class ResourceFactory
     
 
     # Search for a resource. This works a bit differently from both ActiveRecord's find and ActiveResource's find. 
-    # This is most often used for defining associations between objects (ResourceFactory.define). 
+    # This is most often used for defining associations between objects (Dupe.define). 
     # It will return a hash representation of the resource (or an array of hashes if we asked for multiple records).
     #
     # For example, suppose we have an author resource, and a book resource with a nested author attribute (in ActiveRecord
@@ -378,35 +378,35 @@ class ResourceFactory
     #
     # To link up the book and author, we could create the following book definition
     #   
-    #   ResourceFactory.define :book do |book|
-    #     book.author {|name| ResourceFactory.find(:author) {|a| a.name == name}}
+    #   Dupe.define :book do |book|
+    #     book.author {|name| Dupe.find(:author) {|a| a.name == name}}
     #   end
     # 
-    # The line <tt>ResourceFactory.find(:author) {|a| a.name == name}</tt> could be translated as 
+    # The line <tt>Dupe.find(:author) {|a| a.name == name}</tt> could be translated as 
     # "find the first author record where the author's name equals `name`". 
     #
-    # ResourceFactory decided to return only a single record because we specified <tt>find(:author)</tt>. 
+    # Dupe decided to return only a single record because we specified <tt>find(:author)</tt>. 
     # Had we instead specified <tt>find(:authors)</tt>, resource factory would have instead returned an array of results. 
     #
     # More examples: 
     #   
     #   # find all books written in the 1960's
-    #   ResourceFactory.find(:books) {|b| b.year >= 1960 and b.year <= 1969}
+    #   Dupe.find(:books) {|b| b.year >= 1960 and b.year <= 1969}
     #
     #   # find all books written in the 1960's AND written by Arthur C. Clarke (nested resources example)
-    #   ResourceFactory.find(:books) {|b| b.year >= 1960 and b.year <= 1969 and b.author.name == 'Arthur C. Clarke'}
+    #   Dupe.find(:books) {|b| b.year >= 1960 and b.year <= 1969 and b.author.name == 'Arthur C. Clarke'}
     #
     #   # find all sci-fi and fantasy books
-    #   ResourceFactory.find(:books) {|b| b.genre == 'sci-fi' or b.genre == 'fantasy'}
+    #   Dupe.find(:books) {|b| b.genre == 'sci-fi' or b.genre == 'fantasy'}
     #
     #   # find all books written by people named 'Arthur'
-    #   ResourceFactory.find(:books) {|b| b.author.name.match /Arthur/}
+    #   Dupe.find(:books) {|b| b.author.name.match /Arthur/}
     #
     # Also, if you have the need to explicitly specify :all or :first instead of relying on specifying the singular v. plural 
     # version of your resource name (perhaps the singular and plural version of your resource are exactly the same):
     # 
-    #   ResourceFactory.find(:all, :deer) {|d| d.type == 'doe'}
-    #   ResourceFactory.find(:first, :deer) {|d| d.type == 'buck'}
+    #   Dupe.find(:all, :deer) {|d| d.type == 'doe'}
+    #   Dupe.find(:first, :deer) {|d| d.type == 'buck'}
     def find(all_or_first=nil, factory_name, &block) # yield: record
       match        = block ? block : proc {true}
       all_or_first = ((factory_name.to_s.pluralize == factory_name.to_s) ? :all : :first)
@@ -456,7 +456,7 @@ class ResourceFactory
     #end
 
     def setup_factory(factory)
-      factories[factory] = ResourceFactory.new(factory) unless factories[factory]
+      factories[factory] = Dupe.new(factory) unless factories[factory]
     end
 
     def reset(factory)
@@ -464,7 +464,7 @@ class ResourceFactory
     end
 
     def verify_factory_exists(factory_name)
-      raise "ResourceFactory doesn't know about the '#{factory_name}' resource" unless factories[factory_name]
+      raise "Dupe doesn't know about the '#{factory_name}' resource" unless factories[factory_name]
     end
   end
 
@@ -472,7 +472,7 @@ class ResourceFactory
     @records = []
     @sequence = Sequence.new
     @attributes = {} if destroy_definitions
-    ActiveResource::HttpMock.reset_from_resource_factory!
+    ActiveResource::HttpMock.reset_from_dupe!
   end
   
   def stub_services_with(record_template, count=1, starting_value=1, sequence_attribute=nil) #:nodoc:

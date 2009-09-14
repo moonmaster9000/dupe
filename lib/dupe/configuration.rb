@@ -1,4 +1,4 @@
-class ResourceFactory 
+class Dupe 
   class Configuration #:nodoc:
     attr_reader :config
     

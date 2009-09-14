@@ -3,7 +3,7 @@ ActiveResource::HttpMock.instance_eval do #:nodoc:
   def reset! #:nodoc:
   end
 
-  def reset_from_resource_factory! #:nodoc:
+  def reset_from_dupe! #:nodoc:
     requests.clear
     responses.clear
   end

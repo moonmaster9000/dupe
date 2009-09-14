@@ -6,11 +6,11 @@ Feature: mocking resources
 Scenario: mocking simple, unassociated resources
   Given I have no resource definitions
   When I create an empty "book"
-  Then ResourceFactory should mock the response to "/books.xml" with 
+  Then Dupe should mock the response to "/books.xml" with 
   """
   [{"id"=>1}]
   """
-  And ResourceFactory should mock the response to "/books/1.xml" with 
+  And Dupe should mock the response to "/books/1.xml" with 
   """
   {"id"=>1}
   """
@@ -20,26 +20,26 @@ Scenario: mocking complex resources with associations
   And a book that has one author
   When I create an author named "Arthur C. Clarke"
   And I create a book titled "2001: A Space Odyssey" written by "Arthur C. Clarke"
-  Then ResourceFactory should mock the response to "/books.xml" with 
+  Then Dupe should mock the response to "/books.xml" with 
   """
   [{"id"=>1, "title" => "2001: A Space Odyssey", "author" => {"id" => 1, "name" => "Arthur C. Clarke"}}]
   """
-  And ResourceFactory should mock the response to "/books/1.xml" with 
+  And Dupe should mock the response to "/books/1.xml" with 
   """
   {"id"=>1, "title" => "2001: A Space Odyssey", "author" => {"id" => 1, "name" => "Arthur C. Clarke"}}
   """
-  And ResourceFactory should mock the response to "/authors.xml" with
+  And Dupe should mock the response to "/authors.xml" with
   """
   [{"id" => 1, "name" => "Arthur C. Clarke"}]
   """
-  And ResourceFactory should mock the response to "/authors/1.xml" with 
+  And Dupe should mock the response to "/authors/1.xml" with 
   """
   {"id" => 1, "name" => "Arthur C. Clarke"}
   """
 
 Scenario: stubbing simple resources
   When I stub 5 books starting with the title "stubby 1"
-  Then ResourceFactory should mock the response to "/books.xml" with 
+  Then Dupe should mock the response to "/books.xml" with 
   """
   [
     {"id" => 1, "title" => "stubby 1"},
@@ -50,7 +50,7 @@ Scenario: stubbing simple resources
   ]
   """
   When I stub 5 more books starting with the title "stubsville 9000"
-  Then ResourceFactory should mock the response to "/books.xml" with 
+  Then Dupe should mock the response to "/books.xml" with 
   """
   [
     {"id" => 1, "title" => "stubby 1"},
@@ -71,7 +71,7 @@ Scenario: stubbing complex resources
   And a book that has one author
   When I create an author named "stubmeister"
   And  I stub 5 books starting with the title "stubby 1" written by "stubmeister"
-  Then ResourceFactory should mock the response to "/books.xml" with 
+  Then Dupe should mock the response to "/books.xml" with 
   """
   [
     {"id" => 1, "title" => "stubby 1", "author" => {"id" => 1, "name" => "stubmeister"}},
@@ -82,7 +82,7 @@ Scenario: stubbing complex resources
   ]
   """
   When I stub 5 more books starting with the title "stubsville 9000" written by "stubmeister"
-  Then ResourceFactory should mock the response to "/books.xml" with 
+  Then Dupe should mock the response to "/books.xml" with 
   """
   [
     {"id" => 1, "title" => "stubby 1", "author" => {"id" => 1, "name" => "stubmeister"}},

@@ -1,4 +1,4 @@
-class ResourceFactory 
+class Dupe 
   class Attribute #:nodoc:
     def initialize(name, value=nil, prock=nil)
       @name, @value, @prock = name.to_sym, value, prock

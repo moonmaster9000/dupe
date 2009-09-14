@@ -1,4 +1,4 @@
-class ResourceFactory 
+class Dupe 
   class MockServiceResponse #:nodoc:
     attr_reader :mocks
     attr_reader :resource_name

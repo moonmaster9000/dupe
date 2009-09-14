@@ -1,3 +1,3 @@
 After do |scenario| #:nodoc:
-  ResourceFactory.flush
+  Dupe.flush
 end

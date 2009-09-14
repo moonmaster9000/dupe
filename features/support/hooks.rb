@@ -1,3 +1,3 @@
 After do |scenario|
-  ResourceFactory.flush(nil, true)
+  Dupe.flush(nil, true)
 end

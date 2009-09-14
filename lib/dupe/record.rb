@@ -1,4 +1,4 @@
-class ResourceFactory
+class Dupe
   class Record #:nodoc:
     def initialize(hash)
       @attributes = hash.merge(hash) {|k,v| v.is_a?(Hash) ? Record.new(v) : v}

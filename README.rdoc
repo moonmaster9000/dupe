@@ -1,4 +1,4 @@
-= Dupe
+= Dupe 
 
 Dupe allows you to define resources, create a pool of resources, 
 extend those resources with your own custom response mocks, and even override the default 
@@ -7,6 +7,9 @@ mocks Dupe provides (<em>find(:all)</em> and <em>find(id)</em>).
 Dupe is ideally suited for working with Cucumber[http://cukes.info]. It also relies on ActiveResource::HttpMock[http://api.rubyonrails.org/classes/ActiveResource/HttpMock.html] for mocking
 resource responses. 
 
+== Installation
+
+  # gem install moonmaster9000-dupe
 
 == Example
 Let's suppose your cuking a book search application for a library that consumes a RESTFUL book datastore service via ActiveResource.

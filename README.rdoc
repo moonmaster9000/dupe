@@ -1,3 +1,5 @@
+= Dupe
+
 Dupe allows you to define resources, create a pool of resources, 
 extend those resources with your own custom response mocks, and even override the default 
 mocks Dupe provides (<em>find(:all)</em> and <em>find(id)</em>). 
@@ -5,6 +7,8 @@ mocks Dupe provides (<em>find(:all)</em> and <em>find(id)</em>).
 Dupe is ideally suited for working with Cucumber[http://cukes.info]. It also relies on ActiveResource::HttpMock[http://api.rubyonrails.org/classes/ActiveResource/HttpMock.html] for mocking
 resource responses. 
 
+
+== Example
 Let's suppose your cuking a book search application for a library that consumes a RESTFUL book datastore service via ActiveResource.
 You might start by writing the following feature in <em>RAILS_ROOT/features/library/find_book.feature</em>:
 

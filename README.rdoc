@@ -77,5 +77,8 @@ for the Book resource, it will mock:
     </author>
   </book>
 
+From here, you could start scaffolding your controllers, with the assumption that Dupe will mock the responses to Book.find(<id or :all>) and Author.find(<id or :all>).
+
 == More
-Dupe supports resource attribute defaults, stubbing, resource associations, custom resource mocks, and more. Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
+
+Dupe supports attribute defaults, attribute transoformations, stubbing, resource associations, custom resource mocks, and more. Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/

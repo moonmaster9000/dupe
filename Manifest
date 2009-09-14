@@ -14,7 +14,6 @@ lib/dupe/active_resource.rb
 lib/dupe/attribute.rb
 lib/dupe/configuration.rb
 lib/dupe/cucumber_hooks.rb
-lib/dupe/finder.rb
 lib/dupe/mock_service_response.rb
 lib/dupe/record.rb
 lib/dupe/dupe.rb

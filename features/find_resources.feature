@@ -120,25 +120,25 @@ Scenario: find a resource with explicit :all or :first
   When I search for "all" "deer"
   Then I should find:
   """
-  [{:id => 1, :name => "buck1", :type => "buck"}, {:id => 2, :name => "buck2", :type => "buck"}, {:id => 3, :name => "bambi", :type => "doe"}]
+  [{:id => 1, :name => "buck1", :sex => "buck"}, {:id => 2, :name => "buck2", :sex => "buck"}, {:id => 3, :name => "bambi", :sex => "doe"}]
   """
   When I search for "first" "deer"
   Then I should find:
   """
-  {:id => 1, :name => "buck1", :type => "buck"}
+  {:id => 1, :name => "buck1", :sex => "buck"}
   """
   When I search for "all" "deer" with name like "buck"
   Then I should find: 
   """
-  [{:id => 1, :name => "buck1", :type => "buck"}, {:id => 2, :name => "buck2", :type => "buck"}]
+  [{:id => 1, :name => "buck1", :sex => "buck"}, {:id => 2, :name => "buck2", :sex => "buck"}]
   """
   When I search for "first" "deer" with name like "bambi"
   Then I should find:
   """
-  {:id => 3, :name => "bambi", :type => "doe"}
+  {:id => 3, :name => "bambi", :sex => "doe"}
   """
-  When I search for "all" "deer" with type "doe"
+  When I search for "all" "deer" with sex "doe"
   Then I should find:
   """
-  [{:id => 3, :name => "bambi", :type => "doe"}]
+  [{:id => 3, :name => "bambi", :sex => "doe"}]
   """

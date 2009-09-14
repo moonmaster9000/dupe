@@ -46,23 +46,23 @@ When /^I search for "([^\"]*)" written by authors named like "([^\"]*)"$/ do |re
   @results = Dupe.find(resource.to_sym) {|b| /#{author_name}/ === b.author.name}
 end
 
-Given /^(\d+) "([^\"]*)" deer$/ do |count, type|
+Given /^(\d+) "([^\"]*)" deer$/ do |count, sex|
   Dupe.stub(
     :deer,
-    :template => {:name => 'buck', :type => type},
+    :template => {:name => 'buck', :sex => sex},
     :count    => count.to_i,
     :sequence => :name
   )
 end
 
-Given /^a "([^\"]*)" deer named "([^\"]*)"$/ do |type, name|
-  Dupe.create :deer, :name => name, :type => type
+Given /^a "([^\"]*)" deer named "([^\"]*)"$/ do |sex, name|
+  Dupe.create :deer, :name => name, :sex => sex
 end
 
 When /^I search for "([^\"]*)" "([^\"]*)" with name like "([^\"]*)"$/ do |all_or_first, resource, name|
   @results = Dupe.find(all_or_first.to_sym, resource.to_sym) {|d| d.name.include? name}
 end
 
-When /^I search for "([^\"]*)" "([^\"]*)" with type "([^\"]*)"$/ do |all_or_first, resource, type|
-  @results = Dupe.find(all_or_first.to_sym, resource.to_sym) {|d| d.type == type}
+When /^I search for "([^\"]*)" "([^\"]*)" with sex "([^\"]*)"$/ do |all_or_first, resource, sex|
+  @results = Dupe.find(all_or_first.to_sym, resource.to_sym) {|d| d.sex == sex}
 end

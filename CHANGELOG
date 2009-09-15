@@ -1,3 +1,21 @@
+v0.2.1
+  configuration options now behave diffently if that option name is singular v. plural
+  for example, 
+    Dupe.configuration :resource do |config|
+      config.record_identifiers :id
+    end
+  would result in the Dupe.factories[:resource].configuration.config[:record_identifiers] being set to [:id] (since 
+  "record identifiers" is plural, it assumes you're specifying an array of values). 
+
+  however, 
+    Dupe.configuration do |global_config|
+      global_config.debug true
+    end
+  sets Dupe.global_configuration.config[:debug] = true (it assumes that since "debug" is singular, that configuration can
+  only have one value, so it doesn't bother putting it in an array). 
+
+  mostly, you'll never really need to know how Dupe.configuration is storing the configuration internally. 
+
 v0.2.0
 
   * new global configuration option "debug". will output all request attempts / mocked responses that occurred

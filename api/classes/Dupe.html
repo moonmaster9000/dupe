@@ -193,7 +193,7 @@ href="mailto:moonmaster9000@gmail.com">moonmaster9000@gmail.com</a>)
           <a href="Dupe.src/M000004.html" target="Code" class="method-signature"
             onclick="popupCode('Dupe.src/M000004.html');return false;">
 
-          <span class="method-name">configure</span><span class="method-args">(factory) {|configure| ...}</span>
+          <span class="method-name">configure</span><span class="method-args">(factory=nil) {|configure| ...}</span>
 
           </a>
 
@@ -201,9 +201,34 @@ href="mailto:moonmaster9000@gmail.com">moonmaster9000@gmail.com</a>)
 
         <div class="method-description">
 
-          <p>
-This allows you to override the array record identifiers for your resources
-([:id], by default)
+          <h3>Global Configuration</h3>
+<p>
+On a global level, configure supports the following options (expect this
+list to grow as the app grows):
+</p>
+<pre>
+  debug: list the attempted requests and mocked responses that happened during the course of a scenario
+</pre>
+<p>
+To turn on debugging, simply do:
+</p>
+<pre>
+  Dupe.configure do |global_config|
+    global_config.debug true
+  end
+</pre>
+<h3>Factory Configuration</h3>
+<p>
+On a factory level, configure support the following options (expect this
+list to grow as the app grows):
+</p>
+<pre>
+  record_identifiers: a list of attributes that are unique to each record in that resource factory.
+</pre>
+<p>
+The &#8220;record_identifiers&#8220; configuration option allows you to
+override the array record identifiers for your resources ([:id], by
+default)
 </p>
 <p>
 For example, suppose the RESTful application your trying to consume

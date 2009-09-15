@@ -87,7 +87,8 @@ class Dupe
   attr_reader :records        #:nodoc:
 
   class << self
-    attr_accessor :factories  #:nodoc:
+    attr_accessor :factories            #:nodoc:
+    attr_accessor :global_configuration #:nodoc:
     
     # Create data definitions for your resources. This allows you to setup default values for columns
     # and even provide data transformations.
@@ -319,9 +320,14 @@ class Dupe
     #     <name>Arthur C. Clarke</name>
     #     <label>arthur-c-clarke</label>
     #   </author>
-    def configure(factory) # yield: configure
-      setup_factory(factory)
-      yield @factories[factory].config
+    def configure(factory=nil) # yield: configure
+      if factory==nil
+        @global_configuration = Configuration.new
+        yield @global_configuration
+      else
+        setup_factory(factory)
+        yield @factories[factory].config
+      end
     end
     
     # By default, Dupe will mock responses to ActiveResource <tt>find(:all)</tt> and <tt>find(id)</tt>. 

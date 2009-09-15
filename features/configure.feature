@@ -3,7 +3,6 @@ Feature: configure
   I want to configure record identifiers
   so that Dupe will mock responses to services that my application tries to hit. 
 
-@configure
 Scenario: mock id and label
   Given I have configured Dupe to mock by id and label
   When I create a book "2001: A Space Odyssey" labeled "2001-a-space-odyssey"
@@ -24,4 +23,3 @@ Scenario: mock id and label
   """
   {"id" => 2, "title" => "Rendezvous with Rama", "label" => "rendezvous-with-rama"}
   """
- 

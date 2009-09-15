@@ -26,7 +26,7 @@ module ActiveResource #:nodoc:
 end
 
 module ActiveResource
-  class Connection
+  class Connection #:nodoc:
     
     class << self
       attr_reader :request_log

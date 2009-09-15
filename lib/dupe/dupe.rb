@@ -288,7 +288,22 @@ class Dupe
       @factories[factory].stub_services_with(options[:template], options[:count].to_i, (options[:sequence_start_value] || 1), options[:sequence])
     end
 
-    # This allows you to override the array record identifiers for your resources ([:id], by default)
+    # === Global Configuration
+    #
+    # On a global level, configure supports the following options (expect this list to grow as the app grows):
+    #   debug: list the attempted requests and mocked responses that happened during the course of a scenario
+    #
+    # To turn on debugging, simply do:
+    #   Dupe.configure do |global_config|
+    #     global_config.debug true
+    #   end
+    #
+    # === Factory Configuration 
+    #
+    # On a factory level, configure support the following options (expect this list to grow as the app grows):
+    #   record_identifiers: a list of attributes that are unique to each record in that resource factory.
+    #   
+    # The "record_identifiers" configuration option allows you to override the array record identifiers for your resources ([:id], by default)
     # 
     # For example, suppose the RESTful application your trying to consume supports lookups by both a textual 'label' 
     # and a numeric 'id', and that it contains an author service where the author with id '1' has the label 'arthur-c-clarke'.
@@ -321,13 +336,9 @@ class Dupe
     #     <label>arthur-c-clarke</label>
     #   </author>
     def configure(factory=nil) # yield: configure
-      if factory==nil
-        @global_configuration = Configuration.new
-        yield @global_configuration
-      else
-        setup_factory(factory)
-        yield @factories[factory].config
-      end
+      yield global_configuration and return unless factory
+      setup_factory(factory)
+      yield @factories[factory].config
     end
     
     # By default, Dupe will mock responses to ActiveResource <tt>find(:all)</tt> and <tt>find(id)</tt>. 
@@ -440,6 +451,10 @@ class Dupe
 
     def factories #:nodoc:
       @factories ||= {}
+    end
+
+    def global_configuration #:nodoc:
+      @global_configuration ||= Configuration.new
     end
 
     private

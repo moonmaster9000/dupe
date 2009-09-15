@@ -3,6 +3,10 @@ Feature: configure
   I want to configure record identifiers
   so that Dupe will mock responses to services that my application tries to hit. 
 
+  I would also like to put Dupe in config mode 
+  so that I can see the requests the app attempts during the course of a scenario
+  and also see the responses that Dupe mocked. 
+
 Scenario: mock id and label
   Given I have configured Dupe to mock by id and label
   When I create a book "2001: A Space Odyssey" labeled "2001-a-space-odyssey"
@@ -22,4 +26,12 @@ Scenario: mock id and label
   And Dupe should mock the response to "/books/rendezvous-with-rama.xml" with:
   """
   {"id" => 2, "title" => "Rendezvous with Rama", "label" => "rendezvous-with-rama"}
+  """
+
+@log
+Scenario: log requests
+  When I configured Dupe to log requests
+  Then the debug option in the global configuration should be
+  """
+  [true]
   """

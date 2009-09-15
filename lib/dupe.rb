@@ -1,5 +1,6 @@
 require 'active_resource'
 require 'active_resource/http_mock'
+require 'dupe/string'
 require 'dupe/dupe'
 require 'dupe/sequence'
 require 'dupe/mock_service_response'

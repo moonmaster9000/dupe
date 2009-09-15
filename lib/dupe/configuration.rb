@@ -8,7 +8,7 @@ class Dupe
     end
 
     def method_missing(method_name, *args, &block)
-      set_config_option(method_name.to_sym, args)
+      set_config_option(method_name.to_sym, method_name.to_s.plural? ? args : args.first)
     end
 
 

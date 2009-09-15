@@ -429,7 +429,7 @@ class Dupe
     def find(*args, &block) # yield: record
       all_or_first, factory_name = args[-2], args[-1]
       match         = block ? block : proc {true}
-      all_or_first  = ((factory_name.to_s.pluralize == factory_name.to_s) ? :all : :first) unless all_or_first
+      all_or_first  = ((factory_name.to_s.plural?) ? :all : :first) unless all_or_first
       factory_name  = factory_name.to_s.singularize.to_sym
       verify_factory_exists factory_name
       result        = factories[factory_name].find_records_like match

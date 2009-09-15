@@ -3,3 +3,7 @@ v0.2.0
   * new global configuration option "debug". will output all request attempts / mocked responses that occurred
     during the course of a scenario. consult the api documentation (moonmaster9000.github.com/dupe/api) for 
     more information.
+
+v0.1.2 
+  
+  * initial github publish. includes all the basic api: configure (factory), create, stub, define, define_mocks, find.

@@ -48,10 +48,10 @@ module ActiveResource
       def print_request_log
         @request_log ||= []
         if @request_log.empty?
-          puts("  -----No request attempts logged for this scenario")  
+          puts("\n  -----No request attempts logged for this scenario")  
           return
         end
-        puts "    Request attempts logged for this scenario:\n    --------------------------------------------\n\n"
+        puts "\n    Request attempts logged for this scenario:\n    --------------------------------------------\n\n"
         @request_log.each do |request|
           puts "    Request: #{request[:method].upcase} #{request[:path]}"
           puts "    Headers: #{request[:headers].inspect}"
@@ -68,7 +68,7 @@ module ActiveResource
     # Used to get (find) resources.
     def get(path, headers = {})
       response = request(:get, path, build_request_headers(headers, :get))
-      ActiveResource::Connection.log_request(:get, path, headers, response)
+      ActiveResource::Connection.log_request(:get, path, build_request_headers(headers, :get), response)
       format.decode(response.body)
     end
 
@@ -76,7 +76,7 @@ module ActiveResource
     # Used to delete resources.
     def delete(path, headers = {})
       response = request(:delete, path, build_request_headers(headers, :delete))
-      ActiveResource::Connection.log_request(:delete, path, headers, response)
+      ActiveResource::Connection.log_request(:delete, path, build_request_headers(headers, :delete), response)
       response
     end
 
@@ -84,7 +84,7 @@ module ActiveResource
     # Used to update resources.
     def put(path, body = '', headers = {})
       response = request(:put, path, body.to_s, build_request_headers(headers, :put))
-      ActiveResource::Connection.log_request(:put, path, headers, response)
+      ActiveResource::Connection.log_request(:put, path, build_request_headers(headers, :put), response)
       response
     end
 
@@ -92,7 +92,7 @@ module ActiveResource
     # Used to create new resources.
     def post(path, body = '', headers = {})
       response = request(:post, path, body.to_s, build_request_headers(headers, :post))
-      ActiveResource::Connection.log_request(:post, path, headers, response) 
+      ActiveResource::Connection.log_request(:post, path, build_request_headers(headers, :post), response) 
       response
     end
 
@@ -100,7 +100,7 @@ module ActiveResource
     # Used to obtain meta-information about resources, such as whether they exist and their size (via response headers).
     def head(path, headers = {})
       response = request(:head, path, build_request_headers(headers))
-      ActiveResource::Connection.log_request(:head, path, headers, response)
+      ActiveResource::Connection.log_request(:head, path, build_request_headers(headers), response)
       response
     end
   end

@@ -53,7 +53,7 @@ module ActiveResource
         end
         puts "\n    Request attempts logged for this scenario:\n    --------------------------------------------\n\n"
         @request_log.each do |request|
-          puts "    Request: #{request[:method].upcase} #{request[:path]}"
+          puts "    Request: #{request[:method].to_s.upcase} #{request[:path]}"
           puts "    Headers: #{request[:headers].inspect}"
           puts "    Response Body:\n#{request[:response].body.split("\n").map {|s| (" "*6) + s}.join("\n")}"
           puts "    Response Code: #{request[:response].code}"

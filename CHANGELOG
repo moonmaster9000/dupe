@@ -1,3 +1,6 @@
+v0.2.3
+  * ruby 1.8.6 compat fix (Symbol doesn't support upcase)
+
 v0.2.2
   * patched ActiveResource::Connection.get/delete/put/post/head to log appropriate request headers in the request log.  
 

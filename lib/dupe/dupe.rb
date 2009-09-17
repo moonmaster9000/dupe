@@ -74,7 +74,7 @@ class Dupe
     # will ask Dupe to mock ActiveResource responses to find(:all) and find(:id) with the data
     # specified in the cucumber hash table immediately following the "Given the following author:" line. 
     # Since we didn't specify a 'bio' value in our cucumber hash table, Dupe will give it the 
-    # default value 'Bio stub.'. Also, it will transform the 'date_of_birth' value we provided in the hash 
+    # default value 'Lorem ipsum delor.'. Also, it will transform the 'date_of_birth' value we provided in the hash 
     # table into a time object.
     #
     # Similarly, for the :book cucumber hash table, Dupe will transform the author name we provided
@@ -87,7 +87,7 @@ class Dupe
     #   <author>
     #     <id type="integer">1</id>
     #     <name>Arthur C. Clarke</name>
-    #     <bio>Bio stub.</bio>
+    #     <bio>Lorem ipsum delor.</bio>
     #     <date_of_birth>1917-12-16T00:00:00Z</date_of_birth>
     #   </author>
     #
@@ -99,7 +99,7 @@ class Dupe
     #     <author>
     #       <id type="integer">1</id>
     #       <name>Arthur C. Clarke</name>
-    #       <bio>Bio stub.</bio>
+    #       <bio>Lorem ipsum delor.</bio>
     #       <date_of_birth>1917-12-16T00:00:00Z</date_of_birth>
     #     </author>
     #   </book>
@@ -181,7 +181,7 @@ class Dupe
     #   Dupe.define :author {|author| author.name('default')}
     #
     #
-    # the stub would have generated 20 author records like: 
+    # then stub would have generated 20 author records like: 
     #
     #   {:name => 'default', :id => 1}
     #   ....

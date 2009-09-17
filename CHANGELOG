@@ -1,3 +1,9 @@
+v0.3.0
+  * bumped the minor number because this release is not backwards compatible. 
+  * stub now works more intuitively. Suppose you had a :book resource, and you wanted to stub 
+    20 "sci-fi" books where both the title and author were different for every resource .
+      Dupe.stub 20, :books, :like => {:genre => "sci-fi", :title => proc {|n| "title-#{n}"}, :author => proc {|n| "author-#{n}"}}
+
 v0.2.3
   * ruby 1.8.6 compat fix (Symbol doesn't support upcase)
 

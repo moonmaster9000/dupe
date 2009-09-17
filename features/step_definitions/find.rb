@@ -65,3 +65,20 @@ end
 When /^I search for "([^\"]*)" "([^\"]*)" with sex "([^\"]*)"$/ do |all_or_first, resource, sex|
   @results = Dupe.find(all_or_first.to_sym, resource.to_sym) {|d| d.sex == sex}
 end
+
+Given /^a book that has many authors$/ do
+  Dupe.define :book do |book|
+    book.authors do |author_names|
+      author_names.split(', ').map {|name| Dupe.find(:author) {|a| a.name == name }}
+    end
+  end
+end
+
+
+Given /^a book "([^\"]*)" written by author(?:s)? "([^\"]*)"$/ do |title, authors|
+  Dupe.create :book, :title => title, :authors => authors
+end
+
+When /^I search for books "([^\"]*)" wrote$/ do |author_name|
+  @results = Dupe.find(:books) {|b| b.authors.collect {|a| a.name}.include?(author_name)}
+end

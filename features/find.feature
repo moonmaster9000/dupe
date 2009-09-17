@@ -142,3 +142,27 @@ Scenario: find a resource with explicit :all or :first
   """
   [{:id => 3, :name => "bambi", :sex => "doe"}]
   """
+
+@hasmany
+Scenario: find a resource by has many inclusion
+  Given I have an author resource
+  And a book that has many authors
+  And an author named "Bob"
+  And an author named "Cat"
+  And a book "Bob and Cat's Book" written by authors "Bob, Cat" 
+  And a book "Bob's Book" written by author "Bob"
+  When I search for books "Bob" wrote
+  Then I should find:
+  """
+  [
+    {:id => 1, :title => "Bob and Cat's Book", :authors => [{:id => 1, :name => "Bob"}, {:id => 2, :name => "Cat"}]},
+    {:id => 2, :title => "Bob's Book", :authors => [{:id => 1, :name => "Bob"}]}
+  ]
+  """
+  When I search for books "Cat" wrote
+  Then I should find:
+  """
+  [
+    {:id => 1, :title => "Bob and Cat's Book", :authors => [{:id => 1, :name => "Bob"}, {:id => 2, :name => "Cat"}]}
+  ]
+  """

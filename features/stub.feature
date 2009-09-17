@@ -78,3 +78,16 @@ Scenario: stubbing empty resources
   ]
   """
 
+Scenario: stubbing resources that have default values
+  Given a book resource with the default genre "sci-fi"
+  When I stub 5 blank books
+  Then Dupe should mock the response to "/books.xml" with
+  """
+  [
+    {"id" => 1, "genre" => "sci-fi"},
+    {"id" => 2, "genre" => "sci-fi"},
+    {"id" => 3, "genre" => "sci-fi"},
+    {"id" => 4, "genre" => "sci-fi"},
+    {"id" => 5, "genre" => "sci-fi"}
+  ]
+  """

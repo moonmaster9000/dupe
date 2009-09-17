@@ -1,6 +1,11 @@
 Given /^a book resource$/ do
 end
 
+Given /^a book resource with the default genre "([^\"]*)"$/ do |default_genre|
+  Dupe.define(:book) {|book| book.genre default_genre }
+end
+
+
 When /^I define a count mock$/ do
   Dupe.define_mocks :book do |define|
     define.count do |mock, records|

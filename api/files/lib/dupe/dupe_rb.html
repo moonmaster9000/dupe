@@ -53,7 +53,7 @@
     </tr>
     <tr class="top-aligned-row">
       <td><strong>Last Update:</strong></td>
-      <td>2009-09-15 14:18:10 -0400</td>
+      <td>2009-09-17 13:47:03 -0400</td>
     </tr>
     </table>
   </div>
@@ -64,107 +64,15 @@
   <div id="contextContent">
 
     <div id="description">
-      <p>
-<a href="../../../classes/Dupe.html">Dupe</a> allows you to define
-resources, create a pool of resources, extend those resources with your own
-custom response mocks, and even override the default mocks <a
-href="../../../classes/Dupe.html">Dupe</a> provides (<em>find(:all)</em>
-and <em>find(id)</em>).
-</p>
-<p>
-<a href="../../../classes/Dupe.html">Dupe</a> is ideally suited for working
-with <a href="http://cukes.info">Cucumber</a>. It also relies on <a
-href="http://api.rubyonrails.org/classes/ActiveResource/HttpMock.html">ActiveResource::HttpMock</a>
-for mocking resource responses.
-</p>
-<p>
-Let&#8217;s suppose your cuking a book search application for a library
-that consumes a RESTFUL book datastore service via ActiveResource. You
-might start by writing the following feature in
-<em>RAILS_ROOT/features/library/find_book.feature</em>:
-</p>
-<pre>
-  Feature: find a book
-    As a reader
-    I want to search for books
-    so that I can check them out and read them.
+      <table>
+<tr><td valign="top">Author:</td><td>Matt Parker (<a
+href="mailto:moonmaster9000@gmail.com">moonmaster9000@gmail.com</a>)
 
-  Scenario: search by author
-    Given an author &quot;Arthur C. Clarke&quot;
-    And a book &quot;2001: A Space Odyssey&quot; by &quot;Arthur C. Clarke&quot;
-    When I search for &quot;Arthur C. Clarke&quot;
-    I should see &quot;2001: A Space Odyssey&quot;
-</pre>
-<p>
-To get this to pass, you might first create an <a
-href="http://api.rubyonrails.org/classes/ActiveResource/Base.html">ActiveResource</a>
-model for a Book and an Author that will connect to the RESTful book
-service:
-</p>
-<pre>
-  class Book &lt; ActiveResource::Base
-    self.site = 'http://bookservice.domain'
-  end
+</td></tr>
+<tr><td valign="top">License:</td><td>Distributes under the same terms as Ruby
 
-  class Author &lt; ActiveResource::Base
-    self.site = 'http://bookservice.domain'
-  end
-</pre>
-<p>
-Then you might create the following resource definition via <a
-href="../../../classes/Dupe.html#M000001">Dupe.define</a> (put it in a file
-with a .rb extension and place it in RAILS_ROOT/features/support/):
-</p>
-<pre>
-  Dupe.define :book do |define|
-    define.author do |author_name|
-      Dupe.find(:author) {|a| a.name == author_name}
-    end
-  end
-</pre>
-<p>
-and the following cucumber step definitions (utilizing <a
-href="../../../classes/Dupe.html#M000002">Dupe.create</a>):
-</p>
-<pre>
-  Given /^an author &quot;([^\&quot;]*)&quot;$/ do |author|
-    Dupe.create :author, :name =&gt; author
-  end
-
-  Given /^a book &quot;([^\&quot;]*)&quot; by &quot;([^\&quot;]*)&quot;$/ do |book, author|
-    Dupe.create :book, :title =&gt; book, :author =&gt; author
-  end
-</pre>
-<p>
-<a href="../../../classes/Dupe.html#M000002">Dupe.create</a> will in turn
-mock two service responses for each resource. For example, for the Book
-resource, it will mock:
-</p>
-<pre>
-  # Book.find(:all) --&gt; GET /books.xml
-  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-  &lt;books type=&quot;array&quot;&gt;
-    &lt;book&gt;
-      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
-      &lt;title&gt;2001: A Space Odyssey&lt;/title&gt;
-      &lt;author&gt;
-        &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
-        &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
-      &lt;/author&gt;
-    &lt;/book&gt;
-  &lt;/books&gt;
-
-  # Book.find(1) --&gt; GET /books/1.xml
-  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-  &lt;book&gt;
-    &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
-    &lt;title&gt;2001: A Space Odyssey&lt;/title&gt;
-    &lt;author&gt;
-      &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
-      &lt;name&gt;Arthur C. Clarke&lt;/name&gt;
-    &lt;/author&gt;
-  &lt;/book&gt;
-</pre>
+</td></tr>
+</table>
 
     </div>
 

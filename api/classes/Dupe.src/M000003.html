@@ -7,10 +7,11 @@
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File lib/dupe/dupe.rb, line 286</span>
-    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">stub</span>(<span class="ruby-identifier">factory</span>, <span class="ruby-identifier">options</span>)
+  <pre><span class="ruby-comment cmt"># File lib/dupe/dupe.rb, line 216</span>
+    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">stub</span>(<span class="ruby-identifier">count</span>, <span class="ruby-identifier">factory</span>, <span class="ruby-identifier">options</span>={})
+      <span class="ruby-identifier">factory</span> = <span class="ruby-identifier">factory</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">to_sym</span>
       <span class="ruby-identifier">setup_factory</span>(<span class="ruby-identifier">factory</span>)
-      <span class="ruby-ivar">@factories</span>[<span class="ruby-identifier">factory</span>].<span class="ruby-identifier">stub_services_with</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:template</span>], <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:count</span>].<span class="ruby-identifier">to_i</span>, (<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:sequence_start_value</span>] <span class="ruby-operator">||</span> <span class="ruby-value">1</span>), <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:sequence</span>])
+      <span class="ruby-ivar">@factories</span>[<span class="ruby-identifier">factory</span>].<span class="ruby-identifier">stub_services_with</span>((<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:like</span>] <span class="ruby-operator">||</span> {}), <span class="ruby-identifier">count</span>.<span class="ruby-identifier">to_i</span>, (<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:starting_with</span>] <span class="ruby-operator">||</span> <span class="ruby-value">1</span>))
     <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>

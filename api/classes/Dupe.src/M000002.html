@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File lib/dupe/dupe.rb, line 244</span>
+  <pre><span class="ruby-comment cmt"># File lib/dupe/dupe.rb, line 167</span>
     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">create</span>(<span class="ruby-identifier">factory</span>, <span class="ruby-identifier">records</span>={})
       <span class="ruby-identifier">setup_factory</span>(<span class="ruby-identifier">factory</span>)
       <span class="ruby-identifier">raise</span> <span class="ruby-constant">Exception</span>, <span class="ruby-value str">&quot;unknown records type&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">records</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-keyword kw">and</span> <span class="ruby-operator">!</span><span class="ruby-identifier">records</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-keyword kw">and</span> <span class="ruby-operator">!</span><span class="ruby-identifier">records</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)

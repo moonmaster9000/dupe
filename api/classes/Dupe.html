@@ -670,7 +670,7 @@ same):
           <a href="Dupe.src/M000003.html" target="Code" class="method-signature"
             onclick="popupCode('Dupe.src/M000003.html');return false;">
 
-          <span class="method-name">stub</span><span class="method-args">(factory, options)</span>
+          <span class="method-name">stub</span><span class="method-args">(count, factory, options={})</span>
 
           </a>
 
@@ -683,45 +683,57 @@ You can use this method to quickly stub out a large number of resources.
 For example:
 </p>
 <pre>
-  Dupe.stub(
-    :author,
-    :template =&gt; {:name =&gt; 'author'},
-    :count    =&gt; 20
-  )
+  Dupe.stub 20, :authors
 </pre>
 <p>
-would generate 20 author records like:
+Assuming you had an :author resource definition like:
 </p>
 <pre>
-  {:name =&gt; 'author 1', :id =&gt; 1}
+  Dupe.define :author {|author| author.name('default')}
+</pre>
+<p>
+the stub would have generated 20 author records like:
+</p>
+<pre>
+  {:name =&gt; 'default', :id =&gt; 1}
   ....
-  {:name =&gt; 'author 20', :id =&gt; 20}
+  {:name =&gt; 'default', :id =&gt; 20}
 </pre>
 <p>
-and it would also mock find(id) and find(:all) responses for these records
-(along with any other custom mocks you&#8217;ve setup via <a
-href="Dupe.html#M000005">Dupe.define_mocks</a>).
+and it would also have mocked find(id) and find(:all) responses for these
+records (along with any other custom mocks you&#8217;ve setup via <a
+href="Dupe.html#M000005">Dupe.define_mocks</a>). (Had you not defined an
+author resource, then the stub would have generated 20 author records where
+the only attribute is the id).
 </p>
 <p>
-You may override both the sequence starting value and the attribute to
-sequence:
+Of course, it&#8217;s more likely that you wanted to dupe 20
+<em>different</em> authors. You can accomplish this by simply doing:
 </p>
 <pre>
-  Dupe.stub(
-    :book,
-    :template =&gt; {:author =&gt; 'Arthur C. Clarke', :title =&gt; 'moonmaster'},
-    :count    =&gt; 20,
-    :sequence_start_value =&gt; 9000,
-    :sequence =&gt; :title
-  )
+  Dupe.stub 20, :authors, :like =&gt; {:name =&gt; proc {|n| &quot;author #{n}&quot;}}
 </pre>
 <p>
-This would generate 20 book records like:
+which would generate 20 author records like:
 </p>
 <pre>
-  {:id =&gt; 1, :author =&gt; 'Arthur C. Clarke', :title =&gt; 'moonmaster 9000'}
+  {:name =&gt; 'author 1',   :id =&gt; 1}
   ....
-  {:id =&gt; 20, :author =&gt; 'Arthur C. Clarke', :title =&gt; 'moonmaster 9019'}
+  {:name =&gt; 'author 20',  :id =&gt; 20}
+</pre>
+<p>
+You may also override the sequence starting value:
+</p>
+<pre>
+  Dupe.stub 20, :authors, :like =&gt; {:name =&gt; proc {|n| &quot;author #{n}&quot;}}, :starting_with =&gt; 150
+</pre>
+<p>
+This would generate 20 author records like:
+</p>
+<pre>
+  {:name =&gt; 'author 150',   :id =&gt; 1}
+  ....
+  {:name =&gt; 'author 169',  :id =&gt; 20}
 </pre>
 <p>
 Naturally, stub will consult the <a

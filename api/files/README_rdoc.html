@@ -53,7 +53,7 @@
     </tr>
     <tr class="top-aligned-row">
       <td><strong>Last Update:</strong></td>
-      <td>2009-09-15 14:19:07 -0400</td>
+      <td>2009-09-17 12:42:04 -0400</td>
     </tr>
     </table>
   </div>
@@ -74,8 +74,25 @@ about prototyping ActiveResource records? That&#8217;s where <a
 href="../classes/Dupe.html">Dupe</a> steps in.
 </p>
 <h2>Installation</h2>
+<p>
+First, install the gem:
+</p>
 <pre>
   # gem install moonmaster9000-dupe
+</pre>
+<p>
+Then add this to your cucumber.rb environment
+(config/environments/cucumber.rb)
+</p>
+<pre>
+  config.gem 'moonmaster9000-dupe', :lib =&gt; 'dupe'
+</pre>
+<p>
+You might also want to add a particular version number if you want to make
+sure a particular feature is there:
+</p>
+<pre>
+  config.gem 'moonmaster9000-dupe', :lib =&gt; 'dupe', :version =&gt; '&gt;=0.3.0'
 </pre>
 <h2>Example</h2>
 <p>

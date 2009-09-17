@@ -5,7 +5,17 @@ But what about prototyping ActiveResource records? That's where Dupe steps in.
 
 == Installation
 
+First, install the gem: 
+
   # gem install moonmaster9000-dupe
+
+Then add this to your cucumber.rb environment (config/environments/cucumber.rb)
+  
+  config.gem 'moonmaster9000-dupe', :lib => 'dupe'
+
+You might also want to add a particular version number if you want to make sure a particular feature is there:
+  
+  config.gem 'moonmaster9000-dupe', :lib => 'dupe', :version => '>=0.3.0'
 
 == Example
 Let's suppose your cuking a book search application for a library that consumes a RESTFUL book datastore service via ActiveResource.

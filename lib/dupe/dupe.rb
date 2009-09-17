@@ -206,9 +206,10 @@ class Dupe
     #
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 
-    def stub(factory, options)
+    def stub(count, factory, options)
+      factory = factory.to_s.singularize.to_sym
       setup_factory(factory)
-      @factories[factory].stub_services_with(options[:template], options[:count].to_i, (options[:sequence_start_value] || 1), options[:sequence])
+      @factories[factory].stub_services_with((options[:like] || {}), count.to_i, (options[:starting_with] || 1))
     end
 
     # === Global Configuration
@@ -402,9 +403,8 @@ class Dupe
     ActiveResource::HttpMock.reset_from_dupe!
   end
   
-  def stub_services_with(record_template, count=1, starting_value=1, sequence_attribute=nil) #:nodoc:
-    sequence_attribute ||= record_template.keys.first
-    records = stub_records(record_template, count, starting_value, sequence_attribute)
+  def stub_services_with(record_template, count=1, starting_value=1) #:nodoc: 
+    records = stub_records(record_template, count, starting_value)
     generate_services_for(records, true)
   end
   
@@ -459,10 +459,12 @@ class Dupe
     keys.each {|k| define_attribute(k.to_sym) unless @attributes[k.to_sym]}
   end
 
-  def stub_records(record_template, count, starting_value, sequence_attribute)
-    overrides = record_template.merge({sequence_attribute => (record_template[sequence_attribute].to_s + starting_value.to_s), :id => sequence})
+  def stub_records(record_template, count, stub_number)
+    overrides = record_template.merge({})
+    overrides.keys.each {|k| overrides[k] = overrides[k].call(stub_number) if overrides[k].respond_to?(:call)}
+    overrides = {:id => sequence}.merge(overrides) unless overrides[:id]
     return [generate_record(overrides)] if count <= 1
-    [generate_record(overrides)] + stub_records(record_template, count-1, starting_value+1, sequence_attribute)
+    [generate_record(overrides)] + stub_records(record_template, count-1, stub_number+1)
   end
 
 end

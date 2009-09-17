@@ -20,18 +20,17 @@ end
 
 When /^(?:I )?stub (\d+) (?:more )?books$/ do |count|
   Dupe.stub(
-    :book,
-    :template => {:name => 'book'},
-    :count    => count.to_i
+    count.to_i,
+    :books,
+    :like => {:name => (proc {|n| "#{n}-book"})}
   )
 end
 
 When /^stub (\d+) books with genre "([^\"]*)"$/ do |count, genre|
-   Dupe.stub(
-    :book,
-    :template => {:name => 'book', :genre => genre},
-    :count    => count.to_i,
-    :sequence => :name,
-    :sequence_start_value => (Dupe.find(:books).size+1)
+  Dupe.stub(
+    count.to_i,
+    :books,
+    :like     => {:name => (proc {|n| "#{n}-book"}), :genre => genre},
+    :starting_with => (Dupe.find(:books).size+1)
   )
 end

@@ -48,10 +48,9 @@ end
 
 Given /^(\d+) "([^\"]*)" deer$/ do |count, sex|
   Dupe.stub(
+    count.to_i,
     :deer,
-    :template => {:name => 'buck', :sex => sex},
-    :count    => count.to_i,
-    :sequence => :name
+    :like => {:name => proc {|n| "buck#{n}"}, :sex => sex}
   )
 end
 

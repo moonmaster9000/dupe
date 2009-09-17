@@ -29,9 +29,9 @@ Scenario: mocking count and find by genre
   """
   And Dupe should mock the response to "/books.xml?genre=Science+Fiction" with: 
   """
-  [{"id" => 1, "name" => "book1", "genre" => "Science Fiction"}, {"id" => 2, "name" => "book2", "genre" => "Science Fiction"}]
+  [{"id" => 1, "name" => "1-book", "genre" => "Science Fiction"}, {"id" => 2, "name" => "2-book", "genre" => "Science Fiction"}]
   """
   And Dupe should mock the response to "/books.xml?genre=Fantasy" with: 
   """
-  [{"id" => 3, "name" => "book3", "genre" => "Fantasy"}, {"id" => 4, "name" => "book4", "genre" => "Fantasy"}]
+  [{"id" => 3, "name" => "3-book", "genre" => "Fantasy"}, {"id" => 4, "name" => "4-book", "genre" => "Fantasy"}]
   """

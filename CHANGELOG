@@ -1,3 +1,6 @@
+v0.3.1
+  * rdoc documentation updates
+
 v0.3.0
   * bumped the minor number because this release is not backwards compatible. 
   * stub now works more intuitively. Suppose you had a :book resource, and you wanted to stub 

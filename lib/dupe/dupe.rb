@@ -173,36 +173,43 @@ class Dupe
 
     # You can use this method to quickly stub out a large number of resources. For example: 
     #
-    #   Dupe.stub(
-    #     :author,
-    #     :template => {:name => 'author'},
-    #     :count    => 20
-    #   )
+    #   Dupe.stub 20, :authors
     #
-    # would generate 20 author records like: 
     #
-    #   {:name => 'author 1', :id => 1}
+    # Assuming you had an :author resource definition like: 
+    #
+    #   Dupe.define :author {|author| author.name('default')}
+    #
+    #
+    # the stub would have generated 20 author records like: 
+    #
+    #   {:name => 'default', :id => 1}
     #   ....
-    #   {:name => 'author 20', :id => 20}
+    #   {:name => 'default', :id => 20}
     #
-    # and it would also mock find(id) and find(:all) responses for these records (along with any other custom mocks you've
-    # setup via Dupe.define_mocks).
+    # and it would also have mocked find(id) and find(:all) responses for these records (along with any other custom mocks you've
+    # setup via Dupe.define_mocks). (Had you not defined an author resource, then the stub would have generated 20 author records
+    # where the only attribute is the id). 
     #
-    # You may override both the sequence starting value and the attribute to sequence:
+    # Of course, it's more likely that you wanted to dupe 20 <em>different</em> authors. You can accomplish this by simply doing: 
+    #   
+    #   Dupe.stub 20, :authors, :like => {:name => proc {|n| "author #{n}"}}
     #
-    #   Dupe.stub(
-    #     :book,
-    #     :template => {:author => 'Arthur C. Clarke', :title => 'moonmaster'},
-    #     :count    => 20,
-    #     :sequence_start_value => 9000,     
-    #     :sequence => :title
-    #   )
+    # which would generate 20 author records like: 
     #
-    # This would generate 20 book records like: 
-    #
-    #   {:id => 1, :author => 'Arthur C. Clarke', :title => 'moonmaster 9000'}
+    #   {:name => 'author 1',   :id => 1}
     #   ....
-    #   {:id => 20, :author => 'Arthur C. Clarke', :title => 'moonmaster 9019'}
+    #   {:name => 'author 20',  :id => 20}
+    #
+    # You may also override the sequence starting value:
+    #
+    #   Dupe.stub 20, :authors, :like => {:name => proc {|n| "author #{n}"}}, :starting_with => 150
+    #
+    # This would generate 20 author records like:  
+    #
+    #   {:name => 'author 150',   :id => 1}
+    #   ....
+    #   {:name => 'author 169',  :id => 20}
     #
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 

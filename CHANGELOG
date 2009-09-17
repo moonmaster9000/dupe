@@ -1,3 +1,20 @@
+v0.3.2
+  * bug fix for hasmany associations
+    for example, suppose you had the following definition for a book resource that has many authors: 
+      Dupe.define :book do |book|
+        book.authors do |author_names|
+          author_names.split(', ').map {|name| Dupe.find(:author) {|a| a.name == name }}
+        end
+      end
+
+    you can now do a find like: 
+      Dupe.find(:books) {|b| b.authors.collect {|a| a.name}.include?('some author')}
+
+    before you would have had to do:
+      Dupe.find(:books) {|b| b.authors.collect {|a| a[:name]}.include?('some author')}
+
+
+
 v0.3.1
   * rdoc documentation updates
 

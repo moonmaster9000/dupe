@@ -206,7 +206,7 @@ class Dupe
     #
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 
-    def stub(count, factory, options)
+    def stub(count, factory, options={})
       factory = factory.to_s.singularize.to_sym
       setup_factory(factory)
       @factories[factory].stub_services_with((options[:like] || {}), count.to_i, (options[:starting_with] || 1))

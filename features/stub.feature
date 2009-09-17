@@ -64,3 +64,17 @@ Scenario: stubbing complex resources
     {"id" => 10,"title" => "9004-stubsville", "author" => {"id" => 1, "name" => "stubmeister"}}
   ]
   """
+
+Scenario: stubbing empty resources
+  When I stub 5 blank books
+  Then Dupe should mock the response to "/books.xml" with
+  """
+  [
+    {"id" => 1},
+    {"id" => 2},
+    {"id" => 3},
+    {"id" => 4},
+    {"id" => 5}
+  ]
+  """
+

@@ -26,6 +26,14 @@ When /^(?:I )?stub (\d+) (?:more )?books$/ do |count|
   )
 end
 
+When /^(?:I )?stub (\d+) (?:more )?blank books$/ do |count|
+  Dupe.stub(
+    count.to_i,
+    :books
+  )
+end
+
+
 When /^stub (\d+) books with genre "([^\"]*)"$/ do |count, genre|
   Dupe.stub(
     count.to_i,

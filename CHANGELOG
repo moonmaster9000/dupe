@@ -1,3 +1,6 @@
+v0.3.4
+  * removed spurious debug output (sorry)
+
 v0.3.3 
   * now supporting active resource prefixes. 
 

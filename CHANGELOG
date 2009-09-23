@@ -1,3 +1,14 @@
+v0.3.3 
+  * now supporting active resource prefixes. 
+
+    For example, suppose you have an ActiveResource class like: 
+      class Book < ActiveResource::Base
+        self.site = "http://library.com/restful_services"
+      end
+    Then Dupe will mock url responses prefixed with "/restful_services/", (e.g., if you 
+    created a book record with Dupe like Dupe.create :book, :name => 'Bible', :author => 'God', 
+    then Dupe would mock the response to "/restful_services/books.xml" with the appropriate xml)
+
 v0.3.2
   * bug fix for hasmany associations
     for example, suppose you had the following definition for a book resource that has many authors: 

@@ -32,14 +32,16 @@ class Dupe
     private
     def find_all(records)
       ActiveResource::HttpMock.respond_to do |mock|
-        mock.get "/#{@resource_name.to_s.pluralize}.xml",  {}, format_for_service_response(records)
+        puts "mocking response to #{prefix}#{@resource_name.to_s.pluralize}.xml"
+        mock.get "#{prefix}#{@resource_name.to_s.pluralize}.xml",  {}, format_for_service_response(records)
       end
     end
     
     def find_one(record, identifiers)
       ActiveResource::HttpMock.respond_to do |mock|
         identifiers.each do |identifier|
-          mock.get "/#{@resource_name.to_s.pluralize}/#{record[identifier]}.xml", {}, format_for_service_response(record)
+          puts "mocking response to #{prefix}#{@resource_name.to_s.pluralize}/#{record[identifier]}.xml"
+          mock.get "#{prefix}#{@resource_name.to_s.pluralize}/#{record[identifier]}.xml", {}, format_for_service_response(record)
         end
       end
     end
@@ -47,6 +49,10 @@ class Dupe
     def format_for_service_response(records)
       root = (records.is_a? Array) ? @resource_name.to_s.pluralize : @resource_name.to_s
       @format == :json ? records.to_json({:root => root}): records.to_xml({:root => root})
+    end
+
+    def prefix
+      @resource_name.to_s.camelize.constantize.prefix.gsub(/\/+/, '/') rescue "/" 
     end
   end
 end

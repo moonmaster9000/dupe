@@ -26,3 +26,9 @@ end
 When /^I create a book titled "([^\"]*)" written by "([^\"]*)"$/ do |title, author_name|
   Dupe.create :book, :title => title, :author => author_name
 end
+
+
+Given /^a PrefixBook ActiveResource object with a site prefix "([^\"]*)"$/ do |prefix|
+
+end
+

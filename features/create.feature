@@ -36,3 +36,12 @@ Scenario: mocking complex resources with associations
   """
   {"id" => 1, "name" => "Arthur C. Clarke"}
   """
+
+@prefix
+Scenario: mocking active resource with prefixes
+  Given a PrefixBook ActiveResource object with a site prefix "/book_services"
+  When I create an empty "prefix_book"
+  Then Dupe should mock the response to "/book_services/prefix_books.xml" with
+  """
+  [{"id"=>1}]
+  """

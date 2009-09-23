@@ -28,11 +28,9 @@ class Dupe
       records.each {|r| find_one(r, identifiers)}
     end
     
-    
     private
     def find_all(records)
       ActiveResource::HttpMock.respond_to do |mock|
-        puts "mocking response to #{prefix}#{@resource_name.to_s.pluralize}.xml"
         mock.get "#{prefix}#{@resource_name.to_s.pluralize}.xml",  {}, format_for_service_response(records)
       end
     end
@@ -40,7 +38,6 @@ class Dupe
     def find_one(record, identifiers)
       ActiveResource::HttpMock.respond_to do |mock|
         identifiers.each do |identifier|
-          puts "mocking response to #{prefix}#{@resource_name.to_s.pluralize}/#{record[identifier]}.xml"
           mock.get "#{prefix}#{@resource_name.to_s.pluralize}/#{record[identifier]}.xml", {}, format_for_service_response(record)
         end
       end

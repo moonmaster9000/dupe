@@ -60,12 +60,12 @@ Given /^I have an author definition with name transformed to "([^\"]*)"$/ do |au
 end
 
 When /^I create an author named "([^\"]*)"$/ do |name|
-  Dupe.create :author, :name => name 
+  Dupe.create :author, :name => name, :label => name.downcase.gsub(/[^a-zA-Z\ ]/, '').gsub(/\ +/, '-')
 end
 
 Then /^Dupe should contain an author record with the name "([^\"]*)"$/ do |name|
   records = [{:name => name, :id => 1}]
-  records.should == Dupe.factories[:author].records
+  records.collect {|r| {:name => r[:name], :id => r[:id]}}.should == Dupe.factories[:author].records.collect {|r| {:name => r[:name], :id => r[:id]}}
 end
 
 When /^I create "([^\"]*)" (?:more )?books$/ do |num_records|

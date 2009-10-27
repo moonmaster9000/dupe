@@ -41,27 +41,27 @@ Scenario: stubbing complex resources
   Then Dupe should mock the response to "/books.xml" with 
   """
   [
-    {"id" => 1, "title" => "1-stubby", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 2, "title" => "2-stubby", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 3, "title" => "3-stubby", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 4, "title" => "4-stubby", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 5, "title" => "5-stubby", "author" => {"id" => 1, "name" => "stubmeister"}}
+    {"id" => 1, "title" => "1-stubby", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 2, "title" => "2-stubby", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 3, "title" => "3-stubby", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 4, "title" => "4-stubby", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 5, "title" => "5-stubby", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}}
   ]
   """
   When I stub 5 more books starting with the title "stubsville 9000" written by "stubmeister"
   Then Dupe should mock the response to "/books.xml" with 
   """
   [
-    {"id" => 1, "title" => "1-stubby",  "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 2, "title" => "2-stubby",  "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 3, "title" => "3-stubby",  "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 4, "title" => "4-stubby",  "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 5, "title" => "5-stubby",  "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 6, "title" => "9000-stubsville", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 7, "title" => "9001-stubsville", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 8, "title" => "9002-stubsville", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 9, "title" => "9003-stubsville", "author" => {"id" => 1, "name" => "stubmeister"}},
-    {"id" => 10,"title" => "9004-stubsville", "author" => {"id" => 1, "name" => "stubmeister"}}
+    {"id" => 1, "title" => "1-stubby",  "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 2, "title" => "2-stubby",  "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 3, "title" => "3-stubby",  "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 4, "title" => "4-stubby",  "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 5, "title" => "5-stubby",  "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 6, "title" => "9000-stubsville", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 7, "title" => "9001-stubsville", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 8, "title" => "9002-stubsville", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 9, "title" => "9003-stubsville", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}},
+    {"id" => 10,"title" => "9004-stubsville", "author" => {"id" => 1, "name" => "stubmeister", "label" => "stubmeister"}}
   ]
   """
 

@@ -14,9 +14,9 @@ Given /^I have configured Dupe to mock by id$/ do
   end
 end
 
-Then /^"([^\"]*)" should give a 500 error$/ do |url|
+Then /^"([^\"]*)" should raise an error$/ do |url|
   @conn = ActiveResource::Connection.new('http://localhost')
-  lambda { @conn.get(url) }.should raise_error(ActiveResource::InvalidRequestError)
+  lambda { @conn.get(url) }.should raise_error
 end
 
 When /^I configured Dupe to log requests$/ do

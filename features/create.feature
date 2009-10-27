@@ -22,19 +22,19 @@ Scenario: mocking complex resources with associations
   And I create a book titled "2001: A Space Odyssey" written by "Arthur C. Clarke"
   Then Dupe should mock the response to "/books.xml" with 
   """
-  [{"id"=>1, "title" => "2001: A Space Odyssey", "author" => {"id" => 1, "name" => "Arthur C. Clarke"}}]
+  [{"id"=>1, "title" => "2001: A Space Odyssey", "author" => {"id" => 1, "name" => "Arthur C. Clarke", "label" => "arthur-c-clarke"}}]
   """
   And Dupe should mock the response to "/books/1.xml" with 
   """
-  {"id"=>1, "title" => "2001: A Space Odyssey", "author" => {"id" => 1, "name" => "Arthur C. Clarke"}}
+  {"id"=>1, "title" => "2001: A Space Odyssey", "author" => {"id" => 1, "name" => "Arthur C. Clarke", "label" => "arthur-c-clarke"}}
   """
   And Dupe should mock the response to "/authors.xml" with
   """
-  [{"id" => 1, "name" => "Arthur C. Clarke"}]
+  [{"id" => 1, "name" => "Arthur C. Clarke", "label" => "arthur-c-clarke"}]
   """
   And Dupe should mock the response to "/authors/1.xml" with 
   """
-  {"id" => 1, "name" => "Arthur C. Clarke"}
+  {"id" => 1, "name" => "Arthur C. Clarke", "label" => "arthur-c-clarke"}
   """
 
 @prefix

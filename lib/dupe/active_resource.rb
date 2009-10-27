@@ -7,6 +7,10 @@ ActiveResource::HttpMock.instance_eval do #:nodoc:
     requests.clear
     responses.clear
   end
+
+  def delete_mock(http_method, path)
+    responses.reject! {|r| r[0].path == path && r[0].method == http_method}
+  end
 end
 
 # makes it possible to override existing request/response definitions
@@ -25,9 +29,20 @@ module ActiveResource #:nodoc:
   end
 end
 
+module CustomMocks
+  class NotImplementedError < StandardError
+  end
+  
+  def custom_service(url)
+    raise NotImplementedError.new("you must implement the CustomMocks::custom_service method.")
+  end
+end
+
 module ActiveResource
   class Connection #:nodoc:
     
+    include CustomMocks
+
     class << self
       attr_reader :request_log
 
@@ -67,7 +82,21 @@ module ActiveResource
     # Execute a GET request.
     # Used to get (find) resources.
     def get(path, headers = {})
-      response = request(:get, path, build_request_headers(headers, :get))
+      begin
+        response = request(:get, path, build_request_headers(headers, :get))
+
+      # if the request threw an exception
+      rescue
+        
+        # make sure that it's not a custom service that should be handled on the fly
+        response_body = custom_service(path)
+        response_body = response_body.to_xml(:root => path.match(/^\/([^\/\.]+)/)[1]) if response_body.is_a?(Hash) || response_body.is_a?(Array)
+        ActiveResource::HttpMock.respond_to do |mock|
+          mock.get path, {}, response_body
+        end
+        response = request(:get, path, build_request_headers(headers, :get))
+        ActiveResource::HttpMock.delete_mock(:get, path)
+      end
       ActiveResource::Connection.log_request(:get, path, build_request_headers(headers, :get), response)
       format.decode(response.body)
     end

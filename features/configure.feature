@@ -38,12 +38,12 @@ Scenario: mock id
   """
   {"id" => 1, "title" => "2001: A Space Odyssey", "label" => "2001-a-space-odyssey"}
   """
-  And "/books/2001-a-space-odyssey.xml" should give a 500 error
+  And "/books/2001-a-space-odyssey.xml" should raise an error
   And Dupe should mock the response to "/books/2.xml" with:
   """
   {"id" => 2, "title" => "Rendezvous with Rama", "label" => "rendezvous-with-rama"}
   """
-  And "/books/rendezvous-with-rama.xml" should give a 500 error
+  And "/books/rendezvous-with-rama.xml" should raise an error
 
 @log
 Scenario: log requests

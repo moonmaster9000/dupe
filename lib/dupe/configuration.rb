@@ -18,5 +18,3 @@ class Dupe
     end
   end
 end
-
-

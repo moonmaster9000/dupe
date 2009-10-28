@@ -15,6 +15,7 @@ begin
     gemspec.add_dependency('activeresource', '>= 2.3.3')
     gemspec.add_dependency('cucumber', '>= 0.3.98')
   end
+  Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end

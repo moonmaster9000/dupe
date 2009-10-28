@@ -9,7 +9,6 @@ class DupeGenerator < Rails::Generator::Base
 
       # copy the dupe_setup.rb example file into features/support
       m.template 'dupe_setup.rb', 'features/support/dupe_setup.rb'
-
     end
   end
 end

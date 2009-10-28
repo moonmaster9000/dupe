@@ -9,11 +9,10 @@ begin
                            a service-oriented app without having to worry about whether or not the service 
                            is live or available while cuking."
     gemspec.email       = "moonmaster9000@gmail.com"
-    gemspec.files       = FileList['lib/**/*.rb', 'README.rdoc']
+    gemspec.files       = FileList['lib/**/*.rb', 'rails_generators/**/*', 'README.rdoc']
     gemspec.homepage    = "http://github.com/moonmaster9000/dupe"
     gemspec.authors     = ["Matt Parker"]
     gemspec.add_dependency('activeresource', '>= 2.3.3')
-    gemspec.add_dependency('cucumber', '>= 0.3.98')
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

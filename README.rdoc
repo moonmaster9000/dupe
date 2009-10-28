@@ -1,7 +1,8 @@
 = Dupe 
 
-There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's "Factory Girl"[http://www.thoughtbot.com/projects/factory_girl]).
+There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's {"Factory Girl"}[http://www.thoughtbot.com/projects/factory_girl]).
 But what about prototyping ActiveResource records? That's where Dupe steps in.  
+
 
 == Motivation 
 
@@ -11,10 +12,11 @@ Why would anyone want to do that, you might ask? Dupe arose in the midst of a si
 had a complicated, denormalized, and chaotic backend datastore that made ordinary data migration a complex nightmare. So the developers involved
 decided to rebuild the frontend of the site first, and connect it to the existing backend via services. 
 
-Using Dupe, they were able to cuke new frontend, mocking
+Using Dupe, they were able to cuke the new frontend, mocking
 the backend services they needed, and then the developers for the old site were able to use the mocked XML output of Dupe to determine exactly what
-services they needed to expose on the backend, and the format of the XML responses. Once those services existed, data migration (over the services) was a breeze, and the new
-site had a nicely decoupled, service-oriented architecture. 
+services they needed to expose on the backend (along with the XML format of those services). Once those services existed, the new frontend was launched,
+and the developers then created a new backend, migrated data from the old backend (over the services), and connected the new frontend to the new backend services.
+The resulting site had a nicely decoupled, service-oriented architecture. 
 
 
 == Installation
@@ -26,6 +28,10 @@ Add this to your cucumber.rb environment (config/environments/cucumber.rb)
 Then run this rake task to install the gem: 
 
   # rake gems:install RAILS_ENV=cucumber
+
+Lastly, from your rails project root, run:
+
+  # script/generate dupe
 
 
 == Example
@@ -111,7 +117,7 @@ This would send off a request like "/books.xml?author_id=1". If this happened du
   There is no custom service mapping for "/books.xml?author_id=1". 
   Now go to features/support/custom_mocks.rb and add it. (StandardError)
 
-If the file features/support/custom_mocks.rb does not yet exist, create it and paste this into it: 
+When you ran "script/generate dupe" during dupe installation, it created a file features/support/custom_mocks.rb that should look something like this:
 
   module CustomMocks
     # Maps a service request url to a Dupe find. By default, Dupe will only 
@@ -165,7 +171,9 @@ Now remove the "when %r{/bogus_url}" statement and add a custom mock for your se
       end
     end
 
-Dupe will take the result (a Hash), and convert it to XML. You could have alternatively given a string of XML (or a string of anything), and Dupe would have taken it as-is. 
+Dupe will take the result of the Dupe.find(:books)... code (a Hash), and convert it to XML. 
+You could have alternatively given a string of XML (or a string of anything), and Dupe would have taken it as-is. 
+
 
 == More
 

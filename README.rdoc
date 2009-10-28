@@ -108,7 +108,8 @@ you had the following in one of your controllers:
 
 This would send off a request like "/books.xml?author_id=1". If this happened during the context of a cucumber scenario, then Dupe would throw an exception with a message like:
 
-  There is no custom service mapping for "/books.xml?author_id=1". Now go to features/support/custom_mocks.rb and add it. (StandardError)
+  There is no custom service mapping for "/books.xml?author_id=1". 
+  Now go to features/support/custom_mocks.rb and add it. (StandardError)
 
 If the file features/support/custom_mocks.rb does not yet exist, create it and paste this into it: 
 
@@ -139,7 +140,10 @@ If the file features/support/custom_mocks.rb does not yet exist, create it and p
           ''
 
         else
-          raise StandardError.new(%{There is no custom service mapping for "#{url}". Now go to features/support/custom_mocks.rb and add it.})
+          raise StandardError.new(
+            "There is no custom service mapping for \"#{url}\"." +
+            "Now go to features/support/custom_mocks.rb and add it."
+          )
       end
     end
   end
@@ -153,7 +157,11 @@ Now remove the "when %r{/bogus_url}" statement and add a custom mock for your se
           Dupe.find(:books) {|b| b.author.id == $1}
 
         else
-          raise StandardError.new(%{There is no custom service mapping for "#{url}". Now go to features/support/custom_mocks.rb and add it.})
+          raise StandardError.new(
+            "There is no custom service mapping for \"#{url}\"." +
+            "Now go to features/support/custom_mocks.rb and add it."
+          )
+
       end
     end
 

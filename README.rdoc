@@ -165,11 +165,12 @@ Now remove the "when %r{/bogus_url}" statement and add a custom mock for your se
       end
     end
 
-Dupe will take the result (a Hash), and convert it to XML. You could have alternatively given a string of XML (or anything), and Dupe would have taken it as-is. 
+Dupe will take the result (a Hash), and convert it to XML. You could have alternatively given a string of XML (or a string of anything), and Dupe would have taken it as-is. 
 
 == More
 
-Dupe supports attribute defaults, attribute transformations, stubbing, resource associations, custom resource mocks, and more. Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
+Dupe supports attribute defaults, attribute transformations, stubbing, resource associations, custom resource mocks, and more. 
+Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
 
 
 == TODO List

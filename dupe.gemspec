@@ -30,7 +30,8 @@ Gem::Specification.new do |s|
      "lib/dupe/sequence.rb",
      "lib/dupe/string.rb",
      "rails_generators/dupe/dupe_generator.rb",
-     "rails_generators/dupe/templates/custom_mocks.rb"
+     "rails_generators/dupe/templates/custom_mocks.rb",
+     "rails_generators/dupe/templates/dupe_setup.rb"
   ]
   s.homepage = %q{http://github.com/moonmaster9000/dupe}
   s.rdoc_options = ["--charset=UTF-8"]

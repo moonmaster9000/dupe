@@ -15,7 +15,7 @@ decided to rebuild the frontend of the site first, and connect it to the existin
 Using Dupe, they were able to cuke the new frontend, mocking
 the backend services they needed, and then the developers for the old site were able to use the mocked XML output of Dupe to determine exactly what
 services they needed to expose on the backend (along with the XML format of those services). Once those services existed, the new frontend was launched,
-and the developers then created a new backend, migrated data from the old backend (over the services), and connected the new frontend to the new backend services.
+and the developers then created a new backend, migrated data from the old backend (over the services), and pointed the new frontend to the new backend services.
 The resulting site had a nicely decoupled, service-oriented architecture. 
 
 

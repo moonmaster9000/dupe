@@ -28,7 +28,9 @@ Gem::Specification.new do |s|
      "lib/dupe/mock_service_response.rb",
      "lib/dupe/record.rb",
      "lib/dupe/sequence.rb",
-     "lib/dupe/string.rb"
+     "lib/dupe/string.rb",
+     "rails_generators/dupe/dupe_generator.rb",
+     "rails_generators/dupe/templates/custom_mocks.rb"
   ]
   s.homepage = %q{http://github.com/moonmaster9000/dupe}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -42,14 +44,11 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<activeresource>, [">= 2.3.3"])
-      s.add_runtime_dependency(%q<cucumber>, [">= 0.3.98"])
     else
       s.add_dependency(%q<activeresource>, [">= 2.3.3"])
-      s.add_dependency(%q<cucumber>, [">= 0.3.98"])
     end
   else
     s.add_dependency(%q<activeresource>, [">= 2.3.3"])
-    s.add_dependency(%q<cucumber>, [">= 0.3.98"])
   end
 end
 

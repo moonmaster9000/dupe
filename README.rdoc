@@ -3,17 +3,33 @@
 There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's "Factory Girl"[http://www.thoughtbot.com/projects/factory_girl]).
 But what about prototyping ActiveResource records? That's where Dupe steps in.  
 
+== Motivation 
+
+Dupe is ideally suited for cuking the client side of a service-oriented (ActiveResource) application where the backend service does not yet exist.
+
+Why would anyone want to do that, you might ask? Dupe arose in the midst of a site migration project. Essentially, the site being replaced 
+had a complicated, denormalized, and chaotic backend datastore that made ordinary data migration a complex nightmare. So the developers involved
+decided to rebuild the frontend of the site first, and connect it to the existing backend via services. 
+
+Using Dupe, they were able to cuke new frontend, mocking
+the backend services they needed, and then the developers for the old site were able to use the mocked XML output of Dupe to determine exactly what
+services they needed to expose on the backend, and the format of the XML responses. Once those services existed, data migration (over the services) was a breeze, and the new
+site had a nicely decoupled, service-oriented architecture. 
+
+
 == Installation
 
-Then add this to your cucumber.rb environment (config/environments/cucumber.rb)
+Add this to your cucumber.rb environment (config/environments/cucumber.rb)
   
-  config.gem 'dupe', :lib => 'dupe', :source => 'http://gemcutter.org'
+  config.gem 'dupe', :lib => 'dupe', :version => '>=0.3.5' :source => 'http://gemcutter.org'
 
 Then run this rake task to install the gem: 
 
   # rake gems:install RAILS_ENV=cucumber
 
+
 == Example
+
 Let's suppose your cuking a book search application for a library that consumes a RESTFUL book datastore service via ActiveResource.
 You might start by writing the following feature in <em>RAILS_ROOT/features/library/find_book.feature</em>:
 
@@ -85,6 +101,70 @@ for the Book resource, it will mock:
 
 From here, you could start scaffolding your controllers, with the assumption that Dupe will mock the responses to Book.find(<id or :all>) and Author.find(<id or :all>).
 
+However, what happens when one of your controllers uses an ActiveResource object in such a way that it sends off a request that Dupe has not yet mocked? For example, suppose 
+you had the following in one of your controllers:
+
+  Book.find :all, :params => {:author_id => 1}
+
+This would send off a request like "/books.xml?author_id=1". If this happened during the context of a cucumber scenario, then Dupe would throw an exception with a message like:
+
+  There is no custom service mapping for "/books.xml?author_id=1". Now go to features/support/custom_mocks.rb and add it. (StandardError)
+
+If the file features/support/custom_mocks.rb does not yet exist, create it and paste this into it: 
+
+  module CustomMocks
+    # Maps a service request url to a Dupe find. By default, Dupe will only 
+    # mock simple requests like SomeResource.find(some_id) or SomeResource.find(:all)
+    #
+    # For example, suppose you have a Book < ActiveResource::Base class, and 
+    # somewhere your code does: 
+    #
+    #   Book.find :all, :params => {:limit => 10, :offset => 20}
+    #
+    # That in turn will send off a request to a url like: 
+    #
+    #   /books?limit=10&offset=20
+    #
+    # In this file, you could add a "when" statement like:
+    #
+    #   when %r{^/books?limit=\d+&offset=\d+$}
+    #     start = $2.to_i
+    #     finish = start + $1.to_i
+    #     Dupe.find(:books)[start..finish]
+    #
+    def custom_service(url)
+      case url
+        
+        when %r{/bogus_url}
+          ''
+
+        else
+          raise StandardError.new(%{There is no custom service mapping for "#{url}". Now go to features/support/custom_mocks.rb and add it.})
+      end
+    end
+  end
+
+Now remove the "when %r{/bogus_url}" statement and add a custom mock for your service:
+
+    def custom_service(url)
+      case url
+
+        when %r{books.xml\?author_id=(\d+)$}
+          Dupe.find(:books) {|b| b.author.id == $1}
+
+        else
+          raise StandardError.new(%{There is no custom service mapping for "#{url}". Now go to features/support/custom_mocks.rb and add it.})
+      end
+    end
+
+Dupe will take the result (a Hash), and convert it to XML. You could have alternatively given a string of XML (or anything), and Dupe would have taken it as-is. 
+
 == More
 
 Dupe supports attribute defaults, attribute transformations, stubbing, resource associations, custom resource mocks, and more. Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
+
+
+== TODO List
+
+* Thus far, Dupe has only been used for consuming a service via GET requests. There are no facilities yet for mocking responses to PUT, POST, and DELETE requests. 
+* We need a rake task that will run your scenarios and create service documentation based on the dupe log output (i.e., example requests and example responses) that the programmers implementing the service can use as a reference. 

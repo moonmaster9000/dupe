@@ -87,7 +87,6 @@ module ActiveResource
 
       # if the request threw an exception
       rescue
-        
         # make sure that it's not a custom service that should be handled on the fly
         response_body = custom_service(path)
         response_body = response_body.to_xml(:root => path.match(/^\/([^\/\.]+)/)[1]) if response_body.is_a?(Hash) || response_body.is_a?(Array)

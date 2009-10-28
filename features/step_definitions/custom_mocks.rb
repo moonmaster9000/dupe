@@ -1,6 +1,6 @@
 When /^I define a custom `count` mock for "([^"]+)"$/ do |resource|
   eval <<-EOE
-    module CustomMocks
+    CustomMocks.module_eval do
       def custom_service(url)
         case url
           when %r{/#{resource}/count.xml}
@@ -14,7 +14,7 @@ When /^I define a custom `count` mock for "([^"]+)"$/ do |resource|
 end
 
 When /^I define a custom mock for retreiving books written by a particular author$/ do
-  module CustomMocks
+  CustomMocks.module_eval do
     def custom_service(url)
       case url
         when %r{^/books\.xml\?author_id=([^&]*)$}

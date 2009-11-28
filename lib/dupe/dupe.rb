@@ -336,7 +336,7 @@ class Dupe
     # "find the first author record where the author's name equals `name`". 
     #
     # Dupe decided to return only a single record because we specified <tt>find(:author)</tt>. 
-    # Had we instead specified <tt>find(:authors)</tt>, resource factory would have instead returned an array of results. 
+    # Had we instead specified <tt>find(:authors)</tt>, Dupe would have instead returned an array of results. 
     #
     # More examples: 
     #   
@@ -432,6 +432,7 @@ class Dupe
   def generate_services_for(records, records_already_processed=false) #:nodoc:
     records = process_records records unless records_already_processed
     @mocker.run_mocks(@records, @config.config[:record_identifiers])
+    records.length == 1 ? records.first : records
   end
   
   def find_records_like(match) #:nodoc:

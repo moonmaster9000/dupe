@@ -1,3 +1,6 @@
+v0.3.7
+  * fixing cucumber After scenario hook (broke by last patch release)
+
 v0.3.6
   * Dupe.create now returns hashes just like Dupe.find, allowing you to do this:
     

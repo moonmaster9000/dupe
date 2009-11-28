@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{dupe}
-  s.version = "0.3.5"
+  s.version = "0.3.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Parker"]
-  s.date = %q{2009-10-28}
+  s.date = %q{2009-11-28}
   s.description = %q{Dupe rides on top of ActiveResource to allow you to cuke the client side of 
                            a service-oriented app without having to worry about whether or not the service 
                            is live or available while cuking.}
@@ -38,6 +38,11 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{A tool that helps you mock services while cuking.}
+  s.test_files = [
+    "spec/lib_specs/dupe_record_spec.rb",
+     "spec/lib_specs/dupe_spec.rb",
+     "spec/spec_helper.rb"
+  ]
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION

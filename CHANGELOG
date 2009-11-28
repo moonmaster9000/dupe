@@ -1,3 +1,10 @@
+v0.3.6
+  * Dupe.create now returns hashes just like Dupe.find, allowing you to do this:
+    
+    a = Dupe.create :author, :name => 'Andreas Eschbach'
+    b = Dupe.create :book, :title => 'The Carpet Makers', :author => a
+
+
 v0.3.5
   * added support for intercept mocking. Instead of using the clunky Dupe.define_mocks for setting up
     custom mocks, you can now use the CustomMocks module. Add a .rb file to your features/support/ 

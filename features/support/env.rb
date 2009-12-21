@@ -1,5 +1,0 @@
-$LOAD_PATH << './lib'
-require 'rubygems'
-gem 'activeresource'
-gem 'rspec'
-require 'dupe'

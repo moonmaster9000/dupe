@@ -2,17 +2,8 @@
 # License::   Distributes under the same terms as Ruby
 
 class Dupe
-  attr_reader :factory_name   #:nodoc:
-  attr_reader :configuration  #:nodoc:
-  attr_reader :attributes     #:nodoc:
-  attr_reader :config         #:nodoc:
-  attr_reader :mocker         #:nodoc:
-  attr_reader :records        #:nodoc:
 
   class << self
-    attr_accessor :factories            #:nodoc:
-    attr_accessor :global_configuration #:nodoc:
-    
     # Create data definitions for your resources. This allows you to setup default values for columns
     # and even provide data transformations.
     #
@@ -104,8 +95,6 @@ class Dupe
     #     </author>
     #   </book>
     def define(factory) # yield: define
-      setup_factory(factory)
-      yield @factories[factory]
     end
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
@@ -165,10 +154,6 @@ class Dupe
     #     <name>Robert Heinlein</name>
     #   </author>
     def create(factory, records={})
-      setup_factory(factory)
-      raise Exception, "unknown records type" if !records.nil? and !records.is_a?(Array) and !records.is_a?(Hash)
-      records = [records] if records.is_a?(Hash)
-      @factories[factory].generate_services_for(records)
     end
 
     # You can use this method to quickly stub out a large number of resources. For example: 
@@ -214,9 +199,6 @@ class Dupe
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 
     def stub(count, factory, options={})
-      factory = factory.to_s.singularize.to_sym
-      setup_factory(factory)
-      @factories[factory].stub_services_with((options[:like] || {}), count.to_i, (options[:starting_with] || 1))
     end
 
     # === Global Configuration
@@ -267,42 +249,7 @@ class Dupe
     #     <label>arthur-c-clarke</label>
     #   </author>
     def configure(factory=nil) # yield: configure
-      yield global_configuration and return unless factory
-      setup_factory(factory)
-      yield @factories[factory].config
     end
-    
-    # By default, Dupe will mock responses to ActiveResource <tt>find(:all)</tt> and <tt>find(id)</tt>. 
-    # However, it's likely that your cucumber scenarios will eventually fire off an ActiveResource request that's
-    # something other than these basic lookups.
-    #
-    # Dupe.define_mocks allows you to add new resource mocks and override the built-in resource mocks. 
-    #
-    # For example, suppose you had a Book ActiveResource model, and you want to use it to get the :count of all 
-    # Books in the back end system your consuming. <tt>Book.get(:count)</tt> would fire off an HTTP request to the 
-    # backend service like <tt>"GET /books/count.xml"</tt>, and assuming the service is set up to respond to that
-    # request, you might expect to get something back like: 
-    #
-    #   <?xml version="1.0" encoding="UTF-8"?>
-    #   <hash>
-    #     <count type="integer">3</count>
-    #   </hash>
-    #
-    # To mock this for the purposes of cuking, you could do the following:
-    # 
-    #   Dupe.define_mocks :book do |define|
-    #     define.count do |mock, records|
-    #       mock.get "/books/count.xml", {}, {:count => records.size}.to_xml 
-    #     end
-    #   end
-    #
-    # The <tt>mock</tt> object is the ActiveResource::HttpMock object. Please see the documentation for that
-    # if you would like to know more about what's possible with it. 
-    def define_mocks(factory) # yield: define
-      setup_factory(factory)
-      yield @factories[factory].mocker
-    end
-    
 
     # Search for a resource. This works a bit differently from both ActiveRecord's find and ActiveResource's find. 
     # This is most often used for defining associations between objects (Dupe.define). 
@@ -358,121 +305,6 @@ class Dupe
     #   Dupe.find(:all, :deer) {|d| d.type == 'doe'}
     #   Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
     def find(*args, &block) # yield: record
-      all_or_first, factory_name = args[-2], args[-1]
-      match         = block ? block : proc {true}
-      all_or_first  = ((factory_name.to_s.plural?) ? :all : :first) unless all_or_first
-      factory_name  = factory_name.to_s.singularize.to_sym
-      verify_factory_exists factory_name
-      result        = factories[factory_name].find_records_like match
-      all_or_first  == :all ? result : result.first
-    end
-
-    def get_factory(factory) #:nodoc:
-      setup_factory(factory)
-      @factories[factory]
-    end
-
-    def flush(factory=nil, destroy_definitions=false) #:nodoc:
-      if factory and factories[factory]
-        factories[factory].flush(destroy_definitions)
-      else
-        factories.each {|factory_name, factory| factory.flush(destroy_definitions)}
-      end
-    end
-
-    def factories #:nodoc:
-      @factories ||= {}
-    end
-
-    def global_configuration #:nodoc:
-      @global_configuration ||= Configuration.new
-    end
-
-    private
-    
-    def setup_factory(factory)
-      factories[factory] = Dupe.new(factory) unless factories[factory]
-    end
-
-    def reset(factory)
-      factories[factory].flush if factories[factory]
-    end
-
-    def verify_factory_exists(factory_name)
-      raise "Dupe doesn't know about the '#{factory_name}' resource" unless factories[factory_name]
     end
   end
-
-  def flush(destroy_definitions=false) #:nodoc:
-    @records = []
-    @sequence = Sequence.new
-    @attributes = {} if destroy_definitions
-    ActiveResource::HttpMock.reset_from_dupe!
-  end
-  
-  def stub_services_with(record_template, count=1, starting_value=1) #:nodoc: 
-    records = stub_records(record_template, count, starting_value)
-    generate_services_for(records, true)
-  end
-  
-  def initialize(factory) #:nodoc:
-    @factory_name = factory
-    @attributes   = {}
-    @config       = Configuration.new
-    @mocker       = MockServiceResponse.new(@factory_name)
-    @records      = []
-  end
-
-  def method_missing(method_name, *args, &block) #:nodoc:
-    args = [nil] if args.empty?
-    args << block
-    define_attribute(method_name.to_sym, *args)
-  end
-
-  def generate_services_for(records, records_already_processed=false) #:nodoc:
-    records = process_records records unless records_already_processed
-    @mocker.run_mocks(@records, @config.config[:record_identifiers])
-    records.length == 1 ? records.first : records
-  end
-  
-  def find_records_like(match) #:nodoc:
-    @records.select {|r| match.call Record.new(r)}
-  end
-
-  private
-  def define_attribute(name, default_value=nil, prock=nil) 
-    @attributes[name] = Attribute.new(name, default_value, prock)
-  end
-
-  def process_records(records)
-    records.map {|r| generate_record({:id => sequence}.merge(r))}
-  end
-
-  def generate_record(overrides={})
-    define_missing_attributes(overrides.keys)
-    record = {}
-    @attributes.each do |attr_key, attr_class|
-      override_default_value = overrides[attr_key] || overrides[attr_key.to_s]
-      record[attr_key] = attr_class.value(override_default_value)
-    end
-    @records << record
-    record
-  end
-
-  def sequence
-    (@sequence ||= Sequence.new).next
-  end
-
-  def define_missing_attributes(keys)
-    keys.each {|k| define_attribute(k.to_sym) unless @attributes[k.to_sym]}
-  end
-
-  def stub_records(record_template, count, stub_number)
-    overrides = record_template.merge({})
-    overrides.keys.each {|k| overrides[k] = overrides[k].call(stub_number) if overrides[k].respond_to?(:call)}
-    overrides = {:id => sequence}.merge(overrides) unless overrides[:id]
-    return [generate_record(overrides)] if count <= 1
-    [generate_record(overrides)] + stub_records(record_template, count-1, stub_number+1)
-  end
-
 end

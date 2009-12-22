@@ -4,6 +4,10 @@
 class Dupe
 
   class << self
+    
+    # the models you have defined with Dupe
+    attr_accessor :models
+    
     # Create data definitions for your resources. This allows you to setup default values for columns
     # and even provide data transformations.
     #
@@ -94,7 +98,8 @@ class Dupe
     #       <date_of_birth>1917-12-16T00:00:00Z</date_of_birth>
     #     </author>
     #   </book>
-    def define(factory) # yield: define
+    def define(*args, &block) # yield: define
+      model_name, attributes = validate_definition_parameters(args, block)
     end
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
@@ -305,6 +310,69 @@ class Dupe
     #   Dupe.find(:all, :deer) {|d| d.type == 'doe'}
     #   Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
     def find(*args, &block) # yield: record
+    end
+    
+    # This blows away all model definitions, and all created records
+    def reset
+      @models = {}
+    end
+    
+    def models(model_name=nil)
+      @models ||= {}
+      if model_name
+        @models[model_name]
+      else
+        @models
+      end
+    end
+    
+    private
+    def validate_definition_parameters(args, block)
+      # Dupe.define :model_name
+      if  args.length == 1 and 
+          args.first.kind_of?(Symbol) and
+          !block
+        return args.first, {}
+      
+      # Dupe.define :model_name => [:attribute1, :attribute2, :etc]
+      elsif  args.length == 1 and 
+          args.first.kind_of?(Hash) and 
+          args.first.keys.size == 1 and
+          args.first.values.first.kind_of?(Array) and 
+          args.first.values.first.inject(true) {|bool, attribute| attribute.kind_of?(Symbol)}
+        model_name = args.first.keys.first
+        values = {}
+        args.first.values.first.map {|attribute| values[attribute] = nil}
+        Dupe::Model.new(model_name).tap do |m|
+          m.schema = Dupe::Model::Schema.new values
+        end
+      
+      # Dupe.define :model_name => {:attr1 => 'default value', :attr2 => 'default value'}
+      elsif args.length == 1 and
+            args.first.kind_of?(Hash) and
+            args.first.keys.size == 1 and
+            args.first.values.first.kind_of?(Hash)
+        Dupe::Model.new(args.first.keys.first).tap do |m|
+          m.schema = Dupe::Model::Schema.new args.first.values.first
+        end
+        
+      # Dupe.define :model_name { |attrs| attrs.attr1 = 'default value' }
+      elsif args.length == 1 and
+            args.first.kind_of?(Symbol) and
+            block.kind_of?(Proc) and
+            block.arity == 1
+        Dupe::Model.new(args.first).tap do |m|
+          m.schema = Dupe::Model::Schema.new.tap do |s|
+            block.call(s)
+          end
+        end
+        
+      
+      else
+        raise ArgumentError.new(
+          "Unknown Dupe.define parameter format. Please consult the API for information on how to use Dupe.define"
+        )
+      end
     end
   end
 end

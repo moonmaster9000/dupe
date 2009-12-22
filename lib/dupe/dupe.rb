@@ -159,7 +159,7 @@ class Dupe
     #     <id type="integer">2</id>
     #     <name>Robert Heinlein</name>
     #   </author>
-    def create(factory, records={})
+    def create(model, records={})
     end
 
     # You can use this method to quickly stub out a large number of resources. For example: 
@@ -317,8 +317,13 @@ class Dupe
       @models ||= {}
     end
     
+    def database
+      @database ||= Dupe::Database.new
+    end
+    
     def reset
       @models = {}
+      @database = Dupe::Database.new
     end
     
     private

@@ -68,5 +68,16 @@ describe Dupe do
       Dupe.models[:book].schema.attribute_templates[:title].transformer.call('value').should == 'transformed value'
     end
   end
+  
+  describe "create" do
+    it "should require a model name parameter" do
+      proc {Dupe.create}.should raise_error(ArgumentError)
+      proc {Dupe.create :book}.should_not raise_error(ArgumentError)
+    end
+    
+    it "should add an item to the database" do
+      pending
+    end
+  end
  
 end

@@ -99,7 +99,8 @@ class Dupe
     #     </author>
     #   </book>
     def define(*args, &block) # yield: define
-      model_name, attributes = validate_definition_parameters(args, block)
+      model_name, model_object = create_model_if_definition_parameters_are_valid(args, block)
+      models[model_name] = model_object
     end
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
@@ -312,61 +313,30 @@ class Dupe
     def find(*args, &block) # yield: record
     end
     
-    # This blows away all model definitions, and all created records
+    def models
+      @models ||= {}
+    end
+    
     def reset
       @models = {}
     end
     
-    def models(model_name=nil)
-      @models ||= {}
-      if model_name
-        @models[model_name]
-      else
-        @models
-      end
-    end
-    
     private
-    def validate_definition_parameters(args, block)
-      # Dupe.define :model_name
-      if  args.length == 1 and 
-          args.first.kind_of?(Symbol) and
-          !block
-        return args.first, {}
-      
-      # Dupe.define :model_name => [:attribute1, :attribute2, :etc]
-      elsif  args.length == 1 and 
-          args.first.kind_of?(Hash) and 
-          args.first.keys.size == 1 and
-          args.first.values.first.kind_of?(Array) and 
-          args.first.values.first.inject(true) {|bool, attribute| attribute.kind_of?(Symbol)}
-        model_name = args.first.keys.first
-        values = {}
-        args.first.values.first.map {|attribute| values[attribute] = nil}
-        Dupe::Model.new(model_name).tap do |m|
-          m.schema = Dupe::Model::Schema.new values
-        end
-      
-      # Dupe.define :model_name => {:attr1 => 'default value', :attr2 => 'default value'}
-      elsif args.length == 1 and
-            args.first.kind_of?(Hash) and
-            args.first.keys.size == 1 and
-            args.first.values.first.kind_of?(Hash)
-        Dupe::Model.new(args.first.keys.first).tap do |m|
-          m.schema = Dupe::Model::Schema.new args.first.values.first
-        end
+    
+    def create_model_if_definition_parameters_are_valid(args, definition)
+      if args.length == 1 and
+         args.first.kind_of?(Symbol) and
+         definition == nil
         
-      # Dupe.define :model_name { |attrs| attrs.attr1 = 'default value' }
-      elsif args.length == 1 and
-            args.first.kind_of?(Symbol) and
-            block.kind_of?(Proc) and
-            block.arity == 1
-        Dupe::Model.new(args.first).tap do |m|
-          m.schema = Dupe::Model::Schema.new.tap do |s|
-            block.call(s)
-          end
-        end
+        return args.first, Dupe::Model.new(args.first)
         
+      elsif args.length == 1 and
+         args.first.kind_of?(Symbol) and
+         definition.kind_of?(Proc) and
+         definition.arity == 1
+        
+        model_name = args.first
+        return model_name, Dupe::Model.new(model_name).tap {|m| m.define definition}     
       
       else
         raise ArgumentError.new(

@@ -34,7 +34,9 @@ describe Dupe do
     
       # Dupe.define :model_name do |attrs|
       #   attrs.attr1 = 'Default Value'
-      #   attrs.attr2
+      #   attrs.attr2 do |value|
+      #     'transformed value'
+      #   end
       # end
       it "should accept a symbol plus a block (that accepts a single parameter)" do
         proc {

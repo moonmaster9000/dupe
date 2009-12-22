@@ -5,8 +5,16 @@ class Dupe
 
   class << self
     
-    # the models you have defined with Dupe
-    attr_accessor :models
+    # the models you have defined via Dupe.define
+    attr_reader :models
+    
+    # the database where all the records you've created via
+    # Dupe.create are stored. 
+    attr_reader :database
+    
+    # set this to "true" if you Dupe to spit out mocked requests
+    # after each of your cucumber scenario's run
+    attr_accessor :debug
     
     # Create data definitions for your resources. This allows you to setup default values for columns
     # and even provide data transformations.
@@ -101,6 +109,7 @@ class Dupe
     def define(*args, &block) # yield: define
       model_name, model_object = create_model_if_definition_parameters_are_valid(args, block)
       models[model_name] = model_object
+      database.create_table model_name
     end
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
@@ -159,7 +168,25 @@ class Dupe
     #     <id type="integer">2</id>
     #     <name>Robert Heinlein</name>
     #   </author>
-    def create(model, records={})
+    def create(model_name, records={})
+      model_name = model_name.to_s.singularize.to_sym
+      @models[model_name] = Dupe::Model.new(model_name) unless @models[model_name]
+      results = []
+      
+      if records.kind_of?(Array)
+        records.each do |record| 
+          r = @models[model_name].create record
+          database.insert r
+          results << r
+        end
+        return results
+      elsif records.kind_of?(Hash)
+        r = @models[model_name].create records
+        database.insert r
+        return r
+      else
+        raise ArgumentError, "You must create with either a hash or an array of hashes."
+      end
     end
 
     # You can use this method to quickly stub out a large number of resources. For example: 
@@ -205,56 +232,6 @@ class Dupe
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 
     def stub(count, factory, options={})
-    end
-
-    # === Global Configuration
-    #
-    # On a global level, configure supports the following options (expect this list to grow as the app grows):
-    #   debug: list the attempted requests and mocked responses that happened during the course of a scenario
-    #
-    # To turn on debugging, simply do:
-    #   Dupe.configure do |global_config|
-    #     global_config.debug true
-    #   end
-    #
-    # === Factory Configuration 
-    #
-    # On a factory level, configure support the following options (expect this list to grow as the app grows):
-    #   record_identifiers: a list of attributes that are unique to each record in that resource factory.
-    #   
-    # The "record_identifiers" configuration option allows you to override the array record identifiers for your resources ([:id], by default)
-    # 
-    # For example, suppose the RESTful application your trying to consume supports lookups by both a textual 'label' 
-    # and a numeric 'id', and that it contains an author service where the author with id '1' has the label 'arthur-c-clarke'.
-    # Your application should expect the same response whether or not you call <tt>Author.find(1)</tt> or <tt>Author.find('arthur-c-clarke')</tt>.
-    # 
-    # Thus, to ensure that Dupe mocks both, do the following:
-    #   Dupe.configure :author do |configure|
-    #     configure.record_identifiers :id, :label
-    #   end
-    #
-    # With this configuration, a <tt>Dupe.create :author, :name => 'Arthur C. Clarke', :label => 'arthur-c-clarke'</tt>
-    # will result in the following mocked service calls: 
-    #
-    # <tt>Author.find(1) --> (GET /authors/1.xml)</tt>
-    #
-    #   <?xml version="1.0" encoding="UTF-8"?>
-    #   <author>
-    #     <id type="integer">1</id>
-    #     <name>Arthur C. Clarke</name>
-    #     <label>arthur-c-clarke</label>
-    #   </author>
-    #
-    #
-    # <tt>Author.find('arthur-c-clarke') --> (GET /authors/arthur-c-clarke.xml)</tt>
-    #
-    #   <?xml version="1.0" encoding="UTF-8"?>
-    #   <author>
-    #     <id type="integer">1</id>
-    #     <name>Arthur C. Clarke</name>
-    #     <label>arthur-c-clarke</label>
-    #   </author>
-    def configure(factory=nil) # yield: configure
     end
 
     # Search for a resource. This works a bit differently from both ActiveRecord's find and ActiveResource's find. 
@@ -310,7 +287,13 @@ class Dupe
     # 
     #   Dupe.find(:all, :deer) {|d| d.type == 'doe'}
     #   Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
-    def find(*args, &block) # yield: record
+    def find(model_name, &block) # yield: record
+      results = database.select model_name.to_s.singularize.to_sym, block
+      if model_name.to_s.pluralize == model_name.to_s
+        results
+      else
+        results.first
+      end
     end
     
     def models
@@ -324,6 +307,10 @@ class Dupe
     def reset
       @models = {}
       @database = Dupe::Database.new
+    end
+    
+    def debug
+      @debug ||= false
     end
     
     private

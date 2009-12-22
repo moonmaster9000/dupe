@@ -50,4 +50,67 @@ describe Dupe::Database do
       @database.tables[:book][1].should == @book
     end
   end
+  
+  describe "select" do
+    before do
+      Dupe.define :book
+      @book = Dupe.models[:book].create :title => 'test'
+      @database = Dupe::Database.new
+      @database.insert @book
+    end
+    
+    it "should require a valid model name" do
+      proc { @database.select }.should raise_error(ArgumentError)
+      proc { @database.select :undefined_model }.should raise_error(
+        Dupe::Database::TableDoesNotExistError,
+        "The table ':undefined_model' does not exist."
+      )
+      proc { @database.select :book }.should_not raise_error
+    end
+    
+    it "should accept a conditions proc" do
+      proc { @database.select :book, proc {|c| true} }.should_not raise_error
+    end
+    
+    it "should verify that the conditions proc accepts a single parameter" do
+      proc { @database.select :book, proc {true} }.should raise_error(
+        Dupe::Database::InvalidQueryError,
+        "There was a problem with your select conditions. Please consult the API."
+      )
+    end
+    
+    it "should find the requested items and return an array" do
+      results = @database.select :book, proc {|b| b.title == 'test' }
+      results.should be_kind_of(Array)
+      results.should_not be_empty
+      results.first.__model__.should == Dupe.models[:book]
+      results.first.__model__.name.should == :book
+      results.first.title.should == 'test'
+      results.first.id.should == 1
+    end
+  end
+  
+  describe "create_table" do
+    it "should create a database table if one doesn't already exist" do
+      @database = Dupe::Database.new
+      @database.tables.length.should == 0
+      @database.tables[:book].should be_nil
+      @database.create_table 'book'
+      @database.tables[:book].should_not be_nil
+      @database.tables.length.should == 1
+      @database.tables[:book].should == {}
+      
+      # make sure it doesn't overwrite a table that already exists
+      m = Dupe::Model.new :book
+      record = m.create
+      @database.insert record
+      @database.tables[:book].length.should == 1
+      @database.tables[:book].values.first.should == record
+      @database.create_table :book
+      @database.tables[:book].length.should == 1
+      @database.tables[:book].values.first.should == record
+    end
+  end
+  
+
 end

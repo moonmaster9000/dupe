@@ -12,8 +12,6 @@ class Dupe
         @attribute_templates[method_name.to_sym] = 
           AttributeTemplate.new method_name.to_sym, :default => args[0], :transformer => block
       end
-      
-      
     end
   end
 end

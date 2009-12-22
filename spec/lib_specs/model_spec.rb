@@ -67,13 +67,16 @@ describe Dupe::Model do
       }.should_not raise_error
     end
     
-    it "should return a Hashie::Mash instance with the desired parameters" do
+    it "should return a Dupe::Database::Record instance with the desired parameters" do
       book = @book_model.create
+      book.should be_kind_of(Dupe::Database::Record)
+      book.__model__.name.should == :book
       book.id.should == 1
       book.title.should == 'Untitled'
       book.author.should == 'Anon'
       
       book = @book_model.create :author => 'Matt Parker'
+      book.__model__.name.should == :book
       book.id.should == 2
       book.title.should == 'Untitled'
       book.author.should == 'Author: Matt Parker'

@@ -213,6 +213,17 @@ describe Dupe do
       Dupe.database.tables[:author].length.should == 2
     end
     
+    it "shouldn't care if the model_name is singular or plural" do
+      Dupe.database.tables.should be_empty
+      Dupe.stub 5, :author
+      Dupe.database.tables.should_not be_empty
+      Dupe.database.tables.length.should == 1
+      Dupe.database.tables[:author].length.should == 5
+      Dupe.stub 5, :authors
+      Dupe.database.tables[:author].length.should == 10
+      Dupe.database.tables.length.should == 1
+    end
+    
     
   end
   

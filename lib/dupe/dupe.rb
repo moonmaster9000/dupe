@@ -108,9 +108,10 @@ class Dupe
     #   </book>
     def define(*args, &block) # yield: define
       model_name, model_object = create_model_if_definition_parameters_are_valid(args, block)
-      models[model_name] = model_object
-      database.create_table model_name
-      true
+      model_object.tap do |m|
+        models[model_name] = m
+        database.create_table model_name
+      end
     end
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
@@ -217,7 +218,17 @@ class Dupe
     #
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
     # and will honor those definitions (default values, transformations) as you would expect. 
-    def stub(count, factory, options={})
+    def stub(count, model_name, options={})
+      start_at = options[:starting_with] || 1
+      record_template = options[:like] || {}
+      records = []
+      (start_at..(start_at + count - 1)).each do |i|
+        records << 
+          record_template.map do |k,v| 
+            { k => (v.kind_of?(Proc) ? v.call(i) : v) }
+          end.inject({}) {|h, v| h.merge(v)}
+      end
+      create model_name, records
     end
 
     # Search for a resource. This works a bit differently from both ActiveRecord's find and ActiveResource's find. 
@@ -267,19 +278,9 @@ class Dupe
     #
     #   # find all books written by people named 'Arthur'
     #   Dupe.find(:books) {|b| b.author.name.match /Arthur/}
-    #
-    # Also, if you have the need to explicitly specify :all or :first instead of relying on specifying the singular v. plural 
-    # version of your resource name (perhaps the singular and plural version of your resource are exactly the same):
-    # 
-    #   Dupe.find(:all, :deer) {|d| d.type == 'doe'}
-    #   Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
     def find(model_name, &block) # yield: record
       results = database.select model_name.to_s.singularize.to_sym, block
-      if model_name.plural?
-        results
-      else
-        results.first
-      end
+      model_name.plural? ? results : results.first
     end
     
     #:nodoc

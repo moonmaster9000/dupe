@@ -18,7 +18,7 @@ describe Dupe::Model do
     
     it "should setup an id_sequence initialized to 0" do
       m = Dupe::Model.new :book
-      m.id_sequence.current_value.should == 0
+      m.id_sequence.current_value.should == 1
     end
   end
   

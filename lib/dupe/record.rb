@@ -19,6 +19,19 @@ class Dupe
           self[method_name.to_sym]
         end
       end
+
+      def record_inspect
+        class_name = __model__ ? "Duped::#{__model__.name.to_s.titleize}" : self.class.to_s
+        "<##{class_name}".tap do |inspection|
+          keys.each do |key|
+            inspection << " #{key}=#{self[key].inspect}"
+          end
+          inspection << ">"
+        end
+      end
+      
+      alias_method :hash_inspect, :inspect
+      alias_method :inspect, :record_inspect
       
       private
       def attempting_to_assign(method_name)

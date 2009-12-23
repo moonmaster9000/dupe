@@ -186,6 +186,36 @@ describe Dupe do
     end
   end
   
+  describe "stub" do
+    it ": when called with only a count and a model_name, it should generate that many blank (id-only) records" do
+      Dupe.database.tables[:author].should be_nil
+      authors = Dupe.stub 20, :authors
+      authors.length.should == 20
+      Dupe.database.tables[:author].length.should == 20
+      authors.collect(&:id).should == (1..20).to_a
+    end
+    
+    it "should accept procs on stubs" do
+      Dupe.database.tables[:author].should be_nil
+      authors = 
+        Dupe.stub(
+          2, 
+          :authors, 
+          :like => {
+            :name => proc {|n| "Author #{n}"},
+            :bio => proc {|n| "Author #{n}'s bio"}
+          }
+        )
+      authors.first.name.should == "Author 1"
+      authors.first.bio.should == "Author 1's bio"
+      authors.last.name.should == "Author 2"
+      authors.last.bio.should == "Author 2's bio"
+      Dupe.database.tables[:author].length.should == 2
+    end
+    
+    
+  end
+  
   
  
 end

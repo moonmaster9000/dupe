@@ -32,8 +32,30 @@ describe Dupe::Database::Record do
     end
   end
   
-  describe "__model__" do
+  describe "inspect" do
+    it "should show the class name" do
+      d = Dupe::Database::Record.new
+      d.inspect.should match(/^<#Dupe::Database::Record/)
+    end
     
+    it "should show the key/value pairs as attributes" do
+      d = Dupe::Database::Record.new 
+      d.title = 'test'
+      d.inspect.should match(/title="test"/)
+      d.author = Dupe::Database::Record.new
+      d.inspect.should match(/author=<#Dupe::Database::Record/)
+    end
+    
+    it "should show Fake::<model_name> when the record has a model" do
+      b = Dupe.create :book
+      b.inspect.should match(/^<#Duped::Book/)
+      b.author = Dupe.create :author
+      b.inspect.should match(/^<#Duped::Book/)
+      b.inspect.should match(/author=<#Duped::Author/)
+    end
+  end
+  
+  describe "__model__" do  
     it "should have a __model__ instance variable" do
       proc {Dupe::Database::Record.new.__model__}.should_not raise_error
     end
@@ -43,7 +65,6 @@ describe Dupe::Database::Record do
       proc {r.__model__ = :book}.should_not raise_error
       r.__model__.should == :book
     end
-    
   end
   
 end

@@ -2,8 +2,33 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Dupe::Database::Record do
   describe "new" do
-    it "should create an object that is a kind of Hashie::Mash" do
-      Dupe::Database::Record.new.should be_kind_of(Hashie::Mash)
+    it "should create an object that is a kind of Hash" do
+      Dupe::Database::Record.new.should be_kind_of(Hash)
+    end
+  end
+  
+  describe "id" do
+    it "should allow us to set the record id (and not the object id)" do
+      d = Dupe::Database::Record.new
+      d.id.should == nil
+      d[:id].should == nil
+      d.id = 1
+      d.id.should == 1
+      d[:id].should == 1
+    end
+  end
+  
+  describe "method_missing" do
+    it "should allow us to access hash keys as if they were object attributes" do
+      d = Dupe::Database::Record.new
+      d[:some_key].should == nil
+      d.some_key.should == nil
+      d.some_key = 1
+      d.some_key.should == 1
+      d[:some_key].should == 1
+      d[:another_key] = 2
+      d.another_key.should == 2
+      d[:another_key].should == 2
     end
   end
   

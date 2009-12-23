@@ -16,6 +16,14 @@ describe Dupe do
       Dupe.reset
       Dupe.models.should == {}
     end
+    
+    it "should clear out the database" do
+      Dupe.define :book
+      Dupe.define :author
+      Dupe.database.tables.length.should == 2
+      Dupe.reset
+      Dupe.database.tables.should be_empty
+    end
   end
   
   describe "define" do
@@ -70,6 +78,7 @@ describe Dupe do
     
     it "should add a table to the database" do
       Dupe.database.tables.length.should == 0
+      Dupe.database.tables[:book].should be_nil
       Dupe.define :book
       Dupe.database.tables.length.should == 1
       Dupe.database.tables[:book].should_not be_nil

@@ -110,6 +110,7 @@ class Dupe
       model_name, model_object = create_model_if_definition_parameters_are_valid(args, block)
       models[model_name] = model_object
       database.create_table model_name
+      true
     end
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
@@ -170,23 +171,8 @@ class Dupe
     #   </author>
     def create(model_name, records={})
       model_name = model_name.to_s.singularize.to_sym
-      @models[model_name] = Dupe::Model.new(model_name) unless @models[model_name]
-      results = []
-      
-      if records.kind_of?(Array)
-        records.each do |record| 
-          r = @models[model_name].create record
-          database.insert r
-          results << r
-        end
-        return results
-      elsif records.kind_of?(Hash)
-        r = @models[model_name].create records
-        database.insert r
-        return r
-      else
-        raise ArgumentError, "You must create with either a hash or an array of hashes."
-      end
+      create_model model_name unless model_exists(model_name)
+      create_and_insert records, :into => model_name
     end
 
     # You can use this method to quickly stub out a large number of resources. For example: 
@@ -289,31 +275,65 @@ class Dupe
     #   Dupe.find(:first, :deer) {|d| d.name == 'Bambi'}
     def find(model_name, &block) # yield: record
       results = database.select model_name.to_s.singularize.to_sym, block
-      if model_name.to_s.pluralize == model_name.to_s
+      if model_name.plural?
         results
       else
         results.first
       end
     end
     
+    #:nodoc
     def models
       @models ||= {}
     end
     
+    #:nodoc
     def database
       @database ||= Dupe::Database.new
     end
     
+    # clears out all model definitions and database records / tables.
     def reset
       @models = {}
       @database = Dupe::Database.new
     end
     
+    # set to true if you want to see mocked results spit out after each cucumber scenario
     def debug
       @debug ||= false
     end
     
+    
+    
     private
+    def model_exists(model_name)
+      models[model_name.to_sym]
+    end
+    
+    def create_model(model_name)
+      models[model_name] = Dupe::Model.new(model_name) unless models[model_name]
+    end
+    
+    def create_and_insert(records, into)
+      raise(
+        ArgumentError, 
+        "You must pass a hash containing :into => :model_name " + 
+        "as the second parameter to create_and_insert."
+      ) if !into || !into.kind_of?(Hash) || !into[:into]
+      
+      if records.kind_of?(Array) and
+         records.inject(true) {|bool, r| bool and r.kind_of?(Hash)}
+        [].tap do |results|
+          records.each do |record| 
+            results << models[into[:into]].create(record).tap {|r| database.insert r}
+          end
+        end
+      elsif records.kind_of?(Hash)
+        models[into[:into]].create(records).tap {|r| database.insert r}
+      else
+        raise ArgumentError, "You must call Dupe.create with either a hash or an array of hashes."
+      end
+    end
     
     def create_model_if_definition_parameters_are_valid(args, definition)
       if args.length == 1 and

@@ -223,8 +223,13 @@ describe Dupe do
       Dupe.database.tables[:author].length.should == 10
       Dupe.database.tables.length.should == 1
     end
-    
-    
+  end
+  
+  
+  describe "mock_get" do
+    it "should require a url to mock" do
+      proc {Dupe.mock_get}
+    end
   end
   
   

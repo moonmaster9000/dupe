@@ -283,6 +283,9 @@ class Dupe
       model_name.plural? ? results : results.first
     end
     
+    
+    #def mock_get()
+    
     #:nodoc
     def models
       @models ||= {}

@@ -111,6 +111,15 @@ class Dupe
       model_object.tap do |m|
         models[model_name] = m
         database.create_table model_name
+        eval(
+          %{
+            network.define_service_mock(
+              :get, 
+              %r{/#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+              proc {|id| Dupe.find(:#{model_name}) {|resource| resource.id == id.to_i}}
+            )  
+          }
+        )
       end
     end
    
@@ -172,7 +181,7 @@ class Dupe
     #   </author>
     def create(model_name, records={})
       model_name = model_name.to_s.singularize.to_sym
-      create_model model_name unless model_exists(model_name)
+      define model_name unless model_exists(model_name)
       create_and_insert records, :into => model_name
     end
 
@@ -292,6 +301,11 @@ class Dupe
     end
     
     #:nodoc
+    def network
+      @network ||= Dupe::Network.new
+    end
+    
+    #:nodoc
     def database
       @database ||= Dupe::Database.new
     end
@@ -300,6 +314,7 @@ class Dupe
     def reset
       @models = {}
       @database = Dupe::Database.new
+      @network = Dupe::Network.new
     end
     
     # set to true if you want to see mocked results spit out after each cucumber scenario

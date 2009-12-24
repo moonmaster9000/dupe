@@ -24,6 +24,13 @@ describe Dupe do
       Dupe.reset
       Dupe.database.tables.should be_empty
     end
+    
+    it "should clear out the network" do
+      Dupe.reset
+      Dupe::Network::VERBS.each do |verb|
+        Dupe.network.mocks[verb].should be_empty
+      end
+    end
   end
   
   describe "define" do
@@ -84,6 +91,18 @@ describe Dupe do
       Dupe.database.tables[:book].should_not be_nil
       Dupe.database.tables[:book].should == {}
     end
+    
+    it "should add a mock by id to the database" do
+      Dupe.network.mocks[:get].should be_empty
+      Dupe.create :book
+      Dupe.network.mocks[:get].should_not be_empty
+      Dupe.network.mocks[:get].length.should == 1
+      mock = Dupe.network.mocks[:get].first
+      mock.verb.should == :get
+      mock.url_pattern.should == %r{/books/(\d+)\.xml$}
+      mock.mocked_response('/books/1.xml').should == Dupe.find(:book).to_xml(:root => 'book')
+    end
+    
   end
   
   describe "create" do
@@ -224,14 +243,4 @@ describe Dupe do
       Dupe.database.tables.length.should == 1
     end
   end
-  
-  
-  describe "mock_get" do
-    it "should require a url to mock" do
-      proc {Dupe.mock_get}
-    end
-  end
-  
-  
- 
 end

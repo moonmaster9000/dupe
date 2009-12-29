@@ -4,6 +4,7 @@ describe ActiveResource::Connection do
   before do
     Dupe.reset
   end
+  
   describe "#get" do
     before do
       @book = Dupe.create :book, :title => 'Rooby', :label => 'rooby'

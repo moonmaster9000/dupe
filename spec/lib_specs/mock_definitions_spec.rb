@@ -5,7 +5,7 @@ describe "Mock Definition Methods" do
     Dupe.reset
   end
   
-  describe "DupeGet" do    
+  describe "Get" do    
     it "should require a url pattern that is a regex" do
       proc { Get() }.should raise_error(ArgumentError)
       proc { Get 'not a regexp' }.should raise_error(ArgumentError)
@@ -16,16 +16,17 @@ describe "Mock Definition Methods" do
       Dupe.network.mocks[:get].should be_empty
       @book = Dupe.create :book, :label => 'rooby'
       Dupe.network.mocks[:get].should_not be_empty
-      Dupe.network.mocks[:get].length.should == 1
+      Dupe.network.mocks[:get].length.should == 2
       
       mock = Get %r{/books/([^&]+)\.xml} do |label|
         Dupe.find(:book) {|b| b.label == label}
       end
       
-      Dupe.network.mocks[:get].length.should == 2
+      Dupe.network.mocks[:get].length.should == 3
       Dupe.network.mocks[:get].last.should == mock
       Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.xml}
-      Dupe.network.request(:get, '/books/rooby.xml').should == Dupe.find(:book).to_xml(:root => 'book')
+      book = Dupe.find(:book)
+      Dupe.network.request(:get, '/books/rooby.xml').should == book.to_xml(:root => 'book')
     end
   end
 end

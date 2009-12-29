@@ -1,6 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Dupe::Network::Mock do
+  before do
+    Dupe.reset
+  end
+  
   describe "new" do
     it "should require a valid REST type" do
       proc { Dupe::Network::Mock.new :unknown, /\//, proc {} }.should raise_error(Dupe::Network::UnknownRestVerbError)

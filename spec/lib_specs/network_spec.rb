@@ -12,6 +12,10 @@ describe Dupe::Network do
         @network.mocks[verb].should == []
       end
     end
+    
+    it "should initialize @log to a new Dupe::Network::Log" do
+      @network.log.should be_kind_of(Dupe::Network::Log)
+    end
   end
   
   describe "request" do

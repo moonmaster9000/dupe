@@ -4,10 +4,11 @@ class Dupe
     
     class RequestNotFoundError < StandardError; end
     
-    attr_reader :mocks
+    attr_reader :mocks, :log
     
     def initialize
       @mocks = {}
+      @log = Dupe::Network::Log.new
       VERBS.each { |verb| @mocks[verb] = [] }
     end
         

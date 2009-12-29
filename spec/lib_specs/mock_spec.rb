@@ -50,6 +50,18 @@ describe Dupe::Network::Mock do
         mock = Dupe::Network::Mock.new :get, url_pattern, response
         mock.mocked_response('/books/1.xml').should == book.to_xml(:root => 'book')
       end
+      
+      it "should add a request to the Dupe::Network#log" do
+        url_pattern = %r{/books/([a-zA-Z0-9-]+)\.xml}
+        response = proc {|label| Dupe.find(:book) {|b| b.label == label}}
+        book = Dupe.create :book, :label => 'rooby'
+        mock = Dupe::Network::Mock.new :get, url_pattern, response
+        Dupe.network.log.requests.length.should == 0
+        mock.mocked_response('/books/rooby.xml')
+        Dupe.network.log.requests.length.should == 1
+      end
     end
   end
+  
+  
 end

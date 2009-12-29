@@ -31,16 +31,18 @@ class Dupe
         ) unless match?(url)
       
         grouped_results = url_pattern.match(url)[1..-1]
-        r = @response.call *grouped_results
+        resp = @response.call *grouped_results
       
-        case r
+        case resp
           when Dupe::Database::Record
-            r.to_xml(:root => r.__model__.name.to_s)
+            resp = resp.to_xml(:root => resp.__model__.name.to_s)
           when Array
-            r.to_xml(:root => r.first.__model__.name.to_s.pluralize)
-          else
-            r
+            resp = resp.to_xml(:root => resp.first.__model__.name.to_s.pluralize)
         end
+        
+        Dupe.network.log.add_request @verb, url, resp
+        
+        resp
       end
     
     end

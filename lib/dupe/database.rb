@@ -19,8 +19,8 @@ class Dupe
       if !record.kind_of?(Dupe::Database::Record) || !record.__model__ || !record[:id]
         raise ArgumentError, "You may only insert well-defined Dupe::Database::Record objects" 
       end
-      @tables[record.__model__.name] ||= {}
-      @tables[record.__model__.name][record.id] = record
+      @tables[record.__model__.name] ||= []
+      @tables[record.__model__.name] << record
     end
     
     # pass in a model_name (e.g., :book) and optionally a proc with 
@@ -33,17 +33,17 @@ class Dupe
         "There was a problem with your select conditions. Please consult the API."
       ) if conditions and (!conditions.kind_of?(Proc) || conditions.arity != 1)
       
-      return @tables[model_name].values if !conditions
-      @tables[model_name].values.select {|r| conditions.call(r)}
+      return @tables[model_name] if !conditions
+      @tables[model_name].select {|r| conditions.call(r)}
     end
     
     def create_table(model_name)
-      @tables[model_name.to_sym] ||= {}
+      @tables[model_name.to_sym] ||= []
     end
     
     def truncate_tables
       @tables.each do |table_name, table_records|
-        @tables[table_name] = {}
+        @tables[table_name] = []
       end
     end
     

@@ -103,7 +103,7 @@ describe Dupe do
       Dupe.define :book
       Dupe.database.tables.length.should == 1
       Dupe.database.tables[:book].should_not be_nil
-      Dupe.database.tables[:book].should == {}
+      Dupe.database.tables[:book].should == []
     end
     
     it "should add find(:all) and find(<id>) mocks to the database" do
@@ -160,8 +160,8 @@ describe Dupe do
       Dupe.database.tables[:book].should be_empty
       @book = Dupe.create :book, :title => 'test'
       Dupe.database.tables[:book].should_not be_empty
-      Dupe.database.tables[:book].values.length.should == 1
-      Dupe.database.tables[:book].values.first.should == @book
+      Dupe.database.tables[:book].length.should == 1
+      Dupe.database.tables[:book].first.should == @book
     end
     
     it "should create several records if passed an array of hashes (and return an array of the records created)" do
@@ -169,9 +169,9 @@ describe Dupe do
       Dupe.database.tables[:book].should be_empty
       @books = Dupe.create :books, [{:title => 'Book 1'}, {:title => 'Book 2'}]
       Dupe.database.tables[:book].should_not be_empty
-      Dupe.database.tables[:book].values.length.should == 2
-      Dupe.database.tables[:book].values.first.should == @books.first
-      Dupe.database.tables[:book].values.last.should == @books.last      
+      Dupe.database.tables[:book].length.should == 2
+      Dupe.database.tables[:book].first.should == @books.first
+      Dupe.database.tables[:book].last.should == @books.last      
     end
   end
   

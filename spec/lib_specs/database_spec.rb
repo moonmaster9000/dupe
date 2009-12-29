@@ -44,10 +44,10 @@ describe Dupe::Database do
       @database.tables.should be_empty
       @database.insert @book
       @database.tables[:book].should_not be_nil
-      @database.tables[:book].should be_kind_of(Hash)
+      @database.tables[:book].should be_kind_of(Array)
       @database.tables[:book].should_not be_empty
-      @database.tables[:book][1].should_not be_nil
-      @database.tables[:book][1].should == @book
+      @database.tables[:book].first.should_not be_nil
+      @database.tables[:book].first.should == @book
     end
   end
   
@@ -98,17 +98,17 @@ describe Dupe::Database do
       @database.create_table 'book'
       @database.tables[:book].should_not be_nil
       @database.tables.length.should == 1
-      @database.tables[:book].should == {}
+      @database.tables[:book].should == []
       
       # make sure it doesn't overwrite a table that already exists
       m = Dupe::Model.new :book
       record = m.create
       @database.insert record
       @database.tables[:book].length.should == 1
-      @database.tables[:book].values.first.should == record
+      @database.tables[:book].first.should == record
       @database.create_table :book
       @database.tables[:book].length.should == 1
-      @database.tables[:book].values.first.should == record
+      @database.tables[:book].first.should == record
     end
   end
   

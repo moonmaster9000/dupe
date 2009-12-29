@@ -40,5 +40,12 @@ class Dupe
     def create_table(model_name)
       @tables[model_name.to_sym] ||= {}
     end
+    
+    def truncate_tables
+      @tables.each do |table_name, table_records|
+        @tables[table_name] = {}
+      end
+    end
+    
   end
 end

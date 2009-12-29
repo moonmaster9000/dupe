@@ -112,5 +112,22 @@ describe Dupe::Database do
     end
   end
   
+  describe "truncate_tables" do
+    it "should remove all records from all tables" do
+      Dupe.create :book
+      Dupe.create :author
+      Dupe.create :publisher
+      Dupe.database.tables.length.should == 3
+      Dupe.database.tables[:book].length.should == 1
+      Dupe.database.tables[:author].length.should == 1
+      Dupe.database.tables[:publisher].length.should == 1
+      Dupe.database.truncate_tables
+      Dupe.database.tables.length.should == 3
+      Dupe.database.tables[:book].length.should == 0
+      Dupe.database.tables[:author].length.should == 0
+      Dupe.database.tables[:publisher].length.should == 0
+    end
+  end
+  
 
 end

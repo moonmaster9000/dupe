@@ -92,15 +92,21 @@ describe Dupe do
       Dupe.database.tables[:book].should == {}
     end
     
-    it "should add a mock by id to the database" do
+    it "should add find(:all) and find(<id>) mocks to the database" do
       Dupe.network.mocks[:get].should be_empty
       Dupe.create :book
       Dupe.network.mocks[:get].should_not be_empty
-      Dupe.network.mocks[:get].length.should == 1
-      mock = Dupe.network.mocks[:get].first
-      mock.verb.should == :get
-      mock.url_pattern.should == %r{/books/(\d+)\.xml$}
-      mock.mocked_response('/books/1.xml').should == Dupe.find(:book).to_xml(:root => 'book')
+      Dupe.network.mocks[:get].length.should == 2
+      
+      find_all_mock = Dupe.network.mocks[:get].first
+      find_all_mock.verb.should == :get
+      find_all_mock.url_pattern.should == %r{/books\.xml$}
+      find_all_mock.mocked_response('/books.xml').should == Dupe.find(:books).to_xml(:root => 'books')
+      
+      find_one_mock = Dupe.network.mocks[:get].last
+      find_one_mock.verb.should == :get
+      find_one_mock.url_pattern.should == %r{/books/(\d+)\.xml$}
+      find_one_mock.mocked_response('/books/1.xml').should == Dupe.find(:book).to_xml(:root => 'book')
     end
     
   end

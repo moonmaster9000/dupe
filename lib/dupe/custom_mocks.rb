@@ -1,8 +1,3 @@
-module CustomMocks
-  class NotImplementedError < StandardError
-  end
-  
-  def get_request(url)
-    raise NotImplementedError.new("you must implement the CustomMocks::custom_service method.")
-  end
+def Get(url_pattern, &block)
+  Dupe.network.define_service_mock :get, url_pattern, block
 end

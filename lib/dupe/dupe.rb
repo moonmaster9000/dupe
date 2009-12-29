@@ -111,15 +111,19 @@ class Dupe
       model_object.tap do |m|
         models[model_name] = m
         database.create_table model_name
-        eval(
-          %{
-            network.define_service_mock(
-              :get, 
-              %r{/#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
-              proc {|id| Dupe.find(:#{model_name}) {|resource| resource.id == id.to_i}}
-            )  
-          }
-        )
+        mocks = %{
+          network.define_service_mock(
+            :get, 
+            %r{/#{model_name.to_s.pluralize}\\.xml$}, 
+            proc { Dupe.find(:#{model_name.to_s.pluralize}) }
+          )
+          network.define_service_mock(
+            :get, 
+            %r{/#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            proc {|id| Dupe.find(:#{model_name}) {|resource| resource.id == id.to_i}}
+          )  
+        }
+        eval(mocks)
       end
     end
    

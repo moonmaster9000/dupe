@@ -316,8 +316,20 @@ class Dupe
     
     # clears out all model definitions and database records / tables.
     def reset
+      reset_models
+      reset_database
+      reset_network
+    end
+    
+    def reset_models
       @models = {}
+    end
+    
+    def reset_database
       @database = Dupe::Database.new
+    end
+    
+    def reset_network
       @network = Dupe::Network.new
     end
     

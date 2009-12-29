@@ -6,6 +6,15 @@ describe Dupe do
   end
   
   describe "reset" do
+    it "should call reset_models, reset_database, and reset_network" do
+      Dupe.should_receive(:reset_models).once
+      Dupe.should_receive(:reset_database).once
+      Dupe.should_receive(:reset_network).once
+      Dupe.reset
+    end
+  end
+  
+  describe "reset_models" do
     it "should reset @models to an empty hash" do
       Dupe.models.length.should == 0
       Dupe.define :book do |attrs|
@@ -13,24 +22,29 @@ describe Dupe do
         attrs.author
       end
       Dupe.models.length.should == 1
-      Dupe.reset
+      Dupe.reset_models
       Dupe.models.should == {}
     end
-    
+  end
+  
+  describe "reset_database" do
     it "should clear out the database" do
       Dupe.define :book
       Dupe.define :author
       Dupe.database.tables.length.should == 2
-      Dupe.reset
+      Dupe.reset_database
       Dupe.database.tables.should be_empty
-    end
-    
+    end    
+  end
+  
+  describe "reset_network" do
     it "should clear out the network" do
-      Dupe.reset
-      Dupe::Network::VERBS.each do |verb|
-        Dupe.network.mocks[verb].should be_empty
-      end
-    end
+      Dupe.create :book
+      Dupe.network.mocks.values.inject(false) {|b,v| b || !v.empty?}.should == true
+      Dupe.network.mocks[:get].should_not be_empty
+      Dupe.reset_network
+      Dupe.network.mocks.values.inject(false) {|b,v| b || !v.empty?}.should == false
+    end    
   end
   
   describe "define" do

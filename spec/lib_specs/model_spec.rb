@@ -57,7 +57,7 @@ describe Dupe::Model do
           "Author: #{author}"
         end
         attrs.after_create do |book|
-          book.label = book.title.downcase
+          book.label = book.title.downcase.gsub(/\ +/, '-')
         end
       end
       
@@ -79,12 +79,12 @@ describe Dupe::Model do
       book.author.should == 'Anon'
       book.label.should == 'untitled'
       
-      book = @book_model.create :author => 'Matt Parker'
+      book = @book_model.create :title => 'Rooby On Rails', :author => 'Matt Parker'
       book.__model__.name.should == :book
       book.id.should == 2
-      book.title.should == 'Untitled'
+      book.title.should == 'Rooby On Rails'
+      book.label.should == 'rooby-on-rails'
       book.author.should == 'Author: Matt Parker'
-      
     end
   end
 end

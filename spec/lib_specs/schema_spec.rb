@@ -32,13 +32,24 @@ describe Dupe::Model::Schema do
       end
     end
     
-    describe "called with a block" do
+    describe "called with a block that accepts a parameter" do
       it "should create a new attribute template without a default value, but with a tranformer" do
         @schema.title {|dont_care| 'test'}
         @schema.attribute_templates[:title].should be_kind_of(Dupe::Model::Schema::AttributeTemplate)
         @schema.attribute_templates[:title].name.should == :title
         @schema.attribute_templates[:title].default.should be_nil
         @schema.attribute_templates[:title].transformer.should be_kind_of(Proc)
+      end
+    end
+    
+    describe "called with a block that doesn't accept a parameter" do
+      it "should create a new attribute template without a transformer, and with the block as the default value" do
+        @schema.title { 'knock' * 3 }
+        @schema.attribute_templates[:title].should be_kind_of(Dupe::Model::Schema::AttributeTemplate)
+        @schema.attribute_templates[:title].name.should == :title
+        @schema.attribute_templates[:title].default.should be_kind_of(Proc)
+        @schema.attribute_templates[:title].default.call.should == "knockknockknock"
+        @schema.attribute_templates[:title].transformer.should be_nil
       end
     end
     

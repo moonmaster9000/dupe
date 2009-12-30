@@ -296,6 +296,25 @@ class Dupe
       model_name.plural? ? results : results.first
     end
     
+    def find_or_create(model_name, attributes={})
+      results = nil
+      if model_exists(model_name)
+        results = eval("find(:#{model_name}) #{build_conditions(attributes)}")
+      end
+      
+      if !results
+        if model_name.singular?
+          create model_name, attributes
+        else
+          stub((rand(5)+1), model_name, :like => attributes)
+        end
+      elsif results.kind_of?(Array) && results.empty?
+        stub((rand(5)+1), model_name, :like => attributes)
+      else
+        results
+      end
+    end
+    
     
     #def mock_get()
     
@@ -341,8 +360,17 @@ class Dupe
     
     
     private
+    def build_conditions(conditions)
+      return '' if conditions.empty?
+      select = 
+        "{|record| " +
+        conditions.map do |k,v|
+          "record.#{k} == #{v.kind_of?(String) ? "\"#{v}\"" : v}"
+        end.join(" && ") + " }"
+    end
+    
     def model_exists(model_name)
-      models[model_name.to_sym]
+      models[model_name.to_s.singularize.to_sym]
     end
     
     def create_model(model_name)

@@ -58,7 +58,7 @@ class Dupe
         #     ===> :title, 'test'
         def generate(value=NilValue)
           if value == NilValue
-            v = @default
+            v = @default.respond_to?(:call) ? @default.call : @default
           else
             v = (@transformer ? @transformer.call(value) : value)
           end

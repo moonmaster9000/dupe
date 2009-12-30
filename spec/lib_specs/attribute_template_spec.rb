@@ -112,6 +112,34 @@ describe Dupe::Model::Schema::AttributeTemplate do
       end
     end
     
+    describe "on an attribute with a default value that is a proc" do
+      before do
+        @default_value = proc { 'knock' * 3 }
+        @attribute = Dupe::Model::Schema::AttributeTemplate.new(:title, :default => @default_value)
+      end
+
+      it "should generate a key with the name of the attribute" do
+        key, value = @attribute.generate
+        key.should == @attribute.name
+      end   
+      
+      describe "when passed nothing" do
+        it "should return the value of the default_value proc" do
+          key, value = @attribute.generate
+          value.should == @default_value.call
+        end
+      end
+      
+      describe "when passed a value" do
+        it "should generate a value equal to the value passed in" do
+          title = 'Rooby'
+          key, value = @attribute.generate title
+          value.should == title
+        end
+      end
+      
+    end
+    
     describe "on an attribute with a transformer" do
       before do
         @transformer = proc {|dont_care| 'test'}

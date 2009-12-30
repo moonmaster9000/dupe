@@ -83,6 +83,9 @@ describe Dupe do
     it "should create a model and a schema with the desired definition" do
       Dupe.define :book do |attrs|
         attrs.author 'Anon'
+        attrs.genre do
+          'Unknown' + rand(2).to_s
+        end
         attrs.title 'Untitled' do |value|
           "transformed #{value}"
         end
@@ -95,6 +98,10 @@ describe Dupe do
       Dupe.models[:book].schema.attribute_templates[:title].default.should == 'Untitled'
       Dupe.models[:book].schema.attribute_templates[:title].transformer.should be_kind_of(Proc)
       Dupe.models[:book].schema.attribute_templates[:title].transformer.call('value').should == 'transformed value'
+      Dupe.models[:book].schema.attribute_templates[:genre].name.should == :genre
+      Dupe.models[:book].schema.attribute_templates[:genre].transformer.should be_nil
+      Dupe.models[:book].schema.attribute_templates[:genre].default.should be_kind_of(Proc)
+      Dupe.models[:book].schema.attribute_templates[:genre].default.call.should match(/^Unknown\d$/)
     end
     
     it "should add a table to the database" do
@@ -262,5 +269,43 @@ describe Dupe do
       Dupe.database.tables[:author].length.should == 10
       Dupe.database.tables.length.should == 1
     end
+  end
+  
+  describe "find_or_create" do
+    it "should require a model name" do
+      proc { Dupe.find_or_create }.should raise_error(ArgumentError)
+    end
+    
+    it "should find a result if one exists" do
+      b = Dupe.create :book, :title => 'Rooby', :serial_number => 21345
+      found_book = Dupe.find_or_create :book, :title => 'Rooby', :serial_number => 21345
+      b.should === found_book
+      
+      g = Dupe.create :genre, :name => 'Science Fiction', :label => 'sci-fi'
+      found_genre = Dupe.find_or_create :genre, :name => 'Science Fiction', :label => 'sci-fi'
+      g.should === found_genre
+    end
+    
+    it "should create a result if one does not exist" do
+      Dupe.database.tables.should be_empty
+      author = Dupe.find_or_create :author, :name => 'Matt Parker', :age => 27, :label => 'matt-parker'
+      Dupe.database.tables.should_not be_empty
+      author.should === (Dupe.find(:author) {|a| a.label == 'matt-parker' && a.age == 27})
+    end
+    
+    it "should return an array of results if passed a plural model name" do
+      books = Dupe.stub 20, :books, :like => { :title => proc {|n| "book ##{n} title"} }
+      bs = Dupe.find_or_create :books
+      books.should == bs
+    end
+    
+    it "should create and return an array of results if passed a plural model name for which no matching records exist" do
+      Dupe.database.tables.should be_empty
+      books = Dupe.find_or_create :books, :author => 'test'
+      Dupe.database.tables.length.should == 1
+      books.should be_kind_of(Array)
+      books.should == Dupe.find(:books)
+    end
+    
   end
 end

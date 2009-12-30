@@ -2,8 +2,12 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Dupe::Model::Schema do
   describe "new" do
-    it "should initialize attribute_templates to an empty array" do
+    it "should initialize attribute_templates to an empty hash" do
       Dupe::Model::Schema.new.attribute_templates.should == {}
+    end
+    
+    it "should initialize after_create_callbacks to an empty array" do
+      Dupe::Model::Schema.new.after_create_callbacks.should == []
     end
   end
   
@@ -61,6 +65,25 @@ describe Dupe::Model::Schema do
         @schema.attribute_templates[:title].default.should == 'Untitled'
         @schema.attribute_templates[:title].transformer.should be_kind_of(Proc)
       end
+    end
+  end
+  
+  describe "#after_create" do
+    before do
+      @schema = Dupe::Model::Schema.new
+    end
+    
+    it "should require a block that accepts a single parameter" do
+      proc { @schema.after_create }.should raise_error(ArgumentError)
+      proc { @schema.after_create { "parameterless block" } }.should raise_error(ArgumentError)
+      proc { @schema.after_create {|s| s.title = 'test' } }.should_not raise_error
+    end
+    
+    it "should add the callback to the list of after_create_callbacks" do
+      @schema.after_create_callbacks.should be_empty
+      @schema.after_create {|s| s.title = 'test'}
+      @schema.after_create_callbacks.length.should == 1
+      @schema.after_create_callbacks.first.should be_kind_of(Proc)
     end
     
   end

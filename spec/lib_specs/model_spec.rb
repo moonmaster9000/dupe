@@ -56,6 +56,9 @@ describe Dupe::Model do
         attrs.author 'Anon' do |author|
           "Author: #{author}"
         end
+        attrs.after_create do |book|
+          book.label = book.title.downcase
+        end
       end
       
       @book_model = Dupe.models[:book]
@@ -74,6 +77,7 @@ describe Dupe::Model do
       book.id.should == 1
       book.title.should == 'Untitled'
       book.author.should == 'Anon'
+      book.label.should == 'untitled'
       
       book = @book_model.create :author => 'Matt Parker'
       book.__model__.name.should == :book

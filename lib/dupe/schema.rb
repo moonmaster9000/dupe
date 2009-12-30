@@ -2,9 +2,11 @@ class Dupe
   class Model
     class Schema 
       attr_reader :attribute_templates
+      attr_reader :after_create_callbacks
       
       def initialize
         @attribute_templates = {}
+        @after_create_callbacks = []
       end
       
       def method_missing(method_name, *args, &block)
@@ -19,6 +21,15 @@ class Dupe
         
         @attribute_templates[method_name.to_sym] = 
           AttributeTemplate.new method_name.to_sym, :default => default_value, :transformer => transformer
+      end
+      
+      def after_create(&block)
+        raise(
+          ArgumentError, 
+          "You must pass a block that accepts a single parameter to 'after_create'"
+        ) if !block || block.arity != 1
+        
+        @after_create_callbacks << block
       end
     end
   end

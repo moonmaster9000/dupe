@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: custom_mocks.rb</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+  <div id="fileHeader">
+    <h1>custom_mocks.rb</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>lib/dupe/custom_mocks.rb
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>Wed Dec 30 21:33:32 -0500 2009</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+<a href="../../../classes/Dupe.html">Dupe</a> knows how to handle simple
+find by id and find :all lookups from ActiveResource. But what about other
+requests we might potentially make?
+</p>
+<pre>
+  irb# Dupe.create :author, :name =&gt; 'Monkey', :published =&gt; true
+    ==&gt; &lt;#Duped::Author name=&quot;Monkey&quot; published=true id=1&gt;
+
+  irb# Dupe.create :author, :name =&gt; 'Tiger', :published =&gt; false
+    ==&gt; &lt;#Duped::Author name=&quot;Tiger&quot; published=false id=2&gt;
+
+  irb# class Author &lt; ActiveResource::Base; self.site = ''; end
+    ==&gt; &quot;&quot;
+
+  irb# Author.find :all, :from =&gt; :published
+  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors/published.xml'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/custom_methods.rb:57:in `get'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:632:in `find_every'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
+    from (irb):12
+</pre>
+<p>
+Obviously, <a href="../../../classes/Dupe.html">Dupe</a> had no way of
+anticipating this possibility. However, you can create your own custom
+intercept mock for this:
+</p>
+<pre>
+  irb# Get %r{/authors/published.xml} do
+   --#   Dupe.find(:authors) {|a| a.published == true}
+   --# end
+    ==&gt; #&lt;Dupe::Network::Mock:0x1833e88 @url_pattern=/\/authors\/published.xml/, @verb=:get, @response=#&lt;Proc:0x01833f14@(irb):13&gt;
+
+  irb# Author.find :all, :from =&gt; :published
+    ==&gt; [#&lt;Author:0x1821d3c @attributes={&quot;name&quot;=&gt;&quot;Monkey&quot;, &quot;published&quot;=&gt;true, &quot;id&quot;=&gt;1}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+
+    Logged Requests:
+      Request: GET /authors/published.xml
+      Response:
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        &lt;authors type=&quot;array&quot;&gt;
+          &lt;author&gt;
+            &lt;name&gt;Monkey&lt;/name&gt;
+            &lt;published type=&quot;boolean&quot;&gt;true&lt;/published&gt;
+            &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+          &lt;/author&gt;
+        &lt;/authors&gt;
+</pre>
+<p>
+The &quot;<a href="custom_mocks_rb.html#M000001">Get</a>&quot; method
+requires a url pattern and a block. In most cases, your block will return a
+<a href="../../../classes/Dupe.html#M000005">Dupe.find</a> result.
+Internally, <a href="../../../classes/Dupe.html">Dupe</a> will transform
+that into XML. However, if your &quot;<a
+href="custom_mocks_rb.html#M000001">Get</a>&quot; block returns a string,
+<a href="../../../classes/Dupe.html">Dupe</a> will use that as the response
+body and not attempt to do any transformations on it.
+</p>
+<p>
+Suppose instead the service expected us to pass published as a query string
+parameter:
+</p>
+<pre>
+  irb# Author.find :all, :params =&gt; {:published =&gt; true}
+  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors.xml?published=true'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:639:in `find_every'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
+    from (irb):18
+</pre>
+<p>
+We can mock this with the following:
+</p>
+<pre>
+  irb# Get %r{/authors\.xml\?published=(true|false)$} do |published|
+   --#   if published == 'true'
+   --#     Dupe.find(:authors) {|a| a.published == true}
+   --#   else
+   --#     Dupe.find(:authors) {|a| a.published == false}
+   --#   end
+   --# end
+
+  irb# Author.find :all, :params =&gt; {:published =&gt; true}
+    ==&gt; [#&lt;Author:0x17db094 @attributes={&quot;name&quot;=&gt;&quot;Monkey&quot;, &quot;published&quot;=&gt;true, &quot;id&quot;=&gt;1}, prefix_options{}]
+
+  irb# Author.find :all, :params =&gt; {:published =&gt; false}
+    ==&gt; [#&lt;Author:0x17c68c4 @attributes={&quot;name&quot;=&gt;&quot;Tiger&quot;, &quot;published&quot;=&gt;false, &quot;id&quot;=&gt;2}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+
+    Logged Requests:
+      Request: GET /authors.xml?published=true
+      Response:
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        &lt;authors type=&quot;array&quot;&gt;
+          &lt;author&gt;
+            &lt;name&gt;Monkey&lt;/name&gt;
+            &lt;published type=&quot;boolean&quot;&gt;true&lt;/published&gt;
+            &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+          &lt;/author&gt;
+        &lt;/authors&gt;
+
+      Request: GET /authors.xml?published=false
+      Response:
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        &lt;authors type=&quot;array&quot;&gt;
+          &lt;author&gt;
+            &lt;name&gt;Tiger&lt;/name&gt;
+            &lt;published type=&quot;boolean&quot;&gt;false&lt;/published&gt;
+            &lt;id type=&quot;integer&quot;&gt;2&lt;/id&gt;
+          &lt;/author&gt;
+        &lt;/authors&gt;
+</pre>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000001">Get</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
+
+        <div class="method-heading">
+          <a href="#M000001" class="method-signature">
+          <span class="method-name">Get</span><span class="method-args">(url_pattern, &amp;block)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+<a href="../../../classes/Dupe.html">Dupe</a> knows how to handle simple
+find by id and find :all lookups from ActiveResource. But what about other
+requests we might potentially make?
+</p>
+<pre>
+  irb# Dupe.create :author, :name =&gt; 'Monkey', :published =&gt; true
+    ==&gt; &lt;#Duped::Author name=&quot;Monkey&quot; published=true id=1&gt;
+
+  irb# Dupe.create :author, :name =&gt; 'Tiger', :published =&gt; false
+    ==&gt; &lt;#Duped::Author name=&quot;Tiger&quot; published=false id=2&gt;
+
+  irb# class Author &lt; ActiveResource::Base; self.site = ''; end
+    ==&gt; &quot;&quot;
+
+  irb# Author.find :all, :from =&gt; :published
+  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors/published.xml'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/custom_methods.rb:57:in `get'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:632:in `find_every'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
+    from (irb):12
+</pre>
+<p>
+Obviously, <a href="../../../classes/Dupe.html">Dupe</a> had no way of
+anticipating this possibility. However, you can create your own custom
+intercept mock for this:
+</p>
+<pre>
+  irb# Get %r{/authors/published.xml} do
+   --#   Dupe.find(:authors) {|a| a.published == true}
+   --# end
+    ==&gt; #&lt;Dupe::Network::Mock:0x1833e88 @url_pattern=/\/authors\/published.xml/, @verb=:get, @response=#&lt;Proc:0x01833f14@(irb):13&gt;
+
+  irb# Author.find :all, :from =&gt; :published
+    ==&gt; [#&lt;Author:0x1821d3c @attributes={&quot;name&quot;=&gt;&quot;Monkey&quot;, &quot;published&quot;=&gt;true, &quot;id&quot;=&gt;1}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+
+    Logged Requests:
+      Request: GET /authors/published.xml
+      Response:
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        &lt;authors type=&quot;array&quot;&gt;
+          &lt;author&gt;
+            &lt;name&gt;Monkey&lt;/name&gt;
+            &lt;published type=&quot;boolean&quot;&gt;true&lt;/published&gt;
+            &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+          &lt;/author&gt;
+        &lt;/authors&gt;
+</pre>
+<p>
+The &quot;<a href="custom_mocks_rb.html#M000001">Get</a>&quot; method
+requires a url pattern and a block. In most cases, your block will return a
+<a href="../../../classes/Dupe.html#M000005">Dupe.find</a> result.
+Internally, <a href="../../../classes/Dupe.html">Dupe</a> will transform
+that into XML. However, if your &quot;<a
+href="custom_mocks_rb.html#M000001">Get</a>&quot; block returns a string,
+<a href="../../../classes/Dupe.html">Dupe</a> will use that as the response
+body and not attempt to do any transformations on it.
+</p>
+<p>
+Suppose instead the service expected us to pass published as a query string
+parameter:
+</p>
+<pre>
+  irb# Author.find :all, :params =&gt; {:published =&gt; true}
+  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors.xml?published=true'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
+    from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:639:in `find_every'
+    from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
+    from (irb):18
+</pre>
+<p>
+We can mock this with the following:
+</p>
+<pre>
+  irb# Get %r{/authors\.xml\?published=(true|false)$} do |published|
+   --#   if published == 'true'
+   --#     Dupe.find(:authors) {|a| a.published == true}
+   --#   else
+   --#     Dupe.find(:authors) {|a| a.published == false}
+   --#   end
+   --# end
+
+  irb# Author.find :all, :params =&gt; {:published =&gt; true}
+    ==&gt; [#&lt;Author:0x17db094 @attributes={&quot;name&quot;=&gt;&quot;Monkey&quot;, &quot;published&quot;=&gt;true, &quot;id&quot;=&gt;1}, prefix_options{}]
+
+  irb# Author.find :all, :params =&gt; {:published =&gt; false}
+    ==&gt; [#&lt;Author:0x17c68c4 @attributes={&quot;name&quot;=&gt;&quot;Tiger&quot;, &quot;published&quot;=&gt;false, &quot;id&quot;=&gt;2}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+
+    Logged Requests:
+      Request: GET /authors.xml?published=true
+      Response:
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        &lt;authors type=&quot;array&quot;&gt;
+          &lt;author&gt;
+            &lt;name&gt;Monkey&lt;/name&gt;
+            &lt;published type=&quot;boolean&quot;&gt;true&lt;/published&gt;
+            &lt;id type=&quot;integer&quot;&gt;1&lt;/id&gt;
+          &lt;/author&gt;
+        &lt;/authors&gt;
+
+      Request: GET /authors.xml?published=false
+      Response:
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        &lt;authors type=&quot;array&quot;&gt;
+          &lt;author&gt;
+            &lt;name&gt;Tiger&lt;/name&gt;
+            &lt;published type=&quot;boolean&quot;&gt;false&lt;/published&gt;
+            &lt;id type=&quot;integer&quot;&gt;2&lt;/id&gt;
+          &lt;/author&gt;
+        &lt;/authors&gt;
+</pre>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000001-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000001-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/dupe/custom_mocks.rb, line 100</span>
+<span class="ruby-keyword kw">def</span> <span class="ruby-constant">Get</span>(<span class="ruby-identifier">url_pattern</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-constant">Dupe</span>.<span class="ruby-identifier">network</span>.<span class="ruby-identifier">define_service_mock</span> <span class="ruby-identifier">:get</span>, <span class="ruby-identifier">url_pattern</span>, <span class="ruby-identifier">block</span>
+<span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

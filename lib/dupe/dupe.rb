@@ -2,7 +2,6 @@
 # License::   Distributes under the same terms as Ruby
 
 class Dupe
-
   class << self
     
     # the models you have defined via Dupe.define
@@ -16,96 +15,135 @@ class Dupe
     # after each of your cucumber scenario's run
     attr_accessor :debug
     
-    # Create data definitions for your resources. This allows you to setup default values for columns
-    # and even provide data transformations.
-    #
-    # For example, suppose you had the following cucumber scenario: 
-    #
-    #   # RAILS_ROOT/features/library/find_book.feature
-    #   Feature: Find a book
-    #     As a reader
-    #     I want to find books in my library
-    #     So that I can read them
-    #
-    #   Scenario: Browsing books
-    #     Given the following author: 
-    #     | name             | date_of_birth |
-    #     | Arthur C. Clarke | 1917-12-16    |
-    #
-    #     And the following book:
-    #     | name                  | author            |
-    #     | 2001: A Space Odyssey | Arthur C. Clarke  |
-    #
-    #     When....
-    #
-    #
-    # We can use Dupe.define to
-    # * Transform data (e.g., turn the string '1917-12-16' into a Date object)
-    # * Provide default values for attributes (e.g., give all author's a default biography)
-    # * Associate records (e.g., given an author name, return the author record associated with that name)
-    #
-    # To accomplish the afore mentioned definitions:
-    #
-    #   # RAILS_ROOT/features/dupe_definitions/book.rb
-    #
-    #   Dupe.define :author do |define|
-    #     define.bio 'Lorem ipsum delor.'
-    #     define.date_of_birth do |d|
-    #       Date.parse(t)
-    #     end
-    #   end
-    #   
-    #   Dupe.define :book do |define|
-    #     define.author do |author_name|
-    #       Dupe.find(:author) {|a| a.name == author_name}
-    #     end
-    #   end
-    #
-    #   -----------------------------------------------------------------------------------------------------------------
-    #
-    #   # RAILS_ROOT/features/step_definitions/library/find_book_steps.rb
-    #
-    #   Given /^the following author:$/ do |author_table|
-    #     Dupe.create(:author, author_table.hashes)
-    #   end
-    #
-    #   Given /^the following book:$/ do |book_table|
-    #     Dupe.create(:book, book_table.hashes)
-    #   end
-    #
-    # When cucumber encounters the "Given the following author:" line, the corresponding step definition
-    # will ask Dupe to mock ActiveResource responses to find(:all) and find(:id) with the data
-    # specified in the cucumber hash table immediately following the "Given the following author:" line. 
-    # Since we didn't specify a 'bio' value in our cucumber hash table, Dupe will give it the 
-    # default value 'Lorem ipsum delor.'. Also, it will transform the 'date_of_birth' value we provided in the hash 
-    # table into a time object.
-    #
-    # Similarly, for the :book cucumber hash table, Dupe will transform the author name we provided
-    # into the author object we had already specified in the :author table. 
-    #
-    # In terms of mocked responses, we could expect something like: 
-    #
-    #   # Author.find(1) --> GET /authors/1.xml
-    #   <?xml version="1.0" encoding="UTF-8"?>
-    #   <author>
-    #     <id type="integer">1</id>
-    #     <name>Arthur C. Clarke</name>
-    #     <bio>Lorem ipsum delor.</bio>
-    #     <date_of_birth>1917-12-16T00:00:00Z</date_of_birth>
-    #   </author>
-    #
-    #   # Book.find(1) --> GET /books/1.xml
-    #   <?xml version="1.0" encoding="UTF-8"?>
-    #   <book>
-    #     <id type="integer">1</id>
-    #     <name>2001: A Space Odyssey</name>
-    #     <author>
-    #       <id type="integer">1</id>
-    #       <name>Arthur C. Clarke</name>
-    #       <bio>Lorem ipsum delor.</bio>
-    #       <date_of_birth>1917-12-16T00:00:00Z</date_of_birth>
-    #     </author>
-    #   </book>
+    # Suppose we're creating a 'book' resource. Perhaps our app assumes every book has a title, so let's define a book resource
+    # that specifies just that:
+    # 
+    #   irb# Dupe.define :book do |attrs|
+    #    --#   attrs.title 'Untitled'
+    #    --#   attrs.author
+    #    --# end
+    #     ==> #<Dupe::Model:0x17b2694 ...>
+    # 
+    # Basically, this reads like "A book resource has a title attribute with a default value of 'Untitled'. It also has an author attribute." Thus, if we create a book and we don't specify a "title" attribute, it should create a "title" for us, as well as provide a nil "author" attribute.
+    # 
+    #   irb# b = Dupe.create :book
+    #     ==> <#Duped::Book author=nil title="Untitled" id=1>
+    # 
+    # 
+    # If we provide our own title, it should allow us to override the default value:
+    # 
+    #   irb# b = Dupe.create :book, :title => 'Monkeys!'
+    #     ==> <#Duped::Book author=nil title="Monkeys!" id=2>
+    # 
+    # === Attributes with procs as default values
+    # 
+    # Sometimes it might be convenient to procedurally define the default value for an attribute:
+    # 
+    #   irb# Dupe.define :book do |attrs|
+    #    --#   attrs.title 'Untitled'
+    #    --#   attrs.author
+    #    --#   attrs.isbn do
+    #    --#     rand(1000000)
+    #    --#   end
+    #    --# end
+    # 
+    # Now, every time we create a book, it will get assigned a random ISBN number:
+    # 
+    #   irb# b = Dupe.create :book
+    #     ==> <#Duped::Book author=nil title="Untitled" id=1 isbn=895825>
+    # 
+    #   irb# b = Dupe.create :book
+    #     ==> <#Duped::Book author=nil title="Untitled" id=2 isbn=606472>
+    # 
+    # Another common use of this feature is for associations. Lets suppose we'd like to make sure that a book always has a genre, but a genre should be it's own resource. We can accomplish that by taking advantage of Dupe's "find_or_create" method:
+    # 
+    #   irb# Dupe.define :book do |attrs|
+    #    --#   attrs.title 'Untitled'
+    #    --#   attrs.author
+    #    --#   attrs.isbn do
+    #    --#     rand(1000000)
+    #    --#   end
+    #    --#   attrs.genre do
+    #    --#     Dupe.find_or_create :genre
+    #    --#   end
+    #    --# end
+    # 
+    # Now when we create books, Dupe will associate them with an existing genre (the first one it finds), or if none yet exist, it will create one. 
+    # 
+    # First, let's confirm that no genres currently exist: 
+    # 
+    #   irb# Dupe.find :genre
+    #   Dupe::Database::TableDoesNotExistError: The table ':genre' does not exist.
+    #     from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/database.rb:30:in `select'
+    #     from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/dupe.rb:295:in `find'
+    #     from (irb):135
+    # 
+    # Next, let's create a book:
+    # 
+    #   irb# b = Dupe.create :book
+    #     ==> <#Duped::Book genre=<#Duped::Genre id=1> author=nil title="Untitled" id=1 isbn=62572>
+    # 
+    # Notice that it create a genre. If we tried to do another Dupe.find for the genre:
+    # 
+    #   irb# Dupe.find :genre
+    #     ==> <#Duped::Genre id=1>
+    # 
+    # Now, if create another book, it will associate with the genre that was just created:
+    # 
+    #   irb# b = Dupe.create :book
+    #     ==> <#Duped::Book genre=<#Duped::Genre id=1> author=nil title="Untitled" id=2 isbn=729317>
+    # 
+    # 
+    # 
+    # === Attributes with transformers
+    # 
+    # Occasionally, you may find it useful to have attribute values transformed upon creation. 
+    # 
+    # For example, suppose we want to create books with publish dates. In our cucumber scenario's, we may prefer to simply specify a date like '2009-12-29', and have that automatically transformed into an ruby Date object. 
+    # 
+    #   irb# Dupe.define :book do |attrs|
+    #    --#   attrs.title 'Untitled'
+    #    --#   attrs.author
+    #    --#   attrs.isbn do
+    #    --#     rand(1000000)
+    #    --#   end
+    #    --#   attrs.publish_date do |publish_date|
+    #    --#     Date.parse(publish_date)
+    #    --#   end
+    #    --# end
+    # 
+    # Now, let's create a book:
+    # 
+    #   irb# b = Dupe.create :book, :publish_date => '2009-12-29'
+    #     ==> <#Duped::Book author=nil title="Untitled" publish_date=Tue, 29 Dec 2009 id=1 isbn=826291>
+    # 
+    #   irb# b.publish_date
+    #     ==> Tue, 29 Dec 2009
+    # 
+    #   irb# b.publish_date.class
+    #     ==> Date
+    # 
+    # === Callbacks
+    # 
+    # Suppose we'd like to make sure that our books get a unique label. We can accomplish that with an after_create callback:
+    # 
+    #   irb# Dupe.define :book do |attrs|
+    #    --#   attrs.title 'Untitled'
+    #    --#   attrs.author
+    #    --#   attrs.isbn do
+    #    --#     rand(1000000)
+    #    --#   end
+    #    --#   attrs.publish_date do |publish_date|
+    #    --#     Date.parse(publish_date)
+    #    --#   end
+    #    --#   attrs.after_create do |book|
+    #    --#     book.label = book.title.downcase.gsub(/\ +/, '-') + "--#{book.id}"
+    #    --#   end
+    #    --# end
+    # 
+    #   irb# b = Dupe.create :book, :title => 'Rooby on Rails'
+    #     ==> <#Duped::Book author=nil label="rooby-on-rails--1" title="Rooby on Rails" publish_date=nil id=1 isbn=842518>
+    # 
     def define(*args, &block) # yield: define
       model_name, model_object = create_model_if_definition_parameters_are_valid(args, block)
       model_object.tap do |m|
@@ -129,13 +167,14 @@ class Dupe
    
     # This method will cause Dupe to mock resources for the record(s) provided. 
     # The "records" value may be either a hash or an array of hashes. 
-    # For example, suppose you'd like to mock a single author ActiveResource object: 
+    # For example, suppose you'd like to mock a single author: 
     #
-    #   Dupe.create :author, :name => 'Arthur C. Clarke'
+    #   author = Dupe.create :author, :name => 'Arthur C. Clarke'
+    #     ==> <#Duped::Author name="Arthur C. Clarke" id=1>
     #
     # This will translate into the following two mocked resource calls:
     #
-    #   # Author.find(:all) --> GET /authors.xml
+    #   # GET /authors.xml
     #   <?xml version="1.0" encoding="UTF-8"?>
     #   <authors>
     #     <author>
@@ -144,7 +183,7 @@ class Dupe
     #     </author>
     #   </authors>
     #   
-    #   # Author.find(1) --> GET /authors/1.xml
+    #   # GET /authors/1.xml
     #   <?xml version="1.0" encoding="UTF-8"?>
     #   <author>
     #     <id type="integer">1</id>
@@ -152,12 +191,13 @@ class Dupe
     #   </author>
     #
     # However, suppose you wanted to mock two or more authors. 
-    #
-    #   Dupe.create :author, [{:name => 'Arthur C. Clarke'}, {:name => 'Robert Heinlein'}]
-    #
+    # 
+    #   authors = Dupe.create :author, [{:name => 'Arthur C. Clarke'}, {:name => 'Robert Heinlein'}]
+    #     ==> [<#Duped::Author name="Arthur C. Clarke" id=1>, <#Duped::Author name="Robert Heinlein" id=2>]
+    # 
     # This will translate into the following three mocked resource calls: 
     #
-    #   # Author.find(:all) --> GET /authors.xml 
+    #   # GET /authors.xml 
     #   <?xml version="1.0" encoding="UTF-8"?>
     #   <authors>
     #     <author>
@@ -170,14 +210,14 @@ class Dupe
     #     </author>
     #   </authors>
     #   
-    #   # Author.find(1) --> GET /authors/1.xml
+    #   # GET /authors/1.xml
     #   <?xml version="1.0" encoding="UTF-8"?>
     #   <author>
     #     <id type="integer">1</id>
     #     <name>Arthur C. Clarke</name>
     #   </author>
     #
-    #   # Author.find(2) --> GET /authors/2.xml
+    #   # GET /authors/2.xml
     #   <?xml version="1.0" encoding="UTF-8"?>
     #   <author>
     #     <id type="integer">2</id>
@@ -215,22 +255,12 @@ class Dupe
     #
     # which would generate 20 author records like: 
     #
-    #   {:name => 'author 1',   :id => 1}
+    #   <#Duped::Author name="author 1" id=1>
     #   ....
-    #   {:name => 'author 20',  :id => 20}
-    #
-    # You may also override the sequence starting value:
-    #
-    #   Dupe.stub 20, :authors, :like => {:name => proc {|n| "author #{n}"}}, :starting_with => 150
-    #
-    # This would generate 20 author records like:  
-    #
-    #   {:name => 'author 150',   :id => 1}
-    #   ....
-    #   {:name => 'author 169',  :id => 20}
+    #   <#Duped::Author name="author 20" id=20>
     #
     # Naturally, stub will consult the Dupe.define definitions for anything it's attempting to stub
-    # and will honor those definitions (default values, transformations) as you would expect. 
+    # and will honor those definitions (default values, transformations, callbacks) as you would expect. 
     def stub(count, model_name, options={})
       start_at = options[:starting_with] || 1
       record_template = options[:like] || {}
@@ -244,58 +274,80 @@ class Dupe
       create model_name, records
     end
 
-    # Search for a resource. This works a bit differently from both ActiveRecord's find and ActiveResource's find. 
-    # This is most often used for defining associations between objects (Dupe.define). 
-    # It will return a hash representation of the resource (or an array of hashes if we asked for multiple records).
+    # Dupe has a built-in querying system for finding resources you create. 
     #
-    # For example, suppose we have an author resource, and a book resource with a nested author attribute (in ActiveRecord
-    # parlance, Book belongs_to Author, Author has_many Book). 
-    #
-    # Now suppose we've created the following cucumber scenario:
-    #
-    #   Scenario: Browsing books
-    #     Given the following author: 
-    #     | name             | date_of_birth |
-    #     | Arthur C. Clarke | 1917-12-16    |
-    #
-    #     And the following books:
-    #     | name                  | author           | published | genre    |
-    #     | 2001: A Space Odyssey | Arthur C. Clarke | 1968      | sci-fi   |
-    #     | A Fall of Moondust    | Arthur C. Clarke | 1961      | fantasy  |
-    #     | Rendezvous with Rama  | Arthur C. Clarke | 1972      | sci-fi   |
-    #
-    #     When....
-    #
-    # To link up the book and author, we could create the following book definition
-    #   
-    #   Dupe.define :book do |book|
-    #     book.author {|name| Dupe.find(:author) {|a| a.name == name}}
-    #   end
+    #   irb# a = Dupe.create :author, :name => 'Monkey'
+    #     ==> <#Duped::Author name="Monkey" id=1>
     # 
-    # The line <tt>Dupe.find(:author) {|a| a.name == name}</tt> could be translated as 
-    # "find the first author record where the author's name equals `name`". 
-    #
-    # Dupe decided to return only a single record because we specified <tt>find(:author)</tt>. 
-    # Had we instead specified <tt>find(:authors)</tt>, Dupe would have instead returned an array of results. 
-    #
-    # More examples: 
-    #   
-    #   # find all books written in the 1960's
-    #   Dupe.find(:books) {|b| b.published >= 1960 and b.published <= 1969}
-    #
-    #   # return the first book found that was written by Arthur C. Clarke (nested resources example)
-    #   Dupe.find(:book) {|b| b.author.name == 'Arthur C. Clarke'}
-    #
-    #   # find all sci-fi and fantasy books
-    #   Dupe.find(:books) {|b| b.genre == 'sci-fi' or b.genre == 'fantasy'}
-    #
-    #   # find all books written by people named 'Arthur'
-    #   Dupe.find(:books) {|b| b.author.name.match /Arthur/}
+    #   irb# b = Dupe.create :book, :title => 'Bananas', :author => a
+    #     ==> <#Duped::Book author=<#Duped::Author name="Monkey" id=1> title="Bananas" id=1>
+    # 
+    #   irb# Dupe.find(:author) {|a| a.name == 'Monkey'}
+    #     ==> <#Duped::Author name="Monkey" id=1>
+    # 
+    #   irb# Dupe.find(:book) {|b| b.author.name == 'Monkey'}
+    #     ==> <#Duped::Book author=<#Duped::Author name="Monkey" id=1> title="Bananas" id=1>
+    # 
+    #   irb# Dupe.find(:author) {|a| a.id == 1}
+    #     ==> <#Duped::Author name="Monkey" id=1>
+    # 
+    #   irb# Dupe.find(:author) {|a| a.id == 2}
+    #     ==> nil
+    # 
+    # In all cases, notice that we provided the singular form of a model name to Dupe.find. 
+    # This ensures that we either get back either a single resource (if the query was successful), or _nil_.
+    # 
+    # If we'd like to find several resources, we can use the plural form of the model name. For example:
+    # 
+    #   irb# a = Dupe.create :author, :name => 'Monkey', :published => true
+    #     ==> <#Duped::Author published=true name="Monkey" id=1>
+    # 
+    #   irb# b = Dupe.create :book, :title => 'Bananas', :author => a
+    #     ==> <#Duped::Book author=<#Duped::Author published=true name="Monkey" id=1> title="Bananas" id=1>
+    # 
+    #   irb# Dupe.create :author, :name => 'Tiger', :published => false
+    #     ==> <#Duped::Author published=false name="Tiger" id=2>
+    # 
+    #   irb# Dupe.find(:authors)
+    #     ==> [<#Duped::Author published=true name="Monkey" id=1>, <#Duped::Author published=false name="Tiger" id=2>]
+    # 
+    #   irb# Dupe.find(:authors) {|a| a.published == true}
+    #     ==> [<#Duped::Author published=true name="Monkey" id=1>]
+    # 
+    #   irb# Dupe.find(:books)
+    #     ==> [<#Duped::Book author=<#Duped::Author published=true name="Monkey" id=1> title="Bananas" id=1>]
+    # 
+    #   irb# Dupe.find(:books) {|b| b.author.published == false}
+    #     ==> []
+    # 
+    # Notice that by using the plural form of the model name, we ensure that we receive back an array - 
+    # even in the case that the query did not find any results (it simply returns an empty array).
     def find(model_name, &block) # yield: record
       results = database.select model_name.to_s.singularize.to_sym, block
       model_name.plural? ? results : results.first
     end
     
+    # This method will create a resource with the given specifications if one doesn't already exist.
+    # 
+    #   irb# Dupe.find :genre
+    #   Dupe::Database::TableDoesNotExistError: The table ':genre' does not exist.
+    #     from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/database.rb:30:in `select'
+    #     from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/dupe.rb:295:in `find'
+    #     from (irb):40
+    # 
+    #   irb# Dupe.find_or_create :genre
+    #     ==> <#Duped::Genre id=1>
+    # 
+    #   irb# Dupe.find_or_create :genre
+    #     ==> <#Duped::Genre id=1>
+    # 
+    # You can also pass conditions to find_or_create as a hash:
+    # 
+    #   irb# Dupe.find_or_create :genre, :name => 'Science Fiction', :label => 'sci-fi'
+    #     ==> <#Duped::Genre label="sci-fi" name="Science Fiction" id=2>
+    # 
+    #   irb# Dupe.find_or_create :genre, :name => 'Science Fiction', :label => 'sci-fi'
+    #     ==> <#Duped::Genre label="sci-fi" name="Science Fiction" id=2>
     def find_or_create(model_name, attributes={})
       results = nil
       if model_exists(model_name)
@@ -314,10 +366,7 @@ class Dupe
         results
       end
     end
-    
-    
-    #def mock_get()
-    
+        
     #:nodoc
     def models
       @models ||= {}

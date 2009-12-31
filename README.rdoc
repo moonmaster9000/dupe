@@ -1,30 +1,25 @@
 = Dupe 
 
 There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's {"Factory Girl"}[http://www.thoughtbot.com/projects/factory_girl]).
+
 But what about prototyping ActiveResource records? That's where Dupe steps in.  
 
 
 == Motivation 
 
-Dupe is ideally suited for cuking the client side of a service-oriented (ActiveResource) application where the backend service does not yet exist.
-
-Why would anyone want to do that, you might ask? Dupe arose in the midst of a site migration project. Essentially, the site being replaced 
-had a complicated, denormalized, and chaotic backend datastore that made ordinary data migration a complex nightmare. So the developers involved
-decided to rebuild the frontend of the site first, and connect it to the existing backend via services. 
-
-Using Dupe, they were able to cuke the new frontend, mocking
-the backend services they needed, and then the developers for the old site were able to use the mocked XML output of Dupe to determine exactly what
-services they needed to expose on the backend (along with the XML format of those services). Once those services existed, the new frontend was launched,
-and the developers then created a new backend, migrated data from the old backend (over the services), and pointed the new frontend to the new backend services.
-The resulting site had a nicely decoupled, service-oriented architecture. 
+Dupe is ideally suited for cuking the client side of a service-oriented (ActiveResource) application.
 
 
 == Installation
 
-Add this to your cucumber.rb environment (config/environments/cucumber.rb)
-  
-  config.gem 'dupe', :lib => 'dupe', :version => '>=0.3.5' :source => 'http://gemcutter.org'
+If you want to install this for use in something other than a rails project, simply: 
 
+  # gem install dupe
+
+If you're going to use this in a rails project, add this to your cucumber.rb environment (config/environments/cucumber.rb)
+  
+  config.gem 'dupe', :lib => 'dupe', :version => '>=0.4.0'
+  
 Then run this rake task to install the gem: 
 
   # rake gems:install RAILS_ENV=cucumber
@@ -32,157 +27,405 @@ Then run this rake task to install the gem:
 Lastly, from your rails project root, run:
 
   # script/generate dupe
-
-
-== Example
-
-Let's suppose your cuking a book search application for a library that consumes a RESTFUL book datastore service via ActiveResource.
-You might start by writing the following feature in <em>RAILS_ROOT/features/library/find_book.feature</em>:
-
-  Feature: find a book
-    As a reader
-    I want to search for books
-    so that I can check them out and read them. 
-
-  Scenario: search by author
-    Given an author "Arthur C. Clarke"
-    And a book "2001: A Space Odyssey" by "Arthur C. Clarke"
-    When I search for "Arthur C. Clarke"
-    I should see "2001: A Space Odyssey"
-
-To get this to pass, you might first create ActiveResource[http://api.rubyonrails.org/classes/ActiveResource/Base.html] models for Books and Authors that connect to the Library service:
-
-  class Book < ActiveResource::Base
-    self.site = 'http://bookservice.domain'
-  end
-
-  class Author < ActiveResource::Base
-    self.site = 'http://bookservice.domain'
-  end
-
-Then you might create the following resource definition via Dupe.define (put it in a file with a .rb extension and place it in RAILS_ROOT/features/support/):
   
-  Dupe.define :book do |book|
-    book.author do |author_name|
-      Dupe.find(:author) {|a| a.name == author_name}
-    end
-  end
 
-and the following cucumber step definitions (utilizing Dupe.create):
+= Features
+
+==Creating resources
+
+Dupe allows you to quickly create resources, even if you have yet to define them. For example:
+
+  irb# require 'dupe'
+    ==> true
+
+  irb# b = Dupe.create :book, :title => '2001'
+    ==> <#Duped::Book title="2001" id=1>
+
+  irb# a = Dupe.create :author, :name => 'Arthur C. Clarke'
+    ==> <#Duped::Author name="Arthur C. Clarke" id=1>
+
+  irb# b.author
+    ==> nil
+
+  irb# b.author = a
+    ==> <#Duped::Author name="Arthur C. Clarke" id=1>
+
+  irb# b
+    ==> <#Duped::Book author=<#Duped::Author name="Arthur C. Clarke" id=1> title="2001" id=1>
+    
+
+Dupe also provides a way for us to quickly to generate a large number of resources. For example, suppose we have a cucumber scenario that tests paginating through lists of books. To easily create 50 unique books, we could use the Dupe.stub method:
+
+  irb# Dupe.stub 50, :books, :like => {:title => proc {|n| "book ##{n} title"}}
+    ==> [<#Duped::Book title="book #1 title" id=1>, <#Duped::Book title="book #2 title" id=2>, ...]
+
+Notice that each book has a unique title, achieved by passing the "proc {|n| "book ##{n} title"}" as the value for the title. 
+
+
+==Finding Resources
+
+Dupe also has a built-in querying system for finding resources you create. In your tests / cucumber step definitions, you'll most likely be using this approach for finding resources. If you're wondering how your app (i.e., ActiveResource) can find resources you create, skip down to the section on ActiveResource.
+
+  irb# a = Dupe.create :author, :name => 'Monkey'
+    ==> <#Duped::Author name="Monkey" id=1>
+
+  irb# b = Dupe.create :book, :title => 'Bananas', :author => a
+    ==> <#Duped::Book author=<#Duped::Author name="Monkey" id=1> title="Bananas" id=1>
+
+  irb# Dupe.find(:author) {|a| a.name == 'Monkey'}
+    ==> <#Duped::Author name="Monkey" id=1>
   
-  Given /^an author "([^\"]*)"$/ do |author|
-    Dupe.create :author, :name => author
-  end
+  irb# Dupe.find(:book) {|b| b.author.name == 'Monkey'}
+    ==> <#Duped::Book author=<#Duped::Author name="Monkey" id=1> title="Bananas" id=1>
 
-  Given /^a book "([^\"]*)" by "([^\"]*)"$/ do |book, author|
-    Dupe.create :book, :title => book, :author => author 
-  end
+  irb# Dupe.find(:author) {|a| a.id == 1}
+    ==> <#Duped::Author name="Monkey" id=1>
 
-Dupe.create will in turn mock two service responses for each resource. For example,
-for the Book resource, it will mock:
+  irb# Dupe.find(:author) {|a| a.id == 2}
+    ==> nil
+    
+In all cases, notice that we provided the singular form of a model name to Dupe.find. This ensures that we either get back either a single resource (if the query was successful), or _nil_.
 
-  # Book.find(:all) --> GET /books.xml
-  <?xml version="1.0" encoding="UTF-8"?>
-  <books type="array">
-    <book>
-      <id type="integer">1</id>
-      <title>2001: A Space Odyssey</title>
-      <author>
-        <id type="integer">1</id>
-        <name>Arthur C. Clarke</name>
-      </author>
-    </book>
-  </books>
+If we'd like to find several resources, we can use the plural form of the model name. For example:
 
-  # Book.find(1) --> GET /books/1.xml
-  <?xml version="1.0" encoding="UTF-8"?>
-  <book>
-    <id type="integer">1</id>
-    <title>2001: A Space Odyssey</title>
-    <author>
-      <id type="integer">1</id>
-      <name>Arthur C. Clarke</name>
-    </author>
-  </book>
+  irb# a = Dupe.create :author, :name => 'Monkey', :published => true
+    ==> <#Duped::Author published=true name="Monkey" id=1>
 
-From here, you could start scaffolding your controllers, with the assumption that Dupe will mock the responses to Book.find(<id or :all>) and Author.find(<id or :all>).
+  irb# b = Dupe.create :book, :title => 'Bananas', :author => a
+    ==> <#Duped::Book author=<#Duped::Author published=true name="Monkey" id=1> title="Bananas" id=1>
 
-However, what happens when one of your controllers uses an ActiveResource object in such a way that it sends off a request that Dupe has not yet mocked? For example, suppose 
-you had the following in one of your controllers:
+  irb# Dupe.create :author, :name => 'Tiger', :published => false
+    ==> <#Duped::Author published=false name="Tiger" id=2>
 
-  Book.find :all, :params => {:author_id => 1}
+  irb# Dupe.find(:authors)
+    ==> [<#Duped::Author published=true name="Monkey" id=1>, <#Duped::Author published=false name="Tiger" id=2>]
 
-This would send off a request like "/books.xml?author_id=1". If this happened during the context of a cucumber scenario, then Dupe would throw an exception with a message like:
+  irb# Dupe.find(:authors) {|a| a.published == true}
+    ==> [<#Duped::Author published=true name="Monkey" id=1>]
 
-  There is no custom service mapping for "/books.xml?author_id=1". 
-  Now go to features/support/custom_mocks.rb and add it. (StandardError)
+  irb# Dupe.find(:books)
+    ==> [<#Duped::Book author=<#Duped::Author published=true name="Monkey" id=1> title="Bananas" id=1>]
 
-When you ran "script/generate dupe" during dupe installation, it created a file features/support/custom_mocks.rb that should look something like this:
-
-  module CustomMocks
-    # Maps a service request url to a Dupe find. By default, Dupe will only
-    # mock simple requests like SomeResource.find(some_id) or SomeResource.find(:all)
-    #
-    # For example, suppose you have a Book < ActiveResource::Base class, and
-    # somewhere your code does:
-    #
-    #   Book.find :all, :params => {:limit => 10, :offset => 20}
-    #
-    # That in turn will send off a request to a url like:
-    #
-    #   /books.xml?limit=10&offset=20
-    #
-    # In this file, you could add a "when" statement like:
-    #
-    #   when %r{/books.xml\?limit=(\d+)&offset=(\d+)$}
-    #     start = $2.to_i
-    #     finish = start + $1.to_i - 1
-    #     Dupe.find(:books)[start..finish]
-    def custom_service(url)
-      case url
-
-        # remove this and replace it with a real custom mock
-        when %r{/bogus_url}
-          ''
-
-        else
-          raise StandardError.new(
-            "There is no custom service mapping for \"#{url}\"." +
-            "Now go to features/support/custom_mocks.rb and add it."
-          )
-      end
-    end
-  end
+  irb# Dupe.find(:books) {|b| b.author.published == false}
+    ==> []
+    
+Notice that by using the plural form of the model name, we ensure that we receive back an array - even in the case that the query did not find any results (it simply returns an empty array).
 
 
-Now remove the "when %r{/bogus_url}" statement and add a custom mock for your service:
+==Finding or Creating Resources
 
-    def custom_service(url)
-      case url
+You might have seen this one coming: 
 
-        when %r{books.xml\?author_id=(\d+)$}
-          Dupe.find(:books) {|b| b.author.id == $1}
+  irb# Dupe.find :genre
+  Dupe::Database::TableDoesNotExistError: The table ':genre' does not exist.
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/database.rb:30:in `select'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/dupe.rb:295:in `find'
+  	from (irb):40
+  	
+  irb# Dupe.find_or_create :genre
+    ==> <#Duped::Genre id=1>
 
-        else
-          raise StandardError.new(
-            "There is no custom service mapping for \"#{url}\"." +
-            "Now go to features/support/custom_mocks.rb and add it."
-          )
+  irb# Dupe.find_or_create :genre
+    ==> <#Duped::Genre id=1>
+    
+You can also pass conditions to find_or_create as a hash:
 
-      end
-    end
+  irb# Dupe.find_or_create :genre, :name => 'Science Fiction', :label => 'sci-fi'
+    ==> <#Duped::Genre label="sci-fi" name="Science Fiction" id=2>
 
-Dupe will take the result of the Dupe.find(:books)... code (a Hash), and convert it to XML. 
-You could have alternatively given a string of XML (or a string of anything), and Dupe would have taken it as-is. 
+  irb# Dupe.find_or_create :genre, :name => 'Science Fiction', :label => 'sci-fi'
+    ==> <#Duped::Genre label="sci-fi" name="Science Fiction" id=2>
+
+== Defining a resource
+
+Though often we may get away with creating resources willy-nilly, it's sometimes quite handy to define a resource, giving it default attributes and callbacks. 
+
+=== Attributes with default values
+
+Suppose we're creating a 'book' resource. Perhaps our app assumes every book has a title, so let's define a book resource
+that specifies just that:
+
+  irb# Dupe.define :book do |attrs|
+   --#   attrs.title 'Untitled'
+   --#   attrs.author
+   --# end
+    ==> #<Dupe::Model:0x17b2694 ...>
+  
+Basically, this reads like "A book resource has a title attribute with a default value of 'Untitled'. It also has an author attribute." Thus, if we create a book and we don't specify a "title" attribute, it should create a "title" for us, as well as provide a nil "author" attribute.
+
+  irb# b = Dupe.create :book
+    ==> <#Duped::Book author=nil title="Untitled" id=1>
+  
+  
+If we provide our own title, it should allow us to override the default value:
+
+  irb# b = Dupe.create :book, :title => 'Monkeys!'
+    ==> <#Duped::Book author=nil title="Monkeys!" id=2>
+    
+=== Attributes with procs as default values
+
+Sometimes it might be convenient to procedurally define the default value for an attribute:
+
+  irb# Dupe.define :book do |attrs|
+   --#   attrs.title 'Untitled'
+   --#   attrs.author
+   --#   attrs.isbn do
+   --#     rand(1000000)
+   --#   end
+   --# end
+  
+Now, every time we create a book, it will get assigned a random ISBN number:
+
+  irb# b = Dupe.create :book
+    ==> <#Duped::Book author=nil title="Untitled" id=1 isbn=895825>
+
+  irb# b = Dupe.create :book
+    ==> <#Duped::Book author=nil title="Untitled" id=2 isbn=606472>
+
+Another common use of this feature is for associations. Lets suppose we'd like to make sure that a book always has a genre, but a genre should be it's own resource. We can accomplish that by taking advantage of Dupe's "find_or_create" method:
+
+  irb# Dupe.define :book do |attrs|
+   --#   attrs.title 'Untitled'
+   --#   attrs.author
+   --#   attrs.isbn do
+   --#     rand(1000000)
+   --#   end
+   --#   attrs.genre do
+   --#     Dupe.find_or_create :genre
+   --#   end
+   --# end
+   
+Now when we create books, Dupe will associate them with an existing genre (the first one it finds), or if none yet exist, it will create one. 
+
+First, let's confirm that no genres currently exist: 
+
+  irb# Dupe.find :genre
+  Dupe::Database::TableDoesNotExistError: The table ':genre' does not exist.
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/database.rb:30:in `select'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/dupe.rb:295:in `find'
+  	from (irb):135
+
+Next, let's create a book:
+
+  irb# b = Dupe.create :book
+    ==> <#Duped::Book genre=<#Duped::Genre id=1> author=nil title="Untitled" id=1 isbn=62572>
+
+Notice that it create a genre. If we tried to do another Dupe.find for the genre:
+
+  irb# Dupe.find :genre
+    ==> <#Duped::Genre id=1>
+
+Now, if create another book, it will associate with the genre that was just created:
+
+  irb# b = Dupe.create :book
+    ==> <#Duped::Book genre=<#Duped::Genre id=1> author=nil title="Untitled" id=2 isbn=729317>
+ 
+
+
+=== Attributes with transformers
+
+Occasionally, you may find it useful to have attribute values transformed upon creation. 
+
+For example, suppose we want to create books with publish dates. In our cucumber scenario's, we may prefer to simply specify a date like '2009-12-29', and have that automatically transformed into an ruby Date object. 
+
+  irb# Dupe.define :book do |attrs|
+   --#   attrs.title 'Untitled'
+   --#   attrs.author
+   --#   attrs.isbn do
+   --#     rand(1000000)
+   --#   end
+   --#   attrs.publish_date do |publish_date|
+   --#     Date.parse(publish_date)
+   --#   end
+   --# end
+
+Now, let's create a book:
+
+  irb# b = Dupe.create :book, :publish_date => '2009-12-29'
+    ==> <#Duped::Book author=nil title="Untitled" publish_date=Tue, 29 Dec 2009 id=1 isbn=826291>
+
+  irb# b.publish_date
+    ==> Tue, 29 Dec 2009
+
+  irb# b.publish_date.class
+    ==> Date
+
+=== Callbacks
+
+Suppose we'd like to make sure that our books get a unique label. We can accomplish that with an after_create callback:
+
+  irb# Dupe.define :book do |attrs|
+   --#   attrs.title 'Untitled'
+   --#   attrs.author
+   --#   attrs.isbn do
+   --#     rand(1000000)
+   --#   end
+   --#   attrs.publish_date do |publish_date|
+   --#     Date.parse(publish_date)
+   --#   end
+   --#   attrs.after_create do |book|
+   --#     book.label = book.title.downcase.gsub(/\ +/, '-') + "--#{book.id}"
+   --#   end
+   --# end
+
+  irb# b = Dupe.create :book, :title => 'Rooby on Rails'
+    ==> <#Duped::Book author=nil label="rooby-on-rails--1" title="Rooby on Rails" publish_date=nil id=1 isbn=842518>
+
+
+= ActiveResource
+
+So how does Dupe actually help us to spec/test ActiveResource-based applications? It uses a simple, yet sophisticated "intercept-mocking" technique, whereby failed network requests sent by ActiveResource fallback to the "Duped" network. Consider the following:
+
+  irb# Dupe.create :book, :title => 'Monkeys!'
+    ==> <#Duped::Book title="Monkeys!" id=1>
+
+  irb# class Book < ActiveResource::Base; self.site = ''; end
+    ==> ""
+
+  irb# Book.find(1)
+    ==> #<Book:0x1868a20 @attributes={"title"=>"Monkeys!", "id"=>1}, prefix_options{}
+
+Voila! When the _Book_ class was unable to find the book with id 1, it asked Dupe if it knew about any book resources with id 1. Check out the Dupe network log for a clue as to what happened behind the scenes: 
+
+  irb# puts Dupe.network.log.pretty_print
+  
+    Logged Requests:
+      Request: GET /books/1.xml
+      Response:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <book>
+          <title>Monkeys!</title>
+          <id type="integer">1</id>
+        </book>
+
+Similarly: 
+
+  irb# Book.find(:all)
+    ==> [#<Book:0x185608c @attributes={"title"=>"Monkeys!", "id"=>1}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+  
+    Logged Requests:
+      Request: GET /books.xml
+      Response:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <books type="array">
+          <book>
+            <title>Monkeys!</title>
+            <id type="integer">1</id>
+          </book>
+        </books>
+
+
+==Intercept Mocking
+
+Dupe knew how to handle simple find by id and find :all lookups from ActiveResource. But what about other requests we might potentially make? 
+
+  irb# Dupe.create :author, :name => 'Monkey', :published => true
+    ==> <#Duped::Author name="Monkey" published=true id=1>
+
+  irb# Dupe.create :author, :name => 'Tiger', :published => false
+    ==> <#Duped::Author name="Tiger" published=false id=2>
+
+  irb# class Author < ActiveResource::Base; self.site = ''; end
+    ==> ""
+
+  irb# Author.find :all, :from => :published
+  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors/published.xml'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
+  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/custom_methods.rb:57:in `get'
+  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:632:in `find_every'
+  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
+  	from (irb):12
+
+Obviously, Dupe had no way of anticipating this possibility. However, you can create your own custom intercept mock for this: 
+
+  irb# Get %r{/authors/published.xml} do
+   --#   Dupe.find(:authors) {|a| a.published == true}
+   --# end
+    ==> #<Dupe::Network::Mock:0x1833e88 @url_pattern=/\/authors\/published.xml/, @verb=:get, @response=#<Proc:0x01833f14@(irb):13>
+
+  irb# Author.find :all, :from => :published
+    ==> [#<Author:0x1821d3c @attributes={"name"=>"Monkey", "published"=>true, "id"=>1}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+
+    Logged Requests:
+      Request: GET /authors/published.xml
+      Response:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <authors type="array">
+          <author>
+            <name>Monkey</name>
+            <published type="boolean">true</published>
+            <id type="integer">1</id>
+          </author>
+        </authors>
+
+
+The "Get" method requires a url pattern and a block. In most cases, your block will return a Dupe.find result. Internally, Dupe will transform that into XML. However, if your "Get" block returns a string, Dupe will use that as the response body and not attempt to do any transformations on it. 
+
+Suppose instead the service expected us to pass published as a query string parameter:
+
+  irb# Author.find :all, :params => {:published => true}
+  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors.xml?published=true'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
+  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
+  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:639:in `find_every'
+  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
+  	from (irb):18
+
+We can mock this with the following:
+
+  irb# Get %r{/authors\.xml\?published=(true|false)$} do |published|
+   --#   if published == 'true'
+   --#     Dupe.find(:authors) {|a| a.published == true}
+   --#   else
+   --#     Dupe.find(:authors) {|a| a.published == false}
+   --#   end
+   --# end
+
+  irb# Author.find :all, :params => {:published => true}
+    ==> [#<Author:0x17db094 @attributes={"name"=>"Monkey", "published"=>true, "id"=>1}, prefix_options{}]
+
+  irb# Author.find :all, :params => {:published => false}
+    ==> [#<Author:0x17c68c4 @attributes={"name"=>"Tiger", "published"=>false, "id"=>2}, prefix_options{}]
+
+  irb# puts Dupe.network.log.pretty_print
+  
+    Logged Requests:
+      Request: GET /authors.xml?published=true
+      Response:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <authors type="array">
+          <author>
+            <name>Monkey</name>
+            <published type="boolean">true</published>
+            <id type="integer">1</id>
+          </author>
+        </authors>
+
+      Request: GET /authors.xml?published=false
+      Response:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <authors type="array">
+          <author>
+            <name>Tiger</name>
+            <published type="boolean">false</published>
+            <id type="integer">2</id>
+          </author>
+        </authors>
 
 
 == More
 
-Dupe supports attribute defaults, attribute transformations, stubbing, resource associations, custom resource mocks, and more. 
-Want to learn more? Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
+Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
 
 
 == TODO List
 
-* Thus far, Dupe has only been used for consuming a service via GET requests. There are no facilities yet for mocking responses to PUT, POST, and DELETE requests. 
-* We need a rake task that will run your scenarios and create service documentation based on the dupe log output (i.e., example requests and example responses) that the programmers implementing the service can use as a reference. 
+* We need "Put", "Post", and "Delete", and "Head" intercept mocking methods. Currently we only have "Get". 
+* We need a rake task that will run your cucumber scenarios and create service documentation based on the dupe log output (i.e., example requests and example responses) that the programmers implementing the service can use as a reference. 

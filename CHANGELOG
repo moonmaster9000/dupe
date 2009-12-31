@@ -1,3 +1,11 @@
+v0.4.0
+  This is a major rewrite of Dupe. Under the hood, it's architecturally much more sound - and maintainable. It goes much
+  farther with tried and true OO design principles than previous incarnations. It also now includes a spec suite instead of 
+  a cucumber suite (though a higher-level cucumber test suite is in the making), with code coverage above 95%.
+  
+  New features include procs as default attributes, Dupe.find_or_create, and Dupe.define after_create callbacks, and 
+  a new API for url-intercept mocks. Checkout README.rdoc for an overview. 
+
 v0.3.7
   * fixing cucumber After scenario hook (broke by last patch release)
 

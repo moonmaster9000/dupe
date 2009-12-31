@@ -1,11 +1,11 @@
 class Dupe
-  class Database
+  class Database #:nodoc:
     attr_reader :tables
     
-    # thrown whenever you try to select from a table that does not exist in the database
+    #:nodoc:
     class TableDoesNotExistError < StandardError; end
     
-    # thrown whenever you provide invalid conditions to the select method
+    #:nodoc:
     class InvalidQueryError < StandardError; end
     
     # by default, there are not tables in the database

@@ -1,12 +1,12 @@
 ActiveResource::HttpMock.instance_eval do #:nodoc:
-  def delete_mock(http_method, path)
+  def delete_mock(http_method, path) #:nodoc:
     responses.reject! {|r| r[0].path == path && r[0].method == http_method}
   end
 end
 
 module ActiveResource #:nodoc:
   class Connection #:nodoc:
-    def get(path, headers = {})
+    def get(path, headers = {}) #:nodoc:
       begin
         response = request(:get, path, build_request_headers(headers, :get))
 

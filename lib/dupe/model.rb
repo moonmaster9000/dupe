@@ -1,5 +1,5 @@
 class Dupe
-  class Model
+  class Model #:nodoc:
     attr_reader :schema
     attr_reader :name
     attr_reader :id_sequence

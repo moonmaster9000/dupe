@@ -1,9 +1,10 @@
 class Dupe
-  class Network
-    class UnknownRestVerbError < StandardError; end
-    VERBS = [:get, :post, :put, :delete]
+  class Network #:nodoc:
+    #:nodoc:
+    class UnknownRestVerbError < StandardError; end #:nodoc:
+    VERBS = [:get, :post, :put, :delete] #:nodoc:
     
-    module RestValidation  
+    module RestValidation  #:nodoc:
       def validate_request_type(verb)
         raise(
           Dupe::Network::UnknownRestVerbError,

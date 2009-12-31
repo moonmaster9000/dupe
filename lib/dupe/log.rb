@@ -1,10 +1,10 @@
 class Dupe
-  class Network
-    class Log
-      include RestValidation
-      attr_reader :requests
+  class Network #:nodoc:
+    class Log #:nodoc:
+      include RestValidation     #:nodoc:
+      attr_reader :requests    #:nodoc:
       
-      class Request
+      class Request     #:nodoc:
         attr_reader :verb, :path, :response_body
         
         def initialize(verb, path, response_body)
@@ -17,11 +17,11 @@ class Dupe
         end
       end
       
-      def initialize
+      def initialize     #:nodoc:
         @requests = []
       end
       
-      def add_request(verb, path, response_body='')
+      def add_request(verb, path, response_body='')     #:nodoc:
         validate_request_type verb
         @requests << Request.new(verb, path, response_body)
       end
@@ -30,7 +30,7 @@ class Dupe
         "Logged Requests:\n" + requests.map {|r| r.pretty_print.indent }.join("\n\n") + "\n\n"
       end
       
-      def reset
+      def reset #:nodoc:
         @requests = []
       end
     end

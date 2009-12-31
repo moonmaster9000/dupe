@@ -1,3 +1,3 @@
-class Symbol
+class Symbol #:nodoc:
   include SingularPluralDetection
 end

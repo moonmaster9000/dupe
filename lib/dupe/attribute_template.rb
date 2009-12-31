@@ -1,11 +1,11 @@
 class Dupe
-  class Model
-    class Schema
+  class Model #:nodoc:
+    class Schema #:nodoc:
       # This class represents an attribute template.
       # An attribute template consists of an attribute name (a symbol),
       # a potential default value (nil if not specified), 
       # and a potential transformer proc. 
-      class AttributeTemplate
+      class AttributeTemplate #:nodoc:
         
         class NilValue; end
         

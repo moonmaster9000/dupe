@@ -1,6 +1,6 @@
 class Dupe
-  class Network
-    class Mock
+  class Network #:nodoc:
+    class Mock #:nodoc:
       include Dupe::Network::RestValidation
       
       attr_reader :verb

@@ -1,4 +1,4 @@
-class String
+class String #:nodoc:
   include SingularPluralDetection
   
   def indent(spaces=2)

@@ -1,8 +1,8 @@
 class Dupe
-  class Network    
-    include RestValidation
+  class Network    #:nodoc:
+    include RestValidation #:nodoc:
     
-    class RequestNotFoundError < StandardError; end
+    class RequestNotFoundError < StandardError; end #:nodoc:
     
     attr_reader :mocks, :log
     

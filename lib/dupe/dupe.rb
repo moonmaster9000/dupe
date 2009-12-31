@@ -4,12 +4,8 @@
 class Dupe
   class << self
     
-    # the models you have defined via Dupe.define
-    attr_reader :models
-    
-    # the database where all the records you've created via
-    # Dupe.create are stored. 
-    attr_reader :database
+    attr_reader :models #:nodoc:
+    attr_reader :database #:nodoc:
     
     # set this to "true" if you Dupe to spit out mocked requests
     # after each of your cucumber scenario's run
@@ -241,9 +237,9 @@ class Dupe
     #
     # then stub would have generated 20 author records like: 
     #
-    #   {:name => 'default', :id => 1}
+    #   <#Duped::Author name="default" id=1>
     #   ....
-    #   {:name => 'default', :id => 20}
+    #   <#Duped::Author name="default" id=1>
     #
     # and it would also have mocked find(id) and find(:all) responses for these records (along with any other custom mocks you've
     # setup via Dupe.define_mocks). (Had you not defined an author resource, then the stub would have generated 20 author records
@@ -367,18 +363,15 @@ class Dupe
       end
     end
         
-    #:nodoc
-    def models
+    def models #:nodoc:
       @models ||= {}
     end
     
-    #:nodoc
-    def network
+    def network #:nodoc:
       @network ||= Dupe::Network.new
     end
     
-    #:nodoc
-    def database
+    def database #:nodoc:
       @database ||= Dupe::Database.new
     end
     

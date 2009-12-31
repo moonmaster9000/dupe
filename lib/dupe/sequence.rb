@@ -1,4 +1,4 @@
-class Sequence
+class Sequence #:nodoc:
   attr_reader :current_value 
   
   def initialize(starting_at=1)

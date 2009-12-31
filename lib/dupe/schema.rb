@@ -1,6 +1,6 @@
 class Dupe
-  class Model
-    class Schema 
+  class Model #:nodoc:
+    class Schema #:nodoc:
       attr_reader :attribute_templates
       attr_reader :after_create_callbacks
       

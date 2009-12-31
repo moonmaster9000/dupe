@@ -1,6 +1,6 @@
 class Dupe
-  class Database
-    class Record < Hash
+  class Database #:nodoc:
+    class Record < Hash #:nodoc:
       attr_accessor :__model__
       
       def id

@@ -1,3 +1,17 @@
+v0.4.3
+  script/generate now does the following:
+  
+    creates the following directories:
+      RAILS_ROOT/features/dupe
+      RAILS_ROOT/features/dupe/definitions
+      RAILS_ROOT/features/dupe/custom_mocks
+    
+    it places example Dupe definitions in RAILS_ROOT/features/dupe/definitions/definitions.rb
+    
+    it places example custom mocks in RAILS_ROOT/features/dupe/custom_mocks/custom_mocks.rb
+
+    it also adds a load_dupe.rb file (that loads up the definitions and custom mocks) to RAILS_ROOT/features/support/load_dupe.rb
+
 v0.4.2
   Bug fix: fixes issue #3 (http://github.com/moonmaster9000/dupe/issues/#issue/3)
 

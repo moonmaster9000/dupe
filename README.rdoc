@@ -28,6 +28,16 @@ Lastly, from your rails project root, run:
 
   # script/generate dupe
   
+That last command will create the following directories:
+
+- RAILS_ROOT/features/dupe
+- RAILS_ROOT/features/dupe/definitions
+- RAILS_ROOT/features/dupe/custom_mocks
+  
+It will also place example Dupe definitions in RAILS_ROOT/features/dupe/definitions/definitions.rb as well as example custom mocks in RAILS_ROOT/features/dupe/custom_mocks/custom_mocks.rb
+
+Lastly, it will add a load_dupe.rb file (that loads up the definitions and custom mocks) to RAILS_ROOT/features/support/load_dupe.rb
+  
 
 = Features
 

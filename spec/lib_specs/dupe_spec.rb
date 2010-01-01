@@ -180,6 +180,13 @@ describe Dupe do
       Dupe.database.tables[:book].first.should == @books.first
       Dupe.database.tables[:book].last.should == @books.last      
     end
+    
+    it "should symbolize hash keys to keep from duplicating column names" do 
+      b = Dupe.create :book, 'title' => 'War And Not War', :title => 'War and Peace'
+      b.title.should == 'War and Peace'
+      b[:title].should == 'War and Peace'
+      b['title'].should == nil
+    end
   end
   
   describe "find" do

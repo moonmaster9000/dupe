@@ -222,6 +222,7 @@ class Dupe
     def create(model_name, records={})
       model_name = model_name.to_s.singularize.to_sym
       define model_name unless model_exists(model_name)
+      records = records.kind_of?(Array) ? records.map {|r| r.symbolize_keys} : records.symbolize_keys!    
       create_and_insert records, :into => model_name
     end
 

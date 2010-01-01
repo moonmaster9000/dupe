@@ -182,10 +182,18 @@ describe Dupe do
     end
     
     it "should symbolize hash keys to keep from duplicating column names" do 
-      b = Dupe.create :book, 'title' => 'War And Not War', :title => 'War and Peace'
-      b.title.should == 'War and Peace'
-      b[:title].should == 'War and Peace'
+      b = Dupe.create :book, 'title' => 'War And Peace', :title => 'War And Peace'
+      b.title.should == 'War And Peace'
+      b[:title].should == 'War And Peace'
       b['title'].should == nil
+      
+      bs = Dupe.create :books, [{:test => 2, 'test' => 2}, {:test => 4, 'test' => 4}]
+      bs.first.test.should == 2
+      bs.first[:test].should == 2
+      bs.first['test'].should == nil
+      bs.last.test.should == 4
+      bs.last[:test].should == 4
+      bs.last['test'].should == nil
     end
   end
   

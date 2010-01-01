@@ -1,19 +1,9 @@
-v0.4.1
-  Bug fix: ActiveResource requests to mocked resources that returned an empty array will now not throw an exception. 
-  
-  e.g.: 
-  
-    Dupe.define :author
-    class Author < ActiveResource::Base; self.site = ''; end
-    Author.find :all
-      ==> [] (returns empty array as expected; before, it threw an exception)
-    Author.find 1
-      ==> Dupe::Network::Mock::ResourceNotFoundError: Failed with 404: the request '/authors/1.xml' returned nil.
-    Dupe.create :author
-    Author.find 1
-      ==> #<Author:0x18580f8 @attributes={"id"=>1}, prefix_options{}
-      
+v0.4.2
+  Bug fix: fixes issue #3 (http://github.com/moonmaster9000/dupe/issues/#issue/3)
 
+v0.4.1
+  Bug fix: fixes issue #2 (http://github.com/moonmaster9000/dupe/issues/#issue/2)
+  
 v0.4.0
   This is a major rewrite of Dupe. Under the hood, it's architecturally much more sound - and maintainable. It goes much
   farther with tried and true OO design principles than previous incarnations. It also now includes a spec suite instead of 

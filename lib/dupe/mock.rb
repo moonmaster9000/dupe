@@ -3,6 +3,8 @@ class Dupe
     class Mock #:nodoc:
       include Dupe::Network::RestValidation
       
+      class ResourceNotFoundError < StandardError; end
+      
       attr_reader :verb
       attr_reader :url_pattern
       attr_reader :response
@@ -27,17 +29,23 @@ class Dupe
       def mocked_response(url)
         raise(
           StandardError, 
-          "Tried to mock a response to a non-matched url! This should never occur."
+          "Tried to mock a response to a non-matched url! This should never occur. My pattern: #{@url_pattern}. Url: #{url}"
         ) unless match?(url)
       
         grouped_results = url_pattern.match(url)[1..-1]
         resp = @response.call *grouped_results
       
         case resp
+          when NilClass
+            raise ResourceNotFoundError, "Failed with 404: the request '#{url}' returned nil." 
           when Dupe::Database::Record
             resp = resp.to_xml(:root => resp.__model__.name.to_s)
           when Array
-            resp = resp.to_xml(:root => resp.first.__model__.name.to_s.pluralize)
+            if resp.empty?
+              resp = [].to_xml :root => 'results'
+            else
+              resp = resp.to_xml(:root => resp.first.__model__.name.to_s.pluralize)
+            end
         end
         
         Dupe.network.log.add_request @verb, url, resp

@@ -42,13 +42,19 @@ describe Dupe::Network::Mock do
   end
   
   describe "mocked_response" do
-    describe "on a mock object whose response returns a Dupe.find" do
+    describe "on a mock object whose response returns a Dupe.find with actual results" do
       it "should convert the response result to xml" do
         url_pattern = %r{/books/(\d+)\.xml}
         response = proc {|id| Dupe.find(:book) {|b| b.id == id.to_i}}
         book = Dupe.create :book
         mock = Dupe::Network::Mock.new :get, url_pattern, response
         mock.mocked_response('/books/1.xml').should == book.to_xml(:root => 'book')
+        
+        proc { mock.mocked_response('/books/2.xml') }.should raise_error(Dupe::Network::Mock::ResourceNotFoundError)
+        
+        Dupe.define :author
+        mock = Dupe::Network::Mock.new :get, %r{/authors\.xml$}, proc {Dupe.find :authors}
+        mock.mocked_response('/authors.xml').should == [].to_xml(:root => 'results')
       end
       
       it "should add a request to the Dupe::Network#log" do
@@ -61,6 +67,48 @@ describe Dupe::Network::Mock do
         Dupe.network.log.requests.length.should == 1
       end
     end
+    
+    describe "on a mock object whose response returns nil" do
+      it "should raise an error" do
+        url_pattern = %r{/authors/(\d+)\.xml}
+        response = proc { |id| Dupe.find(:author) {|a| a.id == id.to_i}}
+        Dupe.define :author
+        mock = Dupe::Network::Mock.new :get, url_pattern, response
+        proc {mock.mocked_response('/authors/1.xml')}.should raise_error(Dupe::Network::Mock::ResourceNotFoundError)
+      end
+    end
+    
+    describe "on a mock object whose response returns an empty array" do
+      it "should convert the empty array to an xml array record set with root 'results'" do        
+        Dupe.define :author
+        mock = Dupe::Network::Mock.new :get, %r{/authors\.xml$}, proc {Dupe.find :authors}
+        mock.mocked_response('/authors.xml').should == [].to_xml(:root => 'results')
+      end
+      
+      it "should add a request to the Dupe::Network#log" do
+        Dupe.define :author
+        mock = Dupe::Network::Mock.new :get, %r{/authors\.xml$}, proc {Dupe.find :authors}
+        Dupe.network.log.requests.length.should == 0
+        mock.mocked_response('/authors.xml')
+        Dupe.network.log.requests.length.should == 1
+      end
+    end
+    
+    describe "on a mock object whose response returns an array of duped records" do
+      it "should convert the array to xml" do        
+        Dupe.create :author  
+        mock = Dupe::Network::Mock.new :get, %r{/authors\.xml$}, proc {Dupe.find :authors}
+        mock.mocked_response('/authors.xml').should == Dupe.find(:authors).to_xml(:root => 'authors')
+      end
+      
+      it "should add a request to the Dupe::Network#log" do
+        Dupe.create :author
+        mock = Dupe::Network::Mock.new :get, %r{/authors\.xml$}, proc {Dupe.find :authors}
+        Dupe.network.log.requests.length.should == 0
+        mock.mocked_response('/authors.xml')
+        Dupe.network.log.requests.length.should == 1
+      end
+    end    
   end
   
   

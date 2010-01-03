@@ -1,3 +1,17 @@
+v0.4.4
+  Dupe.define will now create resource mocks for find(:all) and find(<id>) honoring ActiveResource self.site prefix's. 
+
+  For example, before this patch:
+
+    class Author < ActiveResource::Base; self.site = 'http://my.site.com/services'; end
+    Dupe.define :author
+      --> that would have generated network mocks with url_patterns like 
+          %r{/authors\.xml$} and %r{/authors/(\d+)\.xml$}. 
+
+  Now, with this patch, the previous two lines would generate mocks responding to: 
+      --> %r{^/services/authors\.xml$} # find :all
+      --> %r{^/services/authors/(\d+)\.xml$} # find <id>
+
 v0.4.3
   script/generate now does the following:
   

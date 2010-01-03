@@ -148,12 +148,12 @@ class Dupe
         mocks = %{
           network.define_service_mock(
             :get, 
-            %r{/#{model_name.to_s.pluralize}\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.xml$}, 
             proc { Dupe.find(:#{model_name.to_s.pluralize}) }
           )
           network.define_service_mock(
             :get, 
-            %r{/#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
             proc {|id| Dupe.find(:#{model_name}) {|resource| resource.id == id.to_i}}
           )  
         }

@@ -261,7 +261,7 @@ Now, let's create a book:
     ==> Date
 
 
-=== Uniquify attributes
+=== Uniquify attributes[#uniquify]
 
 If you'd just like to make sure that some attributes get a unique value, then you can use the uniquify
 method:

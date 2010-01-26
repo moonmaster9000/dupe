@@ -261,9 +261,9 @@ Now, let's create a book:
     ==> Date
 
 
-=== Uniquify attributes[#uniquify]
+=== Uniquify attributes
 
-If you'd just like to make sure that some attributes get a unique value, then you can use the uniquify
+If you'd just like to make sure that some attributes get a unique value, then you can use the uniquify[#uniquify]
 method:
 
   irb# Dupe.define :book do |attrs|

@@ -87,4 +87,23 @@ describe Dupe::Model::Schema do
     end
     
   end
+
+  describe "#uniquify" do
+    before do
+      @schema = Dupe::Model::Schema.new
+    end
+
+    it "should only accept a list of symbols" do
+      proc { @schema.uniquify }.should raise_error(ArgumentError, "You must pass at least one attribute to uniquify.")
+      proc { @schema.uniquify :hash => 'value' }.should raise_error(ArgumentError, "You may only pass symbols to uniquify.")
+      proc { @schema.uniquify :one, :two}.should_not raise_error
+    end
+
+    it "should create after_create_callbacks for each symbol passed to it" do
+      @schema.after_create_callbacks.should be_empty
+      @schema.uniquify :title, :label
+      @schema.after_create_callbacks.length.should == 2
+      @schema.after_create_callbacks.first.should be_kind_of(Proc)
+    end
+  end
 end

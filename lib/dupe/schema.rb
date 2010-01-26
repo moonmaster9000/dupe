@@ -31,6 +31,22 @@ class Dupe
         
         @after_create_callbacks << block
       end
+
+      def uniquify(*args)
+        raise ArgumentError, "You must pass at least one attribute to uniquify." if args.empty?
+        raise ArgumentError, "You may only pass symbols to uniquify." unless all_members_of_class(args, Symbol)
+
+        args.each do |attribute|
+          after_create do |record|
+            record[attribute] = "#{record.__model__.name} #{record.id} #{attribute}" unless record[attribute]
+          end
+        end
+      end
+
+      private
+      def all_members_of_class(ary, klass)
+        ary.inject(true) {|bool, v| bool && v.kind_of?(klass)}
+      end
     end
   end
 end

@@ -213,6 +213,27 @@ describe Dupe do
       bs.last['test'].should == nil
     end
   end
+
+  describe "create resources with unique attributes" do
+    before do
+      Dupe.define :book do |book|
+        book.uniquify :title, :author, :genre
+      end
+    end
+
+    it "should uniquify the appropriate columns if they don't already have values" do
+      b = Dupe.create :book
+      b.title.should == "book 1 title"
+      b.author.should == "book 1 author"
+      b.genre.should == "book 1 genre"
+
+      b = Dupe.create :book, :title => 'Rooby Rocks', :isbn => 1
+      b.title.should == 'Rooby Rocks'
+      b.author.should == "book 2 author"
+      b.genre.should == "book 2 genre"
+      b.isbn.should == 1
+    end
+  end
   
   describe "find" do
     before do

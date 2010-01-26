@@ -260,6 +260,26 @@ Now, let's create a book:
   irb# b.publish_date.class
     ==> Date
 
+
+=== Uniquify attributes
+
+If you'd just like to make sure that some attributes get a unique value (probably), then you can use the uniquify
+method:
+
+  irb# Dupe.define :book do |attrs|
+   --#   attrs.uniquify :title, :genre, :author
+   --# end
+
+Now, Dupe will do it's best to assign unique values to the :title, :genre, and :author attributes on 
+any records it creates:
+
+  irb# b = Dupe.create :book
+    ==> <#Duped::Book author="book 1 author" title="book 1 title" genre="book 1 genre" id=1>
+
+  irb# b2 = Dupe.create :book, :title => 'Rooby'
+    ==> <#Duped::Book author="book 2 author" title="Rooby" genre="book 2 genre" id=2>
+
+
 === Callbacks
 
 Suppose we'd like to make sure that our books get a unique label. We can accomplish that with an after_create callback:

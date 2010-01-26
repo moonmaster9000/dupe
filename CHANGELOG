@@ -1,3 +1,15 @@
+v0.4.5
+  Dupe.define now supports a uniquify method:
+    
+    >> Dupe.define :book do |book|
+    ?>   book.uniquify :title, :genre, :author
+    >> end
+    => #<Dupe::Model:0x1ab1a34 @id_sequence=#<Sequence:0x1ab19f8 @current_value=1>, @name=:book, @schema=#<Dupe::Model::Schema:0x1ab1a0c @after_create_callbacks=[#<Proc:0x01ac8338@./lib/dupe/schema.rb:40>, #<Proc:0x01ac8338@./lib/dupe/schema.rb:40>, #<Proc:0x01ac8338@./lib/dupe/schema.rb:40>], @attribute_templates={}>>
+    >> b = Dupe.create :book
+    => <#Duped::Book author="book 1 author" title="book 1 title" genre="book 1 genre" id=1>
+    >> b2 = Dupe.create :book, :title => 'Rooby'
+    => <#Duped::Book author="book 2 author" title="Rooby" genre="book 2 genre" id=2>
+
 v0.4.4
   Dupe.define will now create resource mocks for find(:all) and find(<id>) honoring ActiveResource self.site prefix's. 
 

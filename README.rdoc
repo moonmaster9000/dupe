@@ -263,7 +263,7 @@ Now, let's create a book:
 
 === Uniquify attributes
 
-If you'd just like to make sure that some attributes get a unique value (probably), then you can use the uniquify
+If you'd just like to make sure that some attributes get a unique value, then you can use the uniquify
 method:
 
   irb# Dupe.define :book do |attrs|

@@ -5,12 +5,65 @@ describe Dupe do
     Dupe.reset
   end
   
+  describe "#sequences" do 
+    it "should be empty on initialization" do
+      Dupe.sequences.should == {}
+    end
+  end
+
+  describe "#sequence" do 
+    it "should require a sequence name and a block" do
+      proc {Dupe.sequence}.should raise_error(ArgumentError)
+      proc {Dupe.sequence :name}.should_not raise_error
+      proc {Dupe.sequence(:name) {}}.should raise_error(ArgumentError, "Your block must accept a single parameter")
+      proc {Dupe.sequence(:name) {|n| n}}.should_not raise_error
+    end
+
+    it "should store the sequence in a sequences hash" do
+      Dupe.sequences.should be_empty
+
+      Dupe.sequence :email do |n|
+        "email-#{n}@address.com"
+      end
+
+      Dupe.sequences.should_not be_empty
+      Dupe.sequences.keys.include?(:email).should == true
+      Dupe.sequences[:email].should be_kind_of(Sequence)
+    end
+  end
+
+  describe "#next" do 
+    it "should require a sequence name" do 
+      Dupe.sequence :email do |n|
+        "email-#{n}@address.com"
+      end
+
+      proc {Dupe.next}.should raise_error(ArgumentError)
+      proc {Dupe.next :title}.should raise_error(ArgumentError, 'Unknown sequence ":title"')
+      Dupe.next(:email).should == "email-1@address.com"
+      Dupe.next(:email).should == "email-2@address.com"
+    end
+  end
+  
   describe "reset" do
     it "should call reset_models, reset_database, and reset_network" do
       Dupe.should_receive(:reset_models).once
       Dupe.should_receive(:reset_database).once
       Dupe.should_receive(:reset_network).once
+      Dupe.should_receive(:reset_sequences).once
       Dupe.reset
+    end
+  end
+
+  describe "reset_sequences" do
+    it "should reset the sequences to an empty hash" do
+      Dupe.sequences.should == {}
+      Dupe.sequence :email do |n|
+        n
+      end
+      Dupe.sequences.should_not be_empty
+      Dupe.reset_sequences
+      Dupe.sequences.should == {}
     end
   end
   

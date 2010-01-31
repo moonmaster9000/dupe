@@ -4,11 +4,10 @@ There are lots of great tools out there to ease the burden of prototyping Active
 
 But what about prototyping ActiveResource records? That's where Dupe steps in.  
 
-
 == Motivation 
 
-Dupe is ideally suited for cuking the client side of a service-oriented (ActiveResource) application.
-
+If you're going to create a service-oriented rails app with ActiveResource, why not cuke the front end first? 
+Let the behavior of the front-end drive the services you build on the backend. That's exactly what Dupe makes possible. 
 
 == Installation
 
@@ -18,7 +17,7 @@ If you want to install this for use in something other than a rails project, sim
 
 If you're going to use this in a rails project, add this to your cucumber.rb environment (config/environments/cucumber.rb)
   
-  config.gem 'dupe', :lib => 'dupe', :version => '>=0.4.0'
+  config.gem 'dupe'
   
 Then run this rake task to install the gem: 
 
@@ -124,16 +123,14 @@ Notice that by using the plural form of the model name, we ensure that we receiv
 
 ==Finding or Creating Resources
 
-You might have seen this one coming: 
+You might have seen this one coming. 
 
-  irb# Dupe.find :genre
-  Dupe::Database::TableDoesNotExistError: The table ':genre' does not exist.
-  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/database.rb:30:in `select'
-  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/dupe.rb:295:in `find'
-  	from (irb):40
-  	
+Let's assume no genres currently exist. If we call the "find_or_create" method, it will create a new :genre.  
+
   irb# Dupe.find_or_create :genre
     ==> <#Duped::Genre id=1>
+
+If we call it again, it will find the :genre we already created:
 
   irb# Dupe.find_or_create :genre
     ==> <#Duped::Genre id=1>
@@ -280,6 +277,29 @@ any records it creates:
     ==> <#Duped::Book author="book 2 author" title="Rooby" genre="book 2 genre" id=2>
 
 
+=== Sequences
+
+The "uniquify" method is great if don't care too much about the format of the values it creates. But what if you'd like to ensure 
+that the value of an attribute conforms to a specific format? 
+
+  irb# Dupe.sequence :email do |n|
+   --#   "email-#{n}@somewhere.com"
+   --# end
+  
+  irb# Dupe.define :user do |user|
+   --#   user.uniquify :name 
+   --#   user.email do 
+   --#     Dupe.next :email
+   --#   end
+   --# end
+  
+  irb# Dupe.create :user
+    ==> <#Duped::User name="user 1 name" id=1 email="email-1@somewhere.com">
+  
+  irb# Dupe.create :user
+    ==> <#Duped::User name="user 2 name" id=2 email="email-2@somewhere.com">
+
+
 === Callbacks
 
 Suppose we'd like to make sure that our books get a unique label. We can accomplish that with an after_create callback:
@@ -300,6 +320,9 @@ Suppose we'd like to make sure that our books get a unique label. We can accompl
 
   irb# b = Dupe.create :book, :title => 'Rooby on Rails'
     ==> <#Duped::Book author=nil label="rooby-on-rails--1" title="Rooby on Rails" publish_date=nil id=1 isbn=842518>
+
+
+
 
 
 = ActiveResource

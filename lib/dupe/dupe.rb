@@ -5,6 +5,7 @@ class Dupe
   class << self
     
     attr_reader :models #:nodoc:
+    attr_reader :sequences #:nodoc:
     attr_reader :database #:nodoc:
     
     # set this to "true" if you Dupe to spit out mocked requests
@@ -385,6 +386,15 @@ class Dupe
         results
       end
     end
+
+    def sequence(name, &block)
+      sequences[name.to_sym] = Sequence.new 1, block
+    end
+
+    def next(name)
+      raise ArgumentError, "Unknown sequence \":#{name}\"" unless sequences.has_key?(name)
+      sequences[name].next
+    end
         
     def models #:nodoc:
       @models ||= {}
@@ -397,14 +407,23 @@ class Dupe
     def database #:nodoc:
       @database ||= Dupe::Database.new
     end
+
+    def sequences #:nodoc:
+      @sequences ||= {}
+    end
     
-    # clears out all model definitions and database records / tables.
+    # clears out all model definitions, sequences, and database records / tables.
     def reset
       reset_models
       reset_database
       reset_network
+      reset_sequences
     end
     
+    def reset_sequences
+      @sequences = {}
+    end
+
     def reset_models
       @models = {}
     end

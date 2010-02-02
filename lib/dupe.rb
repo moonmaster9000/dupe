@@ -1,3 +1,4 @@
+require 'dupe/hash_pruner'
 require 'active_resource'
 require 'active_resource/http_mock'
 require 'dupe/singular_plural_detection'

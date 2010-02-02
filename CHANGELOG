@@ -1,3 +1,6 @@
+v0.4.6
+  Dupe.sequence! works just like Factory Girl sequences. Check the readme. 
+
 v0.4.5
   Dupe.define now supports a uniquify method:
     

@@ -39,12 +39,12 @@ class Dupe
           when NilClass
             raise ResourceNotFoundError, "Failed with 404: the request '#{url}' returned nil." 
           when Dupe::Database::Record
-            resp = resp.to_xml(:root => resp.__model__.name.to_s)
+            resp = resp.to_xml_safe(:root => resp.__model__.name.to_s)
           when Array
             if resp.empty?
               resp = [].to_xml :root => 'results'
             else
-              resp = resp.to_xml(:root => resp.first.__model__.name.to_s.pluralize)
+              resp = resp.map {|r| HashPruner.prune(r)}.to_xml(:root => resp.first.__model__.name.to_s.pluralize)
             end
         end
         

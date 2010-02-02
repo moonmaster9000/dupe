@@ -108,7 +108,7 @@ describe Dupe::Network::Mock do
         mock.mocked_response('/authors.xml')
         Dupe.network.log.requests.length.should == 1
       end
-    end    
+    end 
   end
   
   

@@ -1,5 +1,30 @@
+v0.4.7
+  Created a hash pruning algorithm that overcomes ActiveSupport's to_xml limitations. 
+  Basically, this allows you to have cyclicly referential records rendered into xml. 
+  
+  For example: 
+  
+    dupe_gem = Dupe.create :gem, :name => 'dupe'
+    matt = Dupe.create :author, :name => 'matt'
+    dupe_gem.author = matt
+    matt.gems = [dupe_gem]
+    
+  In Dupe's previous incarnations, if you had called "/authors/1.xml", you would have gotten a
+  "stack level too deep" error? Why? Because ActiveSupport's to_xml method for Hash objects
+  can't handle cyclical stuctures (in this case, dupe_gem has an author matt, who has a gem dupe_gem, 
+  which has an author matt, who has a gem dupe_gem, etc. etc. etc. second star to the left straight
+  on till morning).
+  
+  So I've written a HashPruner that performs a di-graph cycle detection / elimination operation
+  on any hash. dupe now adds a "to_xml_safe" method to hashes, which will essentially run the hash
+  in question through the pruner before passing itself off to ActiveSupport's "to_xml". 
+  
+  So now, "/authors/1.xml" will not error out on cyclical structure, but in fact return xml not unlike
+  ActiveRecord would have produced had these been actual relational database records. 
+    
+
 v0.4.6
-  Dupe.sequence! works just like Factory Girl sequences. Check the readme. 
+  Dupe.sequence works just like Factory Girl sequences. Check the README.rdoc on github. 
 
 v0.4.5
   Dupe.define now supports a uniquify method:

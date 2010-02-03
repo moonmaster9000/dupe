@@ -17,11 +17,12 @@ class HashPruner
         nil
       else
         @visited[item.object_id] = true
-        {}.tap do |new_hash|
-          item.each do |k,v|
-            new_hash[k] = prune(v)
-          end
+        new_hash = {}
+        item.each do |k,v|
+          new_hash[k] = prune(v)
         end
+        @visited.delete item.object_id
+        new_hash
       end
     else
       item

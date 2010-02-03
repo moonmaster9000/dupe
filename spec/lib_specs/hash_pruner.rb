@@ -6,6 +6,7 @@ describe HashPruner do
       clarke = {:name => "Arthur C. Clarke"}
       heinlein = {:name => "Robert Heinlein"}
       sci_fi = {:name => "Science Fiction", :authors => [clarke, heinlein]}
+      clarke[:genre] = sci_fi
       odyssey = {:name => "2001", :genre => sci_fi, :author => clarke}
       hoag = {:name => "the unpleasant profession", :genre => sci_fi, :author => heinlein}
       clarke[:books] = [odyssey]
@@ -14,6 +15,21 @@ describe HashPruner do
       HashPruner.prune(clarke).should == 
         { 
           :name=>"Arthur C. Clarke", 
+          :genre => {
+            :name => "Science Fiction",
+            :authors => [
+              {
+                :name=>"Robert Heinlein", 
+                :books=> [
+                  {
+                    :name => "the unpleasant profession",
+                    :genre => nil, 
+                    :author => nil
+                  }
+                ]
+              }
+            ]
+          },
           :books=> [
             { 
               :name => "2001",

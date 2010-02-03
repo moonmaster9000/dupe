@@ -77,13 +77,18 @@ describe Dupe::Model do
       book.id.should == 1
       book.title.should == 'Untitled'
       book.author.should == 'Anon'
-      book.label.should == 'untitled'
+      
+      # the callback shouldn't get run until the database record is inserted into the duped 'database'
+      book.label.should == nil
       
       book = @book_model.create :title => 'Rooby On Rails', :author => 'Matt Parker'
       book.__model__.name.should == :book
       book.id.should == 2
       book.title.should == 'Rooby On Rails'
-      book.label.should == 'rooby-on-rails'
+      
+      # the callback shouldn't get run until the database record is inserted into the duped 'database'
+      book.label.should == nil
+      
       book.author.should == 'Author: Matt Parker'
     end
   end

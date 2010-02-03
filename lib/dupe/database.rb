@@ -21,6 +21,7 @@ class Dupe
       end
       @tables[record.__model__.name] ||= []
       @tables[record.__model__.name] << record
+      record.__model__.run_after_create_callbacks(record)
     end
     
     # pass in a model_name (e.g., :book) and optionally a proc with 

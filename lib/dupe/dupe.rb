@@ -468,6 +468,7 @@ class Dupe
         "as the second parameter to create_and_insert."
       ) if !into || !into.kind_of?(Hash) || !into[:into]
       
+      # do we have several records to create, and are they each a hash?
       if records.kind_of?(Array) and
          records.inject(true) {|bool, r| bool and r.kind_of?(Hash)}
         [].tap do |results|
@@ -475,8 +476,11 @@ class Dupe
             results << models[into[:into]].create(record).tap {|r| database.insert r}
           end
         end
+      
+      # do we only have one record to create, and is it a hash?
       elsif records.kind_of?(Hash)
         models[into[:into]].create(records).tap {|r| database.insert r}
+      
       else
         raise ArgumentError, "You must call Dupe.create with either a hash or an array of hashes."
       end

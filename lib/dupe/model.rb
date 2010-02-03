@@ -20,9 +20,13 @@ class Dupe
         record.id = @id_sequence.next
         record.merge! default_record
         record.merge! transform(attributes)
-        @schema.after_create_callbacks.each do |callback|
-          callback.call record
-        end
+      end
+    end
+    
+    # called by the Dupe::Database#insert method
+    def run_after_create_callbacks(record)
+      @schema.after_create_callbacks.each do |callback|
+        callback.call record
       end
     end
     

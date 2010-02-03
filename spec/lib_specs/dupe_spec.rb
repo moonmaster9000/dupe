@@ -288,6 +288,25 @@ describe Dupe do
     end
   end
   
+  describe "create resources that have an after_create callback" do
+    before do
+      Dupe.define :book do |book|
+        book.uniquify :title, :author, :genre
+      
+        book.after_create do |b|
+          b.label = b.title.downcase.gsub(/\ +/, '-') unless b.label
+        end
+      end
+    end
+    
+    it "should create a label based on the title if a label is passed in during the create call" do
+      b = Dupe.create :book, :title => 'Testing Testing'
+      b.label.should == 'testing-testing'
+      b = Dupe.create :book, :title => 'Testing Testing', :label => 'testbook'
+      b.label.should == 'testbook'
+    end
+  end
+  
   describe "find" do
     before do
       Dupe.define :book

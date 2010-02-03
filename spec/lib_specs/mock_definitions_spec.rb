@@ -26,7 +26,7 @@ describe "Mock Definition Methods" do
       Dupe.network.mocks[:get].last.should == mock
       Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.xml}
       book = Dupe.find(:book)
-      Dupe.network.request(:get, '/books/rooby.xml').should == book.to_xml(:root => 'book')
+      Dupe.network.request(:get, '/books/rooby.xml').should == book.to_xml_safe(:root => 'book')
     end
   end
 end

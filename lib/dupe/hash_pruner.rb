@@ -14,7 +14,7 @@ class HashPruner
       item.map {|i| prune(i)}.reject {|v| v==nil}
     elsif item.kind_of? Hash
       if @visited[item.object_id]
-        nil
+        item.dup.delete_if {|k,v| v.kind_of?(Hash) || v.kind_of?(Array)}
       else
         @visited[item.object_id] = true
         new_hash = {}

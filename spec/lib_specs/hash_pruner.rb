@@ -19,12 +19,19 @@ describe HashPruner do
             :name => "Science Fiction",
             :authors => [
               {
+                :name=>"Arthur C. Clarke"
+              },
+              {
                 :name=>"Robert Heinlein", 
                 :books=> [
                   {
                     :name => "the unpleasant profession",
-                    :genre => nil, 
-                    :author => nil
+                    :genre => {
+                      :name => "Science Fiction"
+                    }, 
+                    :author => {
+                      :name => "Robert Heinlein"
+                    }
                   }
                 ]
               }
@@ -37,18 +44,27 @@ describe HashPruner do
                 :name => "Science Fiction",
                 :authors => [
                   {
+                    :name => "Arthur C. Clarke"                    
+                  },
+                  {
                     :name=>"Robert Heinlein", 
                     :books=> [
                       {
                         :name => "the unpleasant profession",
-                        :genre => nil, 
-                        :author => nil
+                        :genre => {
+                          :name => "Science Fiction"
+                        }, 
+                        :author => {
+                          :name => "Robert Heinlein"
+                        }
                       }
                     ]
                   }
                 ]
               },
-              :author => nil 
+              :author => {
+                :name => "Arthur C. Clarke"
+              } 
             }
           ]
         }

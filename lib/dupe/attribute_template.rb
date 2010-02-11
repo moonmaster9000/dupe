@@ -63,7 +63,7 @@ class Dupe
             v = (@transformer ? @transformer.call(value) : value)
           end
           
-          return @name, v.dup
+          return @name, (v && v.respond_to?(:dup) ? v.dup : v)
         end
       end
     end

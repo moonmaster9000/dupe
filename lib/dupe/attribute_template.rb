@@ -63,7 +63,7 @@ class Dupe
             v = (@transformer ? @transformer.call(value) : value)
           end
           
-          return @name, v
+          return @name, v.dup
         end
       end
     end

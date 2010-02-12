@@ -433,4 +433,32 @@ describe Dupe do
     end
     
   end
+  
+  describe "creating resources should not change definitions (regression test)" do
+    before do
+      Dupe.define :book do |book|
+        book.authors []
+        book.genre do
+          Dupe.find_or_create :genre, :name => 'Sci-fi'
+        end
+      end
+    end
+    
+    it "should not add a record to the definition when the default value is an array" do
+      b = Dupe.create :book
+      a = Dupe.create :author
+      b.authors << a
+      b.authors.include?(a).should be_true
+      b2 = Dupe.create :book
+      b2.authors.should be_empty
+    end
+    
+    it "should not dupe the value returned by a lazy attribute" do
+      b = Dupe.create :book
+      b2 = Dupe.create :book
+      b.genre.should == b2.genre
+      b.genre.name = 'Science Fiction'
+      b2.genre.name.should == 'Science Fiction'
+    end
+  end
 end

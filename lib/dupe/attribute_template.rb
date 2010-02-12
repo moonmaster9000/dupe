@@ -58,12 +58,12 @@ class Dupe
         #     ===> :title, 'test'
         def generate(value=NilValue)
           if value == NilValue
-            v = @default.respond_to?(:call) ? @default.call : @default
+            v = @default.respond_to?(:call) ? @default.call : (@default.dup rescue @default)
           else
             v = (@transformer ? @transformer.call(value) : value)
           end
           
-          return @name, (v && v.respond_to?(:dup) ? v.dup : v)
+          return @name, v
         end
       end
     end

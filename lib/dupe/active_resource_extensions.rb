@@ -21,5 +21,21 @@ module ActiveResource #:nodoc:
       end
       format.decode(response.body)
     end
+    
+    def post(path, body = '', headers = {}) #:nodoc:
+      begin
+        request(:post, path, body.to_s, build_request_headers(headers, :post))
+        
+      # if the request threw an exception
+      rescue
+        mocked_response = Dupe.network.request(:post, path)
+        ActiveResource::HttpMock.respond_to do |mock|
+          mock.post path, {}, mocked_response
+        end
+        request(:post, path, body.to_s, build_request_headers(headers, :post))
+        ActiveResource::HttpMock.delete_mock(:post, path)
+        end
+      end
+    end    
   end
 end

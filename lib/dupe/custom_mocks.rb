@@ -100,3 +100,7 @@
 def Get(url_pattern, &block)
   Dupe.network.define_service_mock :get, url_pattern, block
 end
+
+def Post(url_pattern, &block)
+  Dupe.network.define_service_mock :post, url_pattern, block
+end

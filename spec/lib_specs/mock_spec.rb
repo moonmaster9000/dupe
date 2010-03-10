@@ -108,7 +108,23 @@ describe Dupe::Network::Mock do
         mock.mocked_response('/authors.xml')
         Dupe.network.log.requests.length.should == 1
       end
-    end 
+    end
+    
+    describe "on a mock object whose response returns a location of a new record" do
+      it "should convert the new post to xml" do        
+        Dupe.create :author  
+        mock = Dupe::Network::Mock.new :post, %r{/authors\.xml$}, proc {Dupe.find(:authors) {|a| a.id == 1}}
+        mock.mocked_response('/authors.xml').should == Dupe.find(:authors) {|a| a.id == 1}.to_xml(:root => 'authors')
+      end
+      
+      it "should add a request to the Dupe::Network#log" do
+        Dupe.create :author
+        mock = Dupe::Network::Mock.new :post, %r{/authors\.xml$}, proc {Dupe.find(:authors) {|a| a.id == 1}}
+        Dupe.network.log.requests.length.should == 0
+        mock.mocked_response('/authors.xml')
+        Dupe.network.log.requests.length.should == 1
+      end
+    end
   end
   
   

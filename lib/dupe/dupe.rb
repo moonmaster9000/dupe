@@ -178,7 +178,7 @@ class Dupe
             :get, 
             %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
             proc {|id| Dupe.find(:#{model_name}) {|resource| resource.id == id.to_i}}
-          )  
+          )
         }
         eval(mocks)
       end
@@ -385,6 +385,10 @@ class Dupe
       else
         results
       end
+    end
+    
+    def destroy(model_name, attributes={})
+      database.delete model_name.to_s.singularize.to_sym, attributes
     end
 
     def sequence(name, &block)

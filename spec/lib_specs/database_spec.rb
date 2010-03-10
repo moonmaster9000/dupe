@@ -90,6 +90,41 @@ describe Dupe::Database do
     end
   end
   
+  describe "delete" do
+    before do
+      Dupe.define :book
+      @book = Dupe.models[:book].create :title => 'test'
+      @database = Dupe::Database.new
+      @database.insert @book
+    end
+    
+    it "should require a valid model name" do
+      proc { @database.delete }.should raise_error(ArgumentError)
+      proc { @database.delete :undefined_model }.should raise_error(
+        Dupe::Database::TableDoesNotExistError,
+        "The table ':undefined_model' does not exist."
+      )
+      proc { @database.delete :book }.should_not raise_error
+    end
+    
+    it "should accept a conditions proc" do
+      proc { @database.delete :book, proc {|c| true} }.should_not raise_error
+    end
+    
+    it "should verify that the conditions proc accepts a single parameter" do
+      proc { @database.delete :book, proc {true} }.should raise_error(
+        Dupe::Database::InvalidQueryError,
+        "There was a problem with your select conditions. Please consult the API."
+      )
+    end
+    
+    it "should delete the requested items and return true" do
+      results = @database.delete :book, proc {|b| b.title == 'test' }
+      results = true
+      @database.tables[:book].length.should == 0
+    end
+  end
+  
   describe "create_table" do
     it "should create a database table if one doesn't already exist" do
       @database = Dupe::Database.new

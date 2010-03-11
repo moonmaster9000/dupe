@@ -120,7 +120,7 @@ describe Dupe::Database do
     
     it "should delete the requested items and return true" do
       results = @database.delete :book, proc {|b| b.title == 'test' }
-      results = true
+      results.should == true
       @database.tables[:book].length.should == 0
     end
   end

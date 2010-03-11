@@ -28,9 +28,9 @@ module ActiveResource #:nodoc:
         
       # if the request threw an exception
       rescue
-        mocked_response = Dupe.network.request(:post, path)
+        mocked_response = Dupe.network.request(:post, path, body)
         ActiveResource::HttpMock.respond_to do |mock|
-          mock.post(path, {}, mocked_response)
+          mock.post(path, {}, mocked_response, 201, "Location" => path )
         end
         response = request(:post, path, body.to_s, build_request_headers(headers, :post))
         ActiveResource::HttpMock.delete_mock(:post, path)

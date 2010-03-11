@@ -12,7 +12,7 @@ class Dupe
       VERBS.each { |verb| @mocks[verb] = [] }
     end
         
-    def request(verb, url, body)
+    def request(verb, url, body=nil)
       validate_request_type verb
       match(verb, url).mocked_response(url)
     end

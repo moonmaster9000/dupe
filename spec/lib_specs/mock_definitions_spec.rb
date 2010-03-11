@@ -42,14 +42,12 @@ describe "Mock Definition Methods" do
       Dupe.network.mocks[:post].should be_empty
       Dupe.network.mocks[:post].length.should == 0
       
-      mock = Post %r{/books.xml} do |label, post_data|
-        b = Dupe.find(:book) {|b| b.label == label}
-        
+      mock = Post %r{/books.xml} do |post_data|
         if invalid(post_data)
           raise Dupe::InvalidPost
         end
         
-        b.merge! post_data
+        Dupe.create(:book, post_data)
       end
       
       Dupe.network.mocks[:post].length.should == 1

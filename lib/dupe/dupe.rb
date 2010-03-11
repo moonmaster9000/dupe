@@ -182,7 +182,6 @@ class Dupe
           network.define_service_mock(
             :post, 
             %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.xml$}, 
-            {}
             proc { Dupe.create(:#{model_name.to_s.pluralize}) }
           )
           network.define_service_mock(

@@ -14,12 +14,31 @@ class Dupe
         
     def request(verb, url, body=nil)
       validate_request_type verb
-      match(verb, url).mocked_response(url)
+      match(verb, url).mocked_response(url, body)
     end
     
     def define_service_mock(verb, url_pattern, response_proc=nil)
-      Mock.new(verb, url_pattern, response_proc).tap do |mock|
-        @mocks[verb] << mock
+      case verb
+      when :get
+        GetMock.new(verb, url_pattern, response_proc).tap do |mock|
+          @mocks[verb] << mock
+        end
+      when :post
+        PostMock.new(verb, url_pattern, response_proc).tap do |mock|
+          @mocks[verb] << mock
+        end
+      when :put
+        PutMock.new(verb, url_pattern, response_proc).tap do |mock|
+          @mocks[verb] << mock
+        end
+      when :delete
+        DeleteMock.new(verb, url_pattern, response_proc).tap do |mock|
+          @mocks[verb] << mock
+        end
+      else
+        Mock.new(verb, url_pattern, response_proc).tap do |mock|
+          @mocks[verb] << mock
+        end
       end
     end
     

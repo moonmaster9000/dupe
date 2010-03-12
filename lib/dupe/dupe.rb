@@ -182,12 +182,7 @@ class Dupe
           network.define_service_mock(
             :post, 
             %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.xml$}, 
-            proc { Dupe.create(:#{model_name.to_s.pluralize}) }
-          )
-          network.define_service_mock(
-            :delete, 
-            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
-            proc {|id| Dupe.destroy(:#{model_name}) {|resource| resource.id == id.to_i}}
+            proc { |post_body| Dupe.create(:#{model_name.to_s}, post_body) }
           )
         }
         eval(mocks)
@@ -257,12 +252,6 @@ class Dupe
       define model_name unless model_exists(model_name)
       records = records.kind_of?(Array) ? records.map {|r| r.symbolize_keys} : records.symbolize_keys!    
       create_and_insert records, :into => model_name
-    end
-    
-    def post(model_name, records={})
-      model_name = model_name.to_s.singularize.to_sym
-      define model_name unless model_exists(model_name)
-      records = records.kind_of?(Array) ? records.map {|r| r.symbolize_keys} : records.symbolize_keys!    
     end
 
     # You can use this method to quickly stub out a large number of resources. For example: 
@@ -528,4 +517,8 @@ class Dupe
       end
     end
   end
+end
+
+class Dupe
+  class UnprocessableEntity < StandardError; end
 end

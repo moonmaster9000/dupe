@@ -29,37 +29,37 @@ describe ActiveResource::Connection do
   
   describe "#post" do
     before do
-      @book = Dupe.post :book, :label => 'rooby', :title => 'Rooby'
+      @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
+      @book.delete(:id)
       class Book < ActiveResource::Base
         self.site = ''
       end
     end
     
     it "should pass a request off to the Dupe network if the original request failed" do
-      Dupe.network.should_receive(:request).with(:post, '/books.xml', @book.to_xml(:root => 'book')).once.and_return(@book.to_xml(:root => 'book'))
+      Dupe.network.should_receive(:request).with(:post, '/books.xml', Hash.from_xml(@book.to_xml(:root => 'book'))["book"] ).once
       book = Book.create({:label => 'rooby', :title => 'Rooby'})
     end
     
     it "should parse the xml and turn the result into active resource objects" do
       book = Book.create({:label => 'rooby', :title => 'Rooby'})
-      book.id.should == '1'
+      book.id.should == 2
       book.title.should == 'Rooby'
       book.label.should == 'rooby'
     end
-  end
-  
-  describe "#delete" do
-    before do
-      @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
-      class Book < ActiveResource::Base
-        self.site = ''
-      end
-    end
     
-    it "should pass a request off to the Dupe network if the original request failed" do
-      book = Book.find(1)
-      Dupe.network.should_receive(:request).with(:delete, '/books/1.xml').once.and_return(nil)
-      book.destroy
+    it "should make ActiveResource throw an unprocessable entity exception if our Post mock throws a Dupe::UnprocessableEntity exception" do
+      Post %r{/books\.xml} do |post_data|
+        raise Dupe::UnprocessableEntity.new(:title => "must be present.") unless post_data["title"]
+        Dupe.create :book, post_data
+      end
+      
+      b = Book.create
+      b.new?.should be_true
+      b.errors.errors.should_not be_empty
+      b = Book.create(:title => "hello")
+      b.new?.should be_false
+      b.errors.should be_empty
     end
   end
 end

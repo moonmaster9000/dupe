@@ -18,6 +18,7 @@ class Dupe
     end
     
     def define_service_mock(verb, url_pattern, response_proc=nil)
+      validate_request_type verb
       case verb
       when :get
         GetMock.new(verb, url_pattern, response_proc).tap do |mock|
@@ -25,20 +26,10 @@ class Dupe
         end
       when :post
         PostMock.new(verb, url_pattern, response_proc).tap do |mock|
-          @mocks[verb] << mock
-        end
-      when :put
-        PutMock.new(verb, url_pattern, response_proc).tap do |mock|
-          @mocks[verb] << mock
-        end
-      when :delete
-        DeleteMock.new(verb, url_pattern, response_proc).tap do |mock|
-          @mocks[verb] << mock
+          @mocks[verb].unshift mock
         end
       else
-        Mock.new(verb, url_pattern, response_proc).tap do |mock|
-          @mocks[verb] << mock
-        end
+        raise StandardError, "Dupe does not (yet) support mocking #{verb.to_s.upcase} requests."
       end
     end
     

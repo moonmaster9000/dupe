@@ -76,44 +76,13 @@ class Dupe
         when NilClass
           raise ResourceNotFoundError, "Failed with 404: the request '#{url}' returned nil." 
         when Dupe::Database::Record
+          new_path = "/#{resp.__model__.name.to_s.pluralize}/#{resp.id}.xml"
           resp = resp.to_xml_safe(:root => resp.__model__.name.to_s)
+          Dupe.network.log.add_request @verb, url, resp
+          return resp, new_path
+        else
+          raise StandardError, "Unknown PostMock Response. Your Post intercept mocks must return a Duped resource object or nil"
         end
-        Dupe.network.log.add_request @verb, url, resp
-        resp
-      end
-    end
-  end
-end
-
-class Dupe
-  class Network
-    class PutMock < Mock #:nodoc:
-      def process_response(resp, url)
-        case resp
-        when NilClass
-          raise ResourceNotFoundError, "Failed with 404: the request '#{url}' returned nil." 
-        when Dupe::Database::Record
-          resp = resp.to_xml_safe(:root => resp.__model__.name.to_s)
-        end
-        Dupe.network.log.add_request @verb, url, resp
-        resp
-      end
-    end
-  end
-end
-
-class Dupe
-  class Network
-    class DeleteMock < Mock #:nodoc:
-      def process_response(resp, url)
-        case resp
-        when NilClass
-          raise ResourceNotFoundError, "Failed with 404: the request '#{url}' returned nil." 
-        when Dupe::Database::Record
-          resp = resp.to_xml_safe(:root => resp.__model__.name.to_s)
-        end
-        Dupe.network.log.add_request @verb, url, resp
-        resp
       end
     end
   end

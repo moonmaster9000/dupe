@@ -51,14 +51,10 @@ describe Dupe::Network do
       @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
       @network.request(:get, '/greeting').should == 'hello'
       
-      @network.define_service_mock :post, %r{/greeting$}, proc { "hello" }
-      @network.request(:post, '/greeting', 'body').should == "hello"
-      
-      @network.define_service_mock :put, %r{/greeting$}, proc { "hello" }
-      @network.request(:put, '/greeting', 'body').should == "hello"
-      
-      @network.define_service_mock :delete, %r{/greeting$}, proc { "hello" }
-      @network.request(:delete, '/greeting', 'body').should == "hello"
+      @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
+      resp, url = @network.request(:post, '/greeting', {} )
+      resp.should == Dupe.find(:greeting).to_xml_safe(:root => 'greeting')
+      url.should == "/greetings/1.xml"
     end
   end
   
@@ -72,19 +68,15 @@ describe Dupe::Network do
       proc { @network.define_service_mock :invalid_rest_verb, // }.should raise_error(Dupe::Network::UnknownRestVerbError)
       proc { @network.define_service_mock :get, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
       proc { @network.define_service_mock :post, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { @network.define_service_mock :put, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { @network.define_service_mock :delete, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
+
     end
     
     it "should require a valid Regexp url pattern" do
       proc { @network.define_service_mock :get, 'not a regular expression' }.should raise_error(ArgumentError)
       proc { @network.define_service_mock :post, 'not a regular expression' }.should raise_error(ArgumentError)
-      proc { @network.define_service_mock :put, 'not a regular expression' }.should raise_error(ArgumentError)
-      proc { @network.define_service_mock :delete, 'not a regular expression' }.should raise_error(ArgumentError)
       proc { @network.define_service_mock :get, // }.should_not raise_error
       proc { @network.define_service_mock :post, // }.should_not raise_error
-      proc { @network.define_service_mock :put, // }.should_not raise_error
-      proc { @network.define_service_mock :delete, // }.should_not raise_error
+
     end
     
     it "should create and return a new get service mock when given valid parameters" do
@@ -110,30 +102,7 @@ describe Dupe::Network do
       @network.mocks[:post].length.should == 1
       @network.mocks[:post].first.should == mock
     end
-    
-    it "should create and return a new put service mock when given valid parameters" do
-      verb = :put
-      pattern = //
-      response = proc { 'test' }
-      @network.mocks[:put].should be_empty
-      mock = @network.define_service_mock verb, pattern, response
-      @network.mocks[:put].should_not be_empty
-      @network.mocks[:put].first.class == "PutMock"
-      @network.mocks[:put].length.should == 1
-      @network.mocks[:put].first.should == mock
-    end
-    
-    it "should create and return a new delete service mock when given valid parameters" do
-      verb = :delete
-      pattern = //
-      response = proc { 'test' }
-      @network.mocks[:delete].should be_empty
-      mock = @network.define_service_mock verb, pattern, response
-      @network.mocks[:delete].should_not be_empty
-      @network.mocks[:delete].first.class == "DeleteMock"
-      @network.mocks[:delete].length.should == 1
-      @network.mocks[:delete].first.should == mock
-    end
+
     
   end
   

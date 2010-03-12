@@ -39,50 +39,20 @@ describe "Mock Definition Methods" do
     
     it "should create and return a Dupe::Network::Mock of type :post" do
       @book = Dupe.create :book, :label => 'rooby'
-      Dupe.network.mocks[:post].should be_empty
-      Dupe.network.mocks[:post].length.should == 0
+      Dupe.network.mocks[:post].should_not be_empty
+      Dupe.network.mocks[:post].length.should == 1
       
-      mock = Post %r{/books.xml} do |post_data|
-        if invalid(post_data)
-          raise Dupe::InvalidPost
-        end
-        
+      mock = Post %r{/books\.xml} do |post_data|
         Dupe.create(:book, post_data)
       end
       
-      Dupe.network.mocks[:post].length.should == 1
-      Dupe.network.mocks[:post].last.should == mock
-      Dupe.network.mocks[:post].last.url_pattern.should == %r{/books.xml}
-      book_post = Dupe.post(:book, {:title => "Rooby", :label => "rooby"})
+      Dupe.network.mocks[:post].length.should == 2
+      Dupe.network.mocks[:post].first.should == mock
+      Dupe.network.mocks[:post].first.url_pattern.should == %r{/books\.xml}
+      book_post = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
+      book_post.delete(:id)
       book_response = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
-      Dupe.network.request(:post, '/books.xml', book_post).should == book_response.to_xml_safe(:root => 'book')
-    end
-  end
-  
-  describe "Delete" do    
-    it "should require a url pattern that is a regex" do
-      proc { Delete() }.should raise_error(ArgumentError)
-      proc { Delete 'not a regexp' }.should raise_error(ArgumentError)
-      proc { Delete %r{/some_url} }.should_not raise_error
-    end
-    
-    it "should create and return a Dupe::Network::Mock of type :delete" do
-      Dupe.network.mocks[:delete].should be_empty
-      Dupe.network.mocks[:delete].length.should == 0
-      @book = Dupe.create :book, :label => 'rooby'
-      Dupe.network.mocks[:get].each {|x| puts x.url_pattern}
-      Dupe.network.mocks[:get].should_not be_empty
-      Dupe.network.mocks[:get].length.should == 2
-      
-      mock = Delete %r{/books/([^&]+)\.xml} do |label|
-        b = Dupe.find(:book) {|b| b.label == label}
-        b.destroy
-      end
-      
-      Dupe.network.mocks[:delete].length.should == 2
-      Dupe.network.mocks[:delete].last.should == mock
-      Dupe.network.mocks[:delete].last.url_pattern.should == %r{/books/([^&]+)\.xml}
-      Dupe.network.request(:delete, '/books/rooby.xml').should == book.to_xml_safe(:root => 'book')
+      Dupe.network.request(:post, '/books.xml', book_post).should == [Dupe.find(:book) {|b| b.id == 4}.to_xml_safe(:root => 'book'), "/books/4.xml"]
     end
   end
 end

@@ -1,21 +1,21 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-describe Dupe::Network::GetMock do
+describe Dupe::Network::Mock do
   before do
     Dupe.reset
   end
   
   describe "new" do
     it "should require a valid REST type" do
-      proc { Dupe::Network::GetMock.new :unknown, /\//, proc {} }.should raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { Dupe::Network::GetMock.new :get,     /\//, proc {} }.should_not raise_error
-      proc { Dupe::Network::GetMock.new :post,    /\//, proc {} }.should_not raise_error
-      proc { Dupe::Network::GetMock.new :put,     /\//, proc {} }.should_not raise_error
-      proc { Dupe::Network::GetMock.new :delete,  /\//, proc {} }.should_not raise_error
+      proc { Dupe::Network::Mock.new :unknown, /\//, proc {} }.should raise_error(Dupe::Network::UnknownRestVerbError)
+      proc { Dupe::Network::Mock.new :get,     /\//, proc {} }.should_not raise_error
+      proc { Dupe::Network::Mock.new :post,    /\//, proc {} }.should_not raise_error
+      proc { Dupe::Network::Mock.new :put,     /\//, proc {} }.should_not raise_error
+      proc { Dupe::Network::Mock.new :delete,  /\//, proc {} }.should_not raise_error
     end
     
     it "should require the url be a kind of regular expression" do
-      proc { Dupe::Network::GetMock.new :get, '', proc {} }.should raise_error(
+      proc { Dupe::Network::Mock.new :get, '', proc {} }.should raise_error(
         ArgumentError,
         "The URL pattern parameter must be a type of regular expression."
       )
@@ -24,7 +24,7 @@ describe Dupe::Network::GetMock do
     it "should set the @verb, @url, and @response parameters accordingly" do
       url_pattern = /\//
       response = proc {}
-      mock = Dupe::Network::GetMock.new :get, url_pattern, response
+      mock = Dupe::Network::Mock.new :get, url_pattern, response
       mock.verb.should == :get
       mock.url_pattern.should == url_pattern
       mock.response.should == response
@@ -35,10 +35,16 @@ describe Dupe::Network::GetMock do
     it "should determine if a given string matches the mock's url pattern" do
       url = %r{/blogs/(\d+).xml}
       response = proc {}
-      mock = Dupe::Network::GetMock.new :get, url, response
+      mock = Dupe::Network::Mock.new :get, url, response
       mock.match?('/blogs/1.xml').should == true
       mock.match?('/bogs/1.xml').should == false
     end
+  end
+end
+
+describe Dupe::Network::GetMock do
+  before do
+    Dupe.reset
   end
   
   describe "mocked_response" do
@@ -109,7 +115,15 @@ describe Dupe::Network::GetMock do
         Dupe.network.log.requests.length.should == 1
       end
     end
-    
+  end
+end
+
+describe Dupe::Network::PostMock do
+  before do
+    Dupe.reset
+  end
+  
+  describe "mocked_response" do
     describe "on a mock object whose response returns a location of a new record" do
       it "should convert the new post to xml" do        
         Dupe.define :author  
@@ -128,6 +142,4 @@ describe Dupe::Network::GetMock do
       end
     end
   end
-  
-  
 end

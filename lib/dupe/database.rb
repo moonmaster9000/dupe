@@ -24,21 +24,6 @@ class Dupe
       record.__model__.run_after_create_callbacks(record)
     end
     
-    def delete(model_name, conditions=nil)
-      raise TableDoesNotExistError, "The table ':#{model_name}' does not exist." unless @tables[model_name]
-      raise(
-        InvalidQueryError, 
-        "There was a problem with your select conditions. Please consult the API."
-      ) if conditions and (!conditions.kind_of?(Proc) || conditions.arity != 1)
-      if !conditions
-        @tables.delete(model_name)
-        return true
-      else
-        @tables[model_name].delete_if {|r| conditions.call(r)}
-        return true
-      end 
-    end
-    
     # pass in a model_name (e.g., :book) and optionally a proc with 
     # conditions (e.g., {|b| b.genre == 'Science Fiction'})
     # and recieve a (possibly empty) array of results

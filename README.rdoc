@@ -374,6 +374,10 @@ Similarly:
 
 Dupe knew how to handle simple find by id and find :all lookups from ActiveResource. But what about other requests we might potentially make? 
 
+===GET requests
+
+In this section, you'll learn how to mock custom GET requests.
+
   irb# Dupe.create :author, :name => 'Monkey', :published => true
     ==> <#Duped::Author name="Monkey" published=true id=1>
 
@@ -384,14 +388,7 @@ Dupe knew how to handle simple find by id and find :all lookups from ActiveResou
     ==> ""
 
   irb# Author.find :all, :from => :published
-  Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors/published.xml'
-  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:32:in `match'
-  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/network.rb:17:in `request'
-  	from /Library/Ruby/Gems/1.8/gems/dupe-0.4.0/lib/dupe/active_resource_extensions.rb:15:in `get'
-  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/custom_methods.rb:57:in `get'
-  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:632:in `find_every'
-  	from /Library/Ruby/Gems/1.8/gems/activeresource-2.3.5/lib/active_resource/base.rb:582:in `find'
-  	from (irb):12
+    ==> Dupe::Network::RequestNotFoundError: No mocked service response found for '/authors/published.xml'
 
 Obviously, Dupe had no way of anticipating this possibility. However, you can create your own custom intercept mock for this: 
 
@@ -472,7 +469,66 @@ We can mock this with the following:
           </author>
         </authors>
 
+===POST requests
 
+Out of the box you get a POST intercept mock:
+
+  irb# Dupe.define :author
+
+  irb# class Author < ActiveResource::Base; self.site = ''; end
+    ==> ""
+
+  irb# Author.create :name => "CS Lewis"
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"CS Lewis", "id"=>1}, @prefix_options={}>
+  
+Author.create sent a network POST to /authors.xml and Dupe responded by creating the resource with the requested parameters:
+
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="CS Lewis" id=1>]
+    
+You can also overwrite the default POST intercept mock for your resource by using the Post method:
+
+  irb# Post %r{/authors\.xml} do |post_data|
+         raise Dupe::UnprocessableEntity.new(:name => " must be present.") unless post_data["name"]
+         Dupe.create :author, post_data
+       end
+    ==> #<Dupe::Network::PostMock:0x1a1afe4 @url_pattern=/\/authors\.xml/, @response=#<Proc:0x01a1b084@(irb):13>, @verb=:post>
+  
+Now, when you try to create an Author without a name, it will respond with the appropriate mocked errors.
+  
+  irb# Dupe.find(:authors)
+    ==> []
+  
+  irb# a = Author.create
+    ==> a = #<Author:0x1a19fb8 @attributes={}, @errors=#<ActiveResource::Errors:0x1a10bc0 @errors={"base"=>["name must be present."]}, @base=#<Author:0x1a19fb8 ...>>, @prefix_options={}>
+  
+  irb# a = a.valid?
+    ==> false
+  
+  irb# a = a.new?
+    ==> true
+    
+Because the resource would invalidate, the Dupe object is not created.
+  
+  irb# Dupe.find(:authors)
+    ==> []
+    
+When we create the Author with the required attributes, it will now be considered valid.
+    
+  irb# a = Author.create :name => "CS Lewis"
+    ==> #<Author:0x19f1edc @attributes={"name"=>"CS Lewis", "id"=>1}, @prefix_options={}>
+    
+  irb# a.valid?
+    ==> true
+    
+  irb# a.new?
+    ==> false
+    
+Now, Dupe will go ahead and create the resource.
+
+  irb# Dupe.find(:authors)
+    ==> [<#Duped::Author name="CS Lewis" id=1>]
+  
 == More
 
 Consult the API documentation at http://moonmaster9000.github.com/dupe/api/

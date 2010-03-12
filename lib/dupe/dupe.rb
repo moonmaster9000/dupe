@@ -391,10 +391,6 @@ class Dupe
         results
       end
     end
-    
-    def destroy(model_name, attributes={})
-      database.delete model_name.to_s.singularize.to_sym, attributes
-    end
 
     def sequence(name, &block)
       sequences[name.to_sym] = Sequence.new 1, block

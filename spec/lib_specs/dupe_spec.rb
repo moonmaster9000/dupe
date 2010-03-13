@@ -182,6 +182,35 @@ describe Dupe do
       find_one_mock.url_pattern.should == %r{^/books/(\d+)\.xml$}
       find_one_mock.mocked_response('/books/1.xml').should == Dupe.find(:book).to_xml(:root => 'book')
     end
+
+    it "should add a POST (create resource) mock to the network" do
+      Dupe.network.mocks[:post].should be_empty
+      Dupe.define :book
+      Dupe.network.mocks[:post].should_not be_empty
+      Dupe.network.mocks[:post].length.should == 1
+
+      post_mock = Dupe.network.mocks[:post].first
+      post_mock.class.should == Dupe::Network::PostMock
+      post_mock.url_pattern.should == %r{^/books\.xml$}
+      resp, url = post_mock.mocked_response('/books.xml', {:title => "Rooby"})
+      resp.should == Dupe.find(:book).to_xml(:root => 'book')
+      url.should == "/books/1.xml"
+    end
+
+    it "should add a PUT (update resource) mock to the network" do
+      Dupe.network.mocks[:put].should be_empty
+      book = Dupe.create :book, :title => 'Rooby!'
+      Dupe.network.mocks[:put].should_not be_empty
+      Dupe.network.mocks[:put].length.should == 1
+
+      put_mock = Dupe.network.mocks[:put].first
+      put_mock.class.should == Dupe::Network::PutMock
+      put_mock.url_pattern.should == %r{^/books/(\d+)\.xml$}
+      resp, url = put_mock.mocked_response('/books/1.xml', {:title => "Rails!"})
+      resp.should == nil
+      url.should == "/books/1.xml"
+      book.title.should == "Rails!"
+    end
     
     it "should honor ActiveResource site prefix's for the find(:all) and find(<id>) mocks" do
       Dupe.network.mocks[:get].should be_empty

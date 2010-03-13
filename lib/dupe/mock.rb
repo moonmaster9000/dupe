@@ -89,3 +89,28 @@ class Dupe
     end
   end
 end
+
+class Dupe
+  class Network
+    class PutMock < Mock #:nodoc:
+      
+      # returns a tuple representing the xml of the processed entity, plus the url to the entity. 
+      def process_response(resp, url)
+        case resp
+          
+          when NilClass
+            raise StandardError, "Failed with 500: the request '#{url}' returned nil." 
+          
+          when Dupe::Database::Record
+            resp = nil
+            Dupe.network.log.add_request :put, url, ""
+            return resp, url
+          
+          else
+            raise StandardError, "Unknown PutMock Response. Your Post intercept mocks must return a Duped resource object or nil"
+        end
+      end
+    end
+  end
+end
+

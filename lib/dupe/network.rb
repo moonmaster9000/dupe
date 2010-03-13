@@ -28,6 +28,10 @@ class Dupe
         PostMock.new(url_pattern, response_proc).tap do |mock|
           @mocks[verb].unshift mock
         end
+      when :put
+        PutMock.new(url_pattern, response_proc).tap do |mock|
+          @mocks[verb].unshift mock
+        end
       else
         raise StandardError, "Dupe does not (yet) support mocking #{verb.to_s.upcase} requests."
       end

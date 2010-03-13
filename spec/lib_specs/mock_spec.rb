@@ -134,3 +134,32 @@ describe Dupe::Network::PostMock do
     end
   end
 end
+
+describe Dupe::Network::PutMock do
+  before do
+    Dupe.reset
+  end
+  
+  describe "mocked_response" do
+    describe "on a mock object whose response returns a location of a new record" do
+      before do
+        Dupe.define :author  
+        @a = Dupe.create :author, :name => "Matt"
+        @mock = Dupe::Network::PutMock.new %r{/authors/(\d+)\.xml$}, proc {|id, put_data| Dupe.find(:author) {|a| a.id == id.to_i}.merge!(put_data)}
+      end
+
+      it "should convert the put to xml" do        
+        resp, url = @mock.mocked_response('/authors/1.xml', {:name => "Rachel"})
+        resp.should == nil
+        @a.name.should == "Rachel"
+        url.should == "/authors/1.xml"
+      end
+      
+      it "should add a request to the Dupe::Network#log" do
+        Dupe.network.log.requests.length.should == 0
+        @mock.mocked_response('/authors/1.xml', {:name => "Rachel"})
+        Dupe.network.log.requests.length.should == 1
+      end
+    end
+  end
+end

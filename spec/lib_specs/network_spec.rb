@@ -68,7 +68,7 @@ describe Dupe::Network do
       proc { @network.define_service_mock :invalid_rest_verb, // }.should raise_error(Dupe::Network::UnknownRestVerbError)
       proc { @network.define_service_mock :get, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
       proc { @network.define_service_mock :post, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
-
+      proc { @network.define_service_mock :put, // }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
     end
     
     it "should require a valid Regexp url pattern" do
@@ -76,7 +76,6 @@ describe Dupe::Network do
       proc { @network.define_service_mock :post, 'not a regular expression' }.should raise_error(ArgumentError)
       proc { @network.define_service_mock :get, // }.should_not raise_error
       proc { @network.define_service_mock :post, // }.should_not raise_error
-
     end
     
     it "should create and return a new get service mock when given valid parameters" do
@@ -86,7 +85,7 @@ describe Dupe::Network do
       @network.mocks[:get].should be_empty
       mock = @network.define_service_mock verb, pattern, response
       @network.mocks[:get].should_not be_empty
-      @network.mocks[:post].first.class == "GetMock"
+      @network.mocks[:get].first.class.should == Dupe::Network::GetMock
       @network.mocks[:get].length.should == 1
       @network.mocks[:get].first.should == mock
     end
@@ -98,9 +97,21 @@ describe Dupe::Network do
       @network.mocks[:post].should be_empty
       mock = @network.define_service_mock verb, pattern, response
       @network.mocks[:post].should_not be_empty
-      @network.mocks[:post].first.class == "PostMock"
+      @network.mocks[:post].first.class.should == Dupe::Network::PostMock
       @network.mocks[:post].length.should == 1
       @network.mocks[:post].first.should == mock
+    end
+    
+    it "should create and return a new post service mock when given valid parameters" do
+      verb = :put
+      pattern = //
+      response = proc { 'test' }
+      @network.mocks[:put].should be_empty
+      mock = @network.define_service_mock verb, pattern, response
+      @network.mocks[:put].should_not be_empty
+      @network.mocks[:put].first.class.should == Dupe::Network::PutMock
+      @network.mocks[:put].length.should == 1
+      @network.mocks[:put].first.should == mock
     end
 
     

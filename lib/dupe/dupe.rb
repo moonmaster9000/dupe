@@ -8,7 +8,7 @@ class Dupe
     attr_reader :sequences #:nodoc:
     attr_reader :database #:nodoc:
     
-    # set this to "true" if you Dupe to spit out mocked requests
+    # set this to "true" if you want Dupe to spit out mocked requests
     # after each of your cucumber scenario's run
     attr_accessor :debug
     
@@ -183,6 +183,11 @@ class Dupe
             :post, 
             %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.xml$}, 
             proc { |post_body| Dupe.create(:#{model_name.to_s}, post_body) }
+          )
+          network.define_service_mock(
+            :put,
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            proc { |id, put_data| Dupe.find(:#{model_name.to_s}) {|resource| resource.id == id.to_i}.merge!(put_data) }
           )
         }
         eval(mocks)

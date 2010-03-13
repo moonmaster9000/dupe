@@ -106,3 +106,7 @@ end
 def Post(url_pattern, &block)
   Dupe.network.define_service_mock :post, url_pattern, block
 end
+
+def Put(url_pattern, &block)
+  Dupe.network.define_service_mock :put, url_pattern, block
+end

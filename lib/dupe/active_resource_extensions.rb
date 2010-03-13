@@ -50,5 +50,37 @@ module ActiveResource #:nodoc:
       end
       response
     end
+    
+    def put(path, body = '', headers = {}) #:nodoc:
+      begin
+        response = request(:put, path, body.to_s, build_request_headers(headers, :put))
+        
+      # if the request threw an exception
+      rescue
+        resource_hash = Hash.from_xml(body)
+        resource_hash = resource_hash[resource_hash.keys.first]
+        resource_hash = {} unless resource_hash.kind_of?(Hash)
+        resource_hash.symbolize_keys!
+
+        begin
+          error = false
+          mocked_response, path = Dupe.network.request(:put, path, resource_hash)
+        rescue Dupe::UnprocessableEntity => e
+          mocked_response = {:error => e.message.to_s}.to_xml(:root => 'errors')
+          error = true
+        end
+        ActiveResource::HttpMock.respond_to do |mock|
+          if error
+            mock.put(path, {}, mocked_response, 422, "Content-Type" => 'application/xml')
+          else
+            mock.put(path, {}, mocked_response, 204)
+          end
+        end
+        response = request(:put, path, body.to_s, build_request_headers(headers, :put))
+        ActiveResource::HttpMock.delete_mock(:put, path)
+      end
+      response
+    end
+
   end
 end

@@ -21,11 +21,11 @@ class Dupe
       validate_request_type verb
       case verb
       when :get
-        GetMock.new(verb, url_pattern, response_proc).tap do |mock|
+        GetMock.new(url_pattern, response_proc).tap do |mock|
           @mocks[verb] << mock
         end
       when :post
-        PostMock.new(verb, url_pattern, response_proc).tap do |mock|
+        PostMock.new(url_pattern, response_proc).tap do |mock|
           @mocks[verb].unshift mock
         end
       else

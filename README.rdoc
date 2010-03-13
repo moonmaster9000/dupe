@@ -508,7 +508,7 @@ Now, when you try to create an Author without a name, it will respond with the a
   irb# a = a.new?
     ==> true
     
-Because the resource would invalidate, the Dupe object is not created.
+Because our custom Post mock determined that the resource was invalid, Dupe did not mock the resource:
   
   irb# Dupe.find(:authors)
     ==> []
@@ -524,7 +524,7 @@ When we create the Author with the required attributes, it will now be considere
   irb# a.new?
     ==> false
     
-Now, Dupe will go ahead and create the resource.
+Since our custom Post mock considered the resource valid, it went ahead and created the resource:
 
   irb# Dupe.find(:authors)
     ==> [<#Duped::Author name="CS Lewis" id=1>]

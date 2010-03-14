@@ -613,6 +613,42 @@ We can, of course, at this point still update the name to a non-nil value and at
   irb# Dupe.find :authors
     ==> [<#Duped::Author name="Matt Parker" id=1>]
 
+===DELETE requests
+
+As you might have guessed, Dupe also supports DELETE intercept mocking (ActiveResource::Base#destroy):
+
+  irb# Dupe.define :author
+
+  irb# class Author < ActiveResource::Base; self.site = ''; end
+    ==> ""
+
+  irb# Author.create :name => "CS Lewis" # --> Dupe intercepts this POST request
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"CS Lewis", "id"=>1}, @prefix_options={}>
+
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="CS Lewis" id=1>]
+ 
+  irb# a = Author.find 1 # --> Dupe intercepts this GET request
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"CS Lewis", "id"=>1}, @prefix_options={}>
+
+  irb# a.destroy
+    ==> #<ActiveResource::Response:0x181c1c0 @body="", @message="200", @code=200, @headers={"Content-Length"=>"0"}
+
+  irb# Dupe.find :authors
+    ==> []
+
+And also, as you might have guessed, you can override the default DELETE intercept mock for a resource:
+
+  irb# Delete %r{/books/(\d+)\.xml} do |id|
+         puts "deleting the book with id #{id}"
+         Dupe.delete(:book) {|b| b.id == id.to_i}
+       end
+
+  irb# a = Author.create :name => "some author"
+
+  irb# a.destroy
+    ==> "deleting the book with id 1"
+
 
 == More
 

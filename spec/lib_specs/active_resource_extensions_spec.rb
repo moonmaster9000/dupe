@@ -128,6 +128,14 @@ describe ActiveResource::Connection do
       @ar_book.destroy
       Dupe.find(:books).length.should == 0
     end
+
+    it "should allow you to override the default DELETE intercept mock" do
+      Delete %r{/books/(\d+)\.xml} do |id|
+        raise StandardError, "Testing Delete override"
+      end
+
+      proc {@ar_book.destroy}.should raise_error(StandardError, "Testing Delete override")
+    end
   end
 
 end

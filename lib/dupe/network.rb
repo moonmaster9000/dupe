@@ -32,8 +32,12 @@ class Dupe
         PutMock.new(url_pattern, response_proc).tap do |mock|
           @mocks[verb].unshift mock
         end
+      when :delete
+        DeleteMock.new(url_pattern, response_proc).tap do |mock|
+          @mocks[verb].unshift mock
+        end
       else
-        raise StandardError, "Dupe does not (yet) support mocking #{verb.to_s.upcase} requests."
+        raise StandardError, "Dupe does not support mocking #{verb.to_s.upcase} requests."
       end
     end
     

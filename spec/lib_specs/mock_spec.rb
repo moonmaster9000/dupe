@@ -163,3 +163,32 @@ describe Dupe::Network::PutMock do
     end
   end
 end
+
+describe Dupe::Network::DeleteMock do
+  before do
+    Dupe.reset
+  end
+  
+  describe "mocked_response" do
+    describe "on a mock object whose response returns a location of a new record" do
+      before do
+        Dupe.define :author  
+        @a = Dupe.create :author, :name => "Matt"
+        @mock = Dupe::Network::DeleteMock.new %r{/authors/(\d+)\.xml$}, proc {|id| Dupe.delete(:author) {|a| a.id == id.to_i}}
+      end
+
+      it "should convert the put to xml" do        
+        Dupe.find(:authors).length.should == 1
+        resp = @mock.mocked_response('/authors/1.xml')
+        resp.should == nil
+        Dupe.find(:authors).length.should == 0
+      end
+      
+      it "should add a request to the Dupe::Network#log" do
+        Dupe.network.log.requests.length.should == 0
+        @mock.mocked_response('/authors/1.xml')
+        Dupe.network.log.requests.length.should == 1
+      end
+    end
+  end
+end

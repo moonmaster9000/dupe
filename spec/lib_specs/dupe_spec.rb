@@ -211,6 +211,18 @@ describe Dupe do
       url.should == "/books/1.xml"
       book.title.should == "Rails!"
     end
+
+    it "should add a DELETE mock to the network" do
+      Dupe.network.mocks[:delete].should be_empty
+      book = Dupe.create :book, :title => 'Rooby!'
+      Dupe.network.mocks[:delete].should_not be_empty
+      Dupe.network.mocks[:delete].length.should == 1
+
+      delete_mock = Dupe.network.mocks[:delete].first
+      delete_mock.class.should == Dupe::Network::DeleteMock
+      delete_mock.url_pattern.should == %r{^/books/(\d+)\.xml$}
+    end
+
     
     it "should honor ActiveResource site prefix's for the find(:all) and find(<id>) mocks" do
       Dupe.network.mocks[:get].should be_empty
@@ -488,6 +500,23 @@ describe Dupe do
       b.genre.should == b2.genre
       b.genre.name = 'Science Fiction'
       b2.genre.name.should == 'Science Fiction'
+    end
+  end
+
+  describe "##delete" do
+    it "should remove any resources that match the conditions provided in the block" do
+      Dupe.stub 10, :authors
+      Dupe.find(:authors).length.should == 10
+      Dupe.delete :author
+      Dupe.find(:authors).length.should == 9
+      Dupe.delete :authors
+      Dupe.find(:authors).length.should == 0
+      Dupe.create :author, :name => 'CS Lewis'
+      Dupe.create :author, :name => 'Robert Lewis Stevenson'
+      Dupe.create :author, :name => 'Frank Herbert'
+      Dupe.delete(:author) {|a| a.name.match /Lewis/}
+      Dupe.find(:authors).length.should == 1
+      Dupe.find(:authors).first.name.should == 'Frank Herbert'
     end
   end
 end

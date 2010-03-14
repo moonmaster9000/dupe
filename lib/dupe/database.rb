@@ -12,6 +12,23 @@ class Dupe
     def initialize
       @tables = {}
     end
+
+    # database.delete :books # --> would delete all books
+    # database.delete :book # --> would delete the first book record found
+    # database.delete :book, proc {|b| b.id < 10} # --> would delete all books found who's id is less than 10
+    # database.delete :books, proc {|b| b.id < 10} # --> would delete all books found who's id is less than 10
+    def delete(resource_name, conditions=nil)
+      model_name = resource_name.to_s.singularize.to_sym
+      raise StandardError, "Invalid DELETE operation: The resource #{model_name} has not been defined" unless @tables[model_name]
+      
+      if conditions
+        @tables[model_name].reject!(&conditions) 
+      elsif resource_name.singular?
+        @tables[model_name].shift
+      elsif resource_name.plural?
+        @tables[model_name] = []
+      end
+    end
     
     # pass in a Dupe::Database::Record object, and this method will store the record
     # in the appropriate table

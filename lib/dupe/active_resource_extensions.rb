@@ -82,5 +82,16 @@ module ActiveResource #:nodoc:
       response
     end
 
+    def delete(path, headers = {})
+      Dupe.network.request(:delete, path)
+
+      ActiveResource::HttpMock.respond_to do |mock|
+        mock.delete(path, {}, nil, 200)
+      end
+      response = request(:delete, path, build_request_headers(headers, :delete))
+      
+      ActiveResource::HttpMock.delete_mock(:delete, path)
+      response
+    end
   end
 end

@@ -102,7 +102,7 @@ describe Dupe::Network do
       @network.mocks[:post].first.should == mock
     end
     
-    it "should create and return a new post service mock when given valid parameters" do
+    it "should create and return a new put service mock when given valid parameters" do
       verb = :put
       pattern = //
       response = proc { 'test' }
@@ -113,8 +113,18 @@ describe Dupe::Network do
       @network.mocks[:put].length.should == 1
       @network.mocks[:put].first.should == mock
     end
-
     
+    it "should create and return a new delete service mock when given valid parameters" do
+      verb = :delete
+      pattern = //
+      response = proc { 'test' }
+      @network.mocks[:delete].should be_empty
+      mock = @network.define_service_mock verb, pattern, response
+      @network.mocks[:delete].should_not be_empty
+      @network.mocks[:delete].first.class.should == Dupe::Network::DeleteMock
+      @network.mocks[:delete].length.should == 1
+      @network.mocks[:delete].first.should == mock
+    end
   end
   
 end

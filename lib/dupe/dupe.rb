@@ -189,6 +189,11 @@ class Dupe
             %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
             proc { |id, put_data| Dupe.find(:#{model_name.to_s}) {|resource| resource.id == id.to_i}.merge!(put_data) }
           )
+          network.define_service_mock(
+            :delete,
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            proc { |id| Dupe.delete(:#{model_name.to_s}) {|resource| resource.id == id.to_i} }
+          )
         }
         eval(mocks)
       end
@@ -395,6 +400,10 @@ class Dupe
       else
         results
       end
+    end
+
+    def delete(resource, &conditions)
+      database.delete resource, conditions 
     end
 
     def sequence(name, &block)

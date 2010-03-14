@@ -109,5 +109,25 @@ describe ActiveResource::Connection do
     end
   end
 
+  describe "#delete" do
+    before do
+      @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
+      class Book < ActiveResource::Base
+        self.site = ''
+      end
+      @ar_book = Book.find(1)
+    end
+    
+    it "should pass a request off to the Dupe network if the original request failed" do
+      Dupe.network.should_receive(:request).with(:delete, '/books/1.xml').once
+      @ar_book.destroy
+    end
+    
+    it "trigger a Dupe.delete to delete the mocked resource from the duped database" do
+      Dupe.find(:books).length.should == 1
+      @ar_book.destroy
+      Dupe.find(:books).length.should == 0
+    end
+  end
 
 end

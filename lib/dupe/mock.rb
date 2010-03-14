@@ -114,3 +114,14 @@ class Dupe
   end
 end
 
+class Dupe
+  class Network
+    class DeleteMock < Mock #:nodoc:
+      # logs the request 
+      def process_response(resp, url)
+        Dupe.network.log.add_request :delete, url, ""
+        nil
+      end
+    end
+  end
+end

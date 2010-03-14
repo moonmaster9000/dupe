@@ -16,6 +16,36 @@ describe Dupe::Database do
     end
   end
   
+  describe "delete" do
+    before do 
+      Dupe.stub 10, :books
+    end
+
+    it "should delete the first record found if the resource name is singular and there is no conditions proc" do
+      Dupe.find(:books).length.should == 10
+      Dupe.database.delete :book
+      Dupe.find(:books).length.should == 9
+    end
+
+    it "should delete all records if the resource name is plural and there is no conditions proc" do
+      Dupe.find(:books).length.should == 10
+      Dupe.database.delete :books
+      Dupe.find(:books).length.should == 0
+    end
+
+    it "should delete all matching records if there is a conditions proc and the resource name is singular" do
+      Dupe.find(:books).length.should == 10
+      Dupe.database.delete :book, proc {|b| b.id < 3}
+      Dupe.find(:books).length.should == 8
+    end
+
+    it "should delete all matching records if there is a conditions proc and the resource name is plural" do
+      Dupe.find(:books).length.should == 10
+      Dupe.database.delete :books, proc {|b| b.id < 3}
+      Dupe.find(:books).length.should == 8
+    end
+  end
+  
   describe "insert" do
     before do
       Dupe.define :book

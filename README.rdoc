@@ -38,6 +38,11 @@ It will also place example Dupe definitions in RAILS_ROOT/features/dupe/definiti
 Lastly, it will add a load_dupe.rb file (that loads up the definitions and custom mocks) to RAILS_ROOT/features/support/load_dupe.rb
   
 
+= Tutorial
+
+Checkout the {dupe example application}[http://github.com/moonmaster9000/dupe_example_app] for a tutorial on cuking an application with
+ActiveResource and Dupe.
+
 = Features
 
 ==Creating resources

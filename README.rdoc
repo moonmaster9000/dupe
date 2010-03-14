@@ -529,6 +529,86 @@ Since our custom Post mock considered the resource valid, it went ahead and crea
   irb# Dupe.find(:authors)
     ==> [<#Duped::Author name="CS Lewis" id=1>]
   
+
+===PUT requests
+
+In ActiveResource, when you update a resource that already exists via the "save" method, it translates to a PUT request. 
+Dupe provides basic PUT intercept mocks out of the box, and like GET and POST mocks, 
+it allows you to override the default PUT intercept mock, and create new ones. 
+
+Let's again examine an "author" resource:
+
+  irb# Dupe.define :author
+
+  irb# class Author < ActiveResource::Base; self.site = ''; end
+    ==> ""
+
+  irb# Author.create :name => "CS Lewis" # --> Dupe intercepts this POST request
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"CS Lewis", "id"=>1}, @prefix_options={}>
+
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="CS Lewis" id=1>]
+ 
+  irb# a = Author.find 1 # --> Dupe intercepts this GET request
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"CS Lewis", "id"=>1}, @prefix_options={}>
+
+So far, we've created a resource (via dupe's POST intercept mocking), and we've also found the resource we create (via dupe's GET
+intercept mocking). Now, let's attempt to update (PUT) the resource:
+
+  irb# a.name = "Frank Herbert"
+  
+  irb# a.save # --> Dupe intercepts this PUT request
+    ==> true
+
+Dupe intercepted the PUT request that ActiveResource attempted to send, and updated the Duped resource accordingly:
+
+  irb# a
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"Frank Herbert", "id"=>1}, @prefix_options={}>
+
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="Frank Herbert" id=1>]
+ 
+You can also overwrite the default PUT intercept mock for your resource by using the "Put" method:
+
+  irb# Put %r{/authors/(\d+)\.xml} do |id, put_data|
+         raise Dupe::UnprocessableEntity.new(:name => " must be present.") unless put_data[:name]
+         Dupe.find(:author) {|a| a.id == id.to_i}.merge! put_data
+       end
+    ==> #<Dupe::Network::PostMock:0x1a1afe4 @url_pattern=/\/authors\.xml/, @response=#<Proc:0x01a1b084@(irb):13>, @verb=:post>
+  
+Now, if we try to update our Author without a name, it will respond with the appropriate errors.
+  
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="Frank Herbert" id=1>]
+
+  irb# a = Author.find 1 # --> Dupe intercepts this GET request
+    ==> #<Author:0x1a4ca58 @attributes={"name"=>"Frank Herbert", "id"=>1}, @prefix_options={}>
+
+  irb# a.name = nil
+
+  irb# a.save
+    ==> false
+
+  irb# a.errors.on_base
+    ==> ["name must be present"]
+
+Since our Put intercept mock raise the Dupe::UnprocessableEntity exception, 
+the underlying Duped record remains unchanged, just as we would expect the real service to have operated:
+
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="Frank Herbert" id=1>]
+
+We can, of course, at this point still update the name to a non-nil value and attempt to save it again:
+
+  irb# a.name = "Matt Parker"
+  
+  irb# a.save
+    ==> true
+
+  irb# Dupe.find :authors
+    ==> [<#Duped::Author name="Matt Parker" id=1>]
+
+
 == More
 
 Consult the API documentation at http://moonmaster9000.github.com/dupe/api/

@@ -9,7 +9,7 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :title => 'Rooby', :label => 'rooby'
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
     end
     
@@ -32,7 +32,7 @@ describe ActiveResource::Connection do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       @book.delete(:id)
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
     end
     
@@ -67,7 +67,7 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
       @ar_book = Book.find(1)
     end
@@ -113,7 +113,7 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
       @ar_book = Book.find(1)
     end

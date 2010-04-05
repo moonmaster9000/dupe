@@ -99,7 +99,7 @@ describe ActiveResource::Connection do
       
       @ar_book.title = nil
       @ar_book.save.should == false
-      @ar_book.errors.on_base.should_not be_empty
+      @ar_book.errors[:base].should_not be_empty
 
       @ar_book.title = "Rails!"
       @ar_book.save.should == true

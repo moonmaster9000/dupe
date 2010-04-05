@@ -56,7 +56,7 @@ describe ActiveResource::Connection do
       
       b = Book.create
       b.new?.should be_true
-      b.errors.errors.should_not be_empty
+      b.errors.should_not be_empty
       b = Book.create(:title => "hello")
       b.new?.should be_false
       b.errors.should be_empty

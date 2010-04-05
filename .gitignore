@@ -1,4 +1,3 @@
 coverage
 *.sw?
 pkg/*
-dupe.gemspec

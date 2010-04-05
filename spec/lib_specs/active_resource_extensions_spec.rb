@@ -73,7 +73,7 @@ describe ActiveResource::Connection do
     end
     
     it "should pass a request off to the Dupe network if the original request failed" do
-      Dupe.network.should_receive(:request).with(:put, '/books/1.xml', Hash.from_xml(@book.merge(:title => "Rails!").to_xml(:root => 'book'))["book"].symbolize_keys!).once
+      Dupe.network.should_receive(:request).with(:put, '/books/1.xml', Hash.from_xml(@book.merge(:title => "Rails!").to_xml(:root => 'book'))["book"].symbolize_keys!).once.and_return([nil, '/books/1.xml'])
       @ar_book.title = 'Rails!'
       @ar_book.save
     end

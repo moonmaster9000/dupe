@@ -23,10 +23,18 @@ describe "Mock Definition Methods" do
       end
       
       Dupe.network.mocks[:get].length.should == 3
-      Dupe.network.mocks[:get].last.should == mock
-      Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.xml}
+      Dupe.network.mocks[:get].first.should == mock
+      Dupe.network.mocks[:get].first.url_pattern.should == %r{/books/([^&]+)\.xml}
       book = Dupe.find(:book)
       Dupe.network.request(:get, '/books/rooby.xml').should == book.to_xml_safe(:root => 'book')
+    end
+
+    it "should, with every successive call to Get, create a new Get mock with higher priority than all the previous Get mocks" do
+      Dupe.network.mocks[:get].should be_empty
+      @book = Dupe.create :book, :label => 'rooby'
+      Dupe.network.request(:get, '/books/1.xml').should == Dupe.find(:book).to_xml_safe(:root => 'book')
+      mock = Get(%r{/books/(\d+)\.xml}) {|id| raise StandardError, "called id override"}
+      proc {Dupe.network.request(:get, '/books/1.xml')}.should raise_error(StandardError, "called id override")
     end
   end
   

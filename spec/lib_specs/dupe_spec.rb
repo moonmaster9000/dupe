@@ -172,12 +172,12 @@ describe Dupe do
       Dupe.network.mocks[:get].should_not be_empty
       Dupe.network.mocks[:get].length.should == 2
       
-      find_all_mock = Dupe.network.mocks[:get].first
+      find_all_mock = Dupe.network.mocks[:get].last
       find_all_mock.class.should == Dupe::Network::GetMock
       find_all_mock.url_pattern.should == %r{^/books\.xml$}
       find_all_mock.mocked_response('/books.xml').should == Dupe.find(:books).to_xml(:root => 'books')
       
-      find_one_mock = Dupe.network.mocks[:get].last
+      find_one_mock = Dupe.network.mocks[:get].first
       find_one_mock.class.should == Dupe::Network::GetMock
       find_one_mock.url_pattern.should == %r{^/books/(\d+)\.xml$}
       find_one_mock.mocked_response('/books/1.xml').should == Dupe.find(:book).to_xml(:root => 'book')
@@ -231,12 +231,12 @@ describe Dupe do
       Dupe.network.mocks[:get].should_not be_empty
       Dupe.network.mocks[:get].length.should == 2
       
-      find_all_mock = Dupe.network.mocks[:get].first
+      find_all_mock = Dupe.network.mocks[:get].last
       find_all_mock.class.should == Dupe::Network::GetMock
       find_all_mock.url_pattern.should == %r{^/book_services/authors\.xml$}
       find_all_mock.mocked_response('/book_services/authors.xml').should == Dupe.find(:authors).to_xml(:root => 'authors')
       
-      find_one_mock = Dupe.network.mocks[:get].last
+      find_one_mock = Dupe.network.mocks[:get].first
       find_one_mock.class.should == Dupe::Network::GetMock
       find_one_mock.url_pattern.should == %r{^/book_services/authors/(\d+)\.xml$}
       find_one_mock.mocked_response('/book_services/authors/1.xml').should == Dupe.find(:author).to_xml(:root => 'author')

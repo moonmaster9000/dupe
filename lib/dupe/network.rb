@@ -22,7 +22,7 @@ class Dupe
       case verb
       when :get
         GetMock.new(url_pattern, response_proc).tap do |mock|
-          @mocks[verb] << mock
+          @mocks[verb].unshift mock
         end
       when :post
         PostMock.new(url_pattern, response_proc).tap do |mock|

@@ -77,6 +77,25 @@ describe ActiveResource::Connection do
       @ar_book.title = 'Rails!'
       @ar_book.save
     end
+
+    context "put methods that return HTTP 204" do
+      before(:each) do
+        @expirable_book = Dupe.create :expirable_book, :title => 'Impermanence'
+        class ExpirableBook < ActiveResource::Base
+          self.site = 'http://www.example.com'
+
+          def expire_copyrights!
+            put(:expire)
+          end
+        end
+        @ar_expirable_book = ExpirableBook.find(1)
+      end
+
+      it "should handle no-content responses" do
+        response = @ar_expirable_book.expire_copyrights!
+        response.code.to_s.should == "204"
+      end
+    end
     
     it "should parse the xml and turn the result into active resource objects" do
       @book.title.should == "Rooby"

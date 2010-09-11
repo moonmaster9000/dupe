@@ -80,19 +80,27 @@ describe ActiveResource::Connection do
 
     context "put methods that return HTTP 204" do
       before(:each) do
-        @expirable_book = Dupe.create :expirable_book, :title => 'Impermanence'
         class ExpirableBook < ActiveResource::Base
           self.site = 'http://www.example.com'
+          attr_accessor :state
 
           def expire_copyrights!
             put(:expire)
           end
         end
-        @ar_expirable_book = ExpirableBook.find(1)
+
+        Put %r{/expirable_books/(\d)+/expire.xml} do |id, body|
+          Dupe.find(:expirable_book) { |eb| eb.id == id.to_i }.tap { |book|
+            book.state = 'expired'
+          }
+        end
+
+        @e = Dupe.create :expirable_book, :title => 'Impermanence', :state => 'active'
       end
 
-      it "should handle no-content responses" do
-        response = @ar_expirable_book.expire_copyrights!
+      it "should handle no-content responses" do 
+        response = ExpirableBook.find(@e.id).expire_copyrights!
+        response.body.should be_blank
         response.code.to_s.should == "204"
       end
     end

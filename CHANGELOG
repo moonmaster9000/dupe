@@ -1,3 +1,7 @@
+v0.5.3
+  when rails 3 went out of beta, the gem started install rails 3 activeresource/activemodel, because of a bug in the gemspec.
+  this release fixes the gemspec.
+
 v0.5.1
   includes PUT and DELETE intercept mocks (checkout the README.rdoc)
 

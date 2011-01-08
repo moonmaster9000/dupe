@@ -9,7 +9,7 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :title => 'Rooby', :label => 'rooby'
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
     end
     
@@ -32,7 +32,7 @@ describe ActiveResource::Connection do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       @book.delete(:id)
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
     end
     
@@ -56,7 +56,7 @@ describe ActiveResource::Connection do
       
       b = Book.create
       b.new?.should be_true
-      b.errors.errors.should_not be_empty
+      b.errors.should_not be_empty
       b = Book.create(:title => "hello")
       b.new?.should be_false
       b.errors.should be_empty
@@ -67,15 +67,42 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
       @ar_book = Book.find(1)
     end
     
     it "should pass a request off to the Dupe network if the original request failed" do
-      Dupe.network.should_receive(:request).with(:put, '/books/1.xml', Hash.from_xml(@book.merge(:title => "Rails!").to_xml(:root => 'book'))["book"].symbolize_keys!).once
+      Dupe.network.should_receive(:request).with(:put, '/books/1.xml', Hash.from_xml(@book.merge(:title => "Rails!").to_xml(:root => 'book'))["book"].symbolize_keys!).once.and_return([nil, '/books/1.xml'])
       @ar_book.title = 'Rails!'
       @ar_book.save
+    end
+
+    context "put methods that return HTTP 204" do
+      before(:each) do
+        class ExpirableBook < ActiveResource::Base
+          self.site = 'http://www.example.com'
+          attr_accessor :state
+
+          def expire_copyrights!
+            put(:expire)
+          end
+        end
+
+        Put %r{/expirable_books/(\d)+/expire.xml} do |id, body|
+          Dupe.find(:expirable_book) { |eb| eb.id == id.to_i }.tap { |book|
+            book.state = 'expired'
+          }
+        end
+
+        @e = Dupe.create :expirable_book, :title => 'Impermanence', :state => 'active'
+      end
+
+      it "should handle no-content responses" do 
+        response = ExpirableBook.find(@e.id).expire_copyrights!
+        response.body.should be_blank
+        response.code.to_s.should == "204"
+      end
     end
     
     it "should parse the xml and turn the result into active resource objects" do
@@ -99,7 +126,7 @@ describe ActiveResource::Connection do
       
       @ar_book.title = nil
       @ar_book.save.should == false
-      @ar_book.errors.on_base.should_not be_empty
+      @ar_book.errors[:base].should_not be_empty
 
       @ar_book.title = "Rails!"
       @ar_book.save.should == true
@@ -113,7 +140,7 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       class Book < ActiveResource::Base
-        self.site = ''
+        self.site = 'http://www.example.com'
       end
       @ar_book = Book.find(1)
     end

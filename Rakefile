@@ -34,11 +34,11 @@ begin
     gemspec.files       = FileList['lib/**/*.rb', 'rails_generators/**/*', 'README.rdoc']
     gemspec.homepage    = "http://github.com/moonmaster9000/dupe"
     gemspec.authors     = ["Matt Parker"]
-    gemspec.add_dependency('activeresource', '~> 2.3')
+    gemspec.add_dependency('activeresource', '>= 3.0.0.beta2')
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
-  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+  puts "Jeweler not available. Install it with: gem install jeweler"
 end
 
 

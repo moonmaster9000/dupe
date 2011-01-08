@@ -15,39 +15,9 @@ If you want to install this for use in something other than a rails project, sim
 
   # gem install dupe
 
-If you're going to use this in a rails (2.3.*) project, add this to your cucumber.rb environment (config/environments/cucumber.rb)
-  
-  config.gem 'dupe'
-  
-Then run this rake task to install the gem: 
-
-  # rake gems:install RAILS_ENV=cucumber
-
-Lastly, from your rails project root, run:
-
-  # script/generate dupe
-  
-That last command will create the following directories:
-
-- RAILS_ROOT/features/dupe
-- RAILS_ROOT/features/dupe/definitions
-- RAILS_ROOT/features/dupe/custom_mocks
-  
-It will also place example Dupe definitions in RAILS_ROOT/features/dupe/definitions/definitions.rb as well as example custom mocks in RAILS_ROOT/features/dupe/custom_mocks/custom_mocks.rb
-
-Lastly, it will add a load_dupe.rb file (that loads up the definitions and custom mocks) to RAILS_ROOT/features/support/load_dupe.rb
-
 == Rails 3
 
-{Thorbjørn Hermansen}[http://github.com/thhermansen] has contributed a branch[http://github.com/moonmaster9000/dupe/tree/rails3] for rails 3 compatibility! 
-If you need Dupe for a rails 3 project, give it a whirl. Simply add something like the following to your bundler file: 
-
-  gem 'dupe', :git => 'git://github.com/moonmaster9000/dupe.git', :branch => 'rails3' 
-
-"script/generate dupe" doesn't yet work in Rails3. 
-
-Once Rails3 goes production, we'll be merging this branch into master and only supporting Rails3 from that point on. (Of course, if 
-anyone at that point still has a need to use Dupe in a rails 2.3 project, they will still be able to use one of the older versions).
+Dupe versions 0.6.0 and greater only work with Rails 3 / ActiveResource 3. If you're working on a Rails 2.* project, use Dupe version 0.5.3.
 
 = Tutorial
 

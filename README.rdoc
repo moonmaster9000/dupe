@@ -1,5 +1,7 @@
-= Dupe 
+== DISCLAIMER - Read this before using
+Dupe does not support post,put,delete verbs.  Using dupe will cause any post,put,delete to fail with an unclear exception message.  Dupe is awesome for get requests, but if you will ever need to support the others verbs, this is probably not the right tool for the job yet.
 
+= Dupe 
 There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's {"Factory Girl"}[http://www.thoughtbot.com/projects/factory_girl]).
 
 But what about prototyping ActiveResource records? That's where Dupe steps in.  
@@ -485,7 +487,7 @@ We can mock this with the following:
           </author>
         </authors>
 
-===POST requests
+===POST requests (not currently implemented)
 
 Out of the box you get a POST intercept mock:
 
@@ -546,7 +548,7 @@ Since our custom Post mock considered the resource valid, it went ahead and crea
     ==> [<#Duped::Author name="CS Lewis" id=1>]
   
 
-===PUT requests
+===PUT requests (not currently implemented)
 
 In ActiveResource, when you update a resource that already exists via the "save" method, it translates to a PUT request. 
 Dupe provides basic PUT intercept mocks out of the box, and like GET and POST mocks, 
@@ -624,9 +626,9 @@ We can, of course, at this point still update the name to a non-nil value and at
   irb# Dupe.find :authors
     ==> [<#Duped::Author name="Matt Parker" id=1>]
 
-===DELETE requests
+===DELETE requests (not currently implemented)
 
-As you might have guessed, Dupe also supports DELETE intercept mocking (ActiveResource::Base#destroy):
+As you might have guessed, Dupe also doesn't support DELETE intercept mocking (ActiveResource::Base#destroy):
 
   irb# Dupe.define :author
 

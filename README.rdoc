@@ -633,10 +633,8 @@ And also, as you might have guessed, you can override the default DELETE interce
 
 == More
 
-Consult the API documentation at http://moonmaster9000.github.com/dupe/api/
-
+API docs available at: http://rdoc.info
 
 == TODO List
 
-* We need "Put", "Post", and "Delete", and "Head" intercept mocking methods. Currently we only have "Get". 
 * We need a rake task that will run your cucumber scenarios and create service documentation based on the dupe log output (i.e., example requests and example responses) that the programmers implementing the service can use as a reference. 

@@ -1,3 +1,6 @@
+v1.0.0
+  updated specs for rails 3.1 compatibility (tomeric) (https://github.com/moonmaster9000/dupe/pull/21)
+
 v0.5.3
   when rails 3 went out of beta, the gem started install rails 3 activeresource/activemodel, because of a bug in the gemspec.
   this release fixes the gemspec.

@@ -1,8 +1,4 @@
 $LOAD_PATH.unshift './lib'
 require 'rubygems'
-gem 'activeresource'
-gem 'rspec'
-gem 'cucumber'
-require 'cucumber'
 require 'active_resource'
 require 'dupe'

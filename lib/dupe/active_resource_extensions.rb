@@ -19,7 +19,12 @@ module ActiveResource #:nodoc:
         response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
         ActiveResource::HttpMock.delete_mock(:get, path)
       end
-      format.decode(response.body)
+      
+      if ActiveResource::VERSION::MAJOR == 3 && ActiveResource::VERSION::MINOR >= 1
+        response
+      else
+        format.decode(response.body)
+      end
     end
     
     def post(path, body = '', headers = {}) #:nodoc:

@@ -9,7 +9,8 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :title => 'Rooby', :label => 'rooby'
       class Book < ActiveResource::Base
-        self.site = 'http://www.example.com'
+        self.site   = 'http://www.example.com'
+        self.format = :xml
       end
     end
     
@@ -81,7 +82,8 @@ describe ActiveResource::Connection do
     context "put methods that return HTTP 204" do
       before(:each) do
         class ExpirableBook < ActiveResource::Base
-          self.site = 'http://www.example.com'
+          self.site   = 'http://www.example.com'
+          self.format = :xml
           attr_accessor :state
 
           def expire_copyrights!
@@ -140,7 +142,8 @@ describe ActiveResource::Connection do
     before do
       @book = Dupe.create :book, :label => 'rooby', :title => 'Rooby'
       class Book < ActiveResource::Base
-        self.site = 'http://www.example.com'
+        self.site   = 'http://www.example.com'
+        self.format = :xml
       end
       @ar_book = Book.find(1)
     end

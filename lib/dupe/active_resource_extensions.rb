@@ -19,22 +19,24 @@ module ActiveResource #:nodoc:
         response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
         ActiveResource::HttpMock.delete_mock(:get, path)
       end
-      
+
       if ActiveResource::VERSION::MAJOR == 3 && ActiveResource::VERSION::MINOR >= 1
         response
       else
         format.decode(response.body)
       end
     end
-    
+
     def post(path, body = '', headers = {}) #:nodoc:
       begin
         response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
-        
+
       # if the request threw an exception
       rescue
-        resource_hash = Hash.from_xml(body)
-        resource_hash = resource_hash[resource_hash.keys.first]
+        unless body.blank?
+          resource_hash = Hash.from_xml(body)
+          resource_hash = resource_hash[resource_hash.keys.first]
+        end
         resource_hash = {} unless resource_hash.kind_of?(Hash)
         begin
           mocked_response, new_path = Dupe.network.request(:post, path, resource_hash)
@@ -55,11 +57,11 @@ module ActiveResource #:nodoc:
       end
       response
     end
-    
+
     def put(path, body = '', headers = {}) #:nodoc:
       begin
         response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
-        
+
       # if the request threw an exception
       rescue
         unless body.blank?
@@ -96,7 +98,7 @@ module ActiveResource #:nodoc:
         mock.delete(path, {}, nil, 200)
       end
       response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
-      
+
       ActiveResource::HttpMock.delete_mock(:delete, path)
       response
     end

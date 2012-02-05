@@ -1,3 +1,6 @@
+v1.0.1
+  bug fix: correctly handle blank POST body (samsonw https://github.com/moonmaster9000/dupe/pull/24)
+
 v1.0.0
   updated specs for rails 3.1 compatibility (tomeric) (https://github.com/moonmaster9000/dupe/pull/21)
 

@@ -193,7 +193,7 @@ describe Dupe do
       post_mock.class.should == Dupe::Network::PostMock
       post_mock.url_pattern.should == %r{^/books\.xml$}
       resp, url = post_mock.mocked_response('/books.xml', {:title => "Rooby"})
-      resp.should == Dupe.find(:book).to_xml(:root => 'book')
+      Hash.from_xml(resp).should == Hash.from_xml(Dupe.find(:book).to_xml(:root => 'book'))
       url.should == "/books/1.xml"
     end
 

@@ -31,7 +31,11 @@ class HashPruner
 end
 
 class Hash 
-  def to_xml_safe(options={})
-    HashPruner.prune(self).to_xml(options)  
+  def make_safe
+    HashPruner.prune(self)
+  end
+
+  def self.from_json(s)
+    ActiveSupport::JSON.decode(s)
   end
 end

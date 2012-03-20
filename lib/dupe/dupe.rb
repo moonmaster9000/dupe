@@ -11,7 +11,10 @@ class Dupe
     # set this to "true" if you want Dupe to spit out mocked requests
     # after each of your cucumber scenario's run
     attr_accessor :debug
-    
+
+    # Get the format to use (default is ActiveResource::Base.format)
+    attr_accessor :format
+
     # Suppose we're creating a 'book' resource. Perhaps our app assumes every book has a title, so let's define a book resource
     # that specifies just that:
     # 
@@ -171,27 +174,27 @@ class Dupe
         mocks = %{
           network.define_service_mock(
             :get, 
-            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.(?:xml|json)$}, 
             proc { Dupe.find(:#{model_name.to_s.pluralize}) }
           )
           network.define_service_mock(
             :get, 
-            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.(?:xml|json)$}, 
             proc {|id| Dupe.find(:#{model_name}) {|resource| resource.id == id.to_i}}
           )
           network.define_service_mock(
             :post, 
-            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}\\.(?:xml|json)$}, 
             proc { |post_body| Dupe.create(:#{model_name.to_s}, post_body) }
           )
           network.define_service_mock(
             :put,
-            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.(?:xml|json)$}, 
             proc { |id, put_data| Dupe.find(:#{model_name.to_s}) {|resource| resource.id == id.to_i}.merge!(put_data) }
           )
           network.define_service_mock(
             :delete,
-            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.xml$}, 
+            %r{^#{model_name.to_s.titleize.constantize.prefix rescue '/'}#{model_name.to_s.pluralize}/(\\d+)\\.(?:xml|json)$}, 
             proc { |id| Dupe.delete(:#{model_name.to_s}) {|resource| resource.id == id.to_i} }
           )
         }
@@ -460,7 +463,10 @@ class Dupe
       @debug ||= false
     end
     
-    
+    # Get the current format, defaulting to ActiveResource's configured formatter
+    def format
+      @format ||= ActiveResource::Base.format
+    end   
     
     private
     def build_conditions(conditions)

@@ -28,6 +28,7 @@ class Dupe
       
         grouped_results = url_pattern.match(url)[1..-1]
         grouped_results << body if body
+
         resp = @response.call *grouped_results
         process_response(resp, url)
       end
@@ -49,13 +50,15 @@ class Dupe
             raise ResourceNotFoundError, "Failed with 404: the request '#{url}' returned nil." 
             
           when Dupe::Database::Record
-            resp = resp.to_xml_safe(:root => resp.__model__.name.to_s)
+            resp = Dupe.format.encode( resp.make_safe, :root => resp.__model__.name.to_s )
 
           when Array
             if resp.empty?
-              resp = [].to_xml :root => 'results'
+              resp = Dupe.format.encode( [], :root => 'results' )
             else
-              resp = resp.map {|r| HashPruner.prune(r)}.to_xml(:root => resp.first.__model__.name.to_s.pluralize)
+              resp = Dupe.format.encode( 
+                resp.map {|r| HashPruner.prune(r)},
+                :root => resp.first.__model__.name.to_s.pluralize )
             end
         end
         Dupe.network.log.add_request :get, url, resp
@@ -69,7 +72,7 @@ class Dupe
   class Network
     class PostMock < Mock #:nodoc:
       
-      # returns a tuple representing the xml of the processed entity, plus the url to the entity. 
+      # returns a tuple representing the encoded form of the processed entity, plus the url to the entity. 
       def process_response(resp, url)
         case resp
           
@@ -77,8 +80,8 @@ class Dupe
             raise StandardError, "Failed with 500: the request '#{url}' returned nil." 
           
           when Dupe::Database::Record
-            new_path = "/#{resp.__model__.name.to_s.pluralize}/#{resp.id}.xml"
-            resp = resp.to_xml_safe(:root => resp.__model__.name.to_s)
+            new_path = "/#{resp.__model__.name.to_s.pluralize}/#{resp.id}.#{Dupe.format.extension}"
+            resp = Dupe.format.encode( resp.make_safe, :root => resp.__model__.name.to_s)
             Dupe.network.log.add_request :post, url, resp
             return resp, new_path
           
@@ -94,7 +97,7 @@ class Dupe
   class Network
     class PutMock < Mock #:nodoc:
       
-      # returns a tuple representing the xml of the processed entity, plus the url to the entity. 
+      # returns a tuple representing the encoded form of the processed entity, plus the url to the entity. 
       def process_response(resp, url)
         case resp
           

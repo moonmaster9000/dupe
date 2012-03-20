@@ -47,14 +47,38 @@ describe Dupe::Network do
       proc { @network.request(:delete, '/some_url')}.should raise_error(Dupe::Network::RequestNotFoundError)
     end
     
-    it "should return the appropriate mock response if a mock matches the url" do
-      @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
-      @network.request(:get, '/greeting').should == 'hello'
-      
-      @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
-      resp, url = @network.request(:post, '/greeting', {} )
-      resp.should == Dupe.find(:greeting).to_xml_safe(:root => 'greeting')
-      url.should == "/greetings/1.xml"
+    describe "using xml" do
+      before :each do
+        Dupe.format = ActiveResource::Formats::XmlFormat
+        Dupe.reset
+      end
+
+      it "should return the appropriate mock response if a mock matches the url" do
+        @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
+        @network.request(:get, '/greeting').should == 'hello'
+        
+        @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
+        resp, url = @network.request(:post, '/greeting', {} )
+        resp.should == Dupe.find(:greeting).make_safe.to_xml(:root => 'greeting')
+        url.should == "/greetings/1.xml"
+      end
+    end
+
+    describe "using json" do
+      before :each do
+        Dupe.format = ActiveResource::Formats::JsonFormat
+        Dupe.reset
+      end
+
+      it "should return the appropriate mock response if a mock matches the url" do
+        @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
+        @network.request(:get, '/greeting').should == 'hello'
+        
+        @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
+        resp, url = @network.request(:post, '/greeting', {} )
+        resp.should == Dupe.find(:greeting).make_safe.to_json(:root => 'greeting')
+        url.should == "/greetings/1.json"
+      end
     end
   end
   

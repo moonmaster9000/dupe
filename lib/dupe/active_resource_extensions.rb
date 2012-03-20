@@ -23,7 +23,7 @@ module ActiveResource #:nodoc:
       if ActiveResource::VERSION::MAJOR == 3 && ActiveResource::VERSION::MINOR >= 1
         response
       else
-        format.decode(response.body)
+        Dupe.format.decode(response.body)
       end
     end
 
@@ -34,20 +34,19 @@ module ActiveResource #:nodoc:
       # if the request threw an exception
       rescue
         unless body.blank?
-          resource_hash = Hash.from_xml(body)
-          resource_hash = resource_hash[resource_hash.keys.first]
+          resource_hash = Dupe.format.decode(body)      
         end
         resource_hash = {} unless resource_hash.kind_of?(Hash)
         begin
           mocked_response, new_path = Dupe.network.request(:post, path, resource_hash)
           error = false
         rescue Dupe::UnprocessableEntity => e
-          mocked_response = {:error => e.message.to_s}.to_xml(:root => 'errors')
+          mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors')
           error = true
         end
         ActiveResource::HttpMock.respond_to do |mock|
           if error
-            mock.post(path, {}, mocked_response, 422, "Content-Type" => 'application/xml')
+            mock.post(path, {}, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
           else
             mock.post(path, {}, mocked_response, 201, "Location" => new_path)
           end
@@ -65,8 +64,7 @@ module ActiveResource #:nodoc:
       # if the request threw an exception
       rescue
         unless body.blank?
-          resource_hash = Hash.from_xml(body)
-          resource_hash = resource_hash[resource_hash.keys.first]
+          resource_hash = Dupe.format.decode(body)
         end
         resource_hash = {} unless resource_hash.kind_of?(Hash)
         resource_hash.symbolize_keys!
@@ -75,12 +73,12 @@ module ActiveResource #:nodoc:
           error = false
           mocked_response, path = Dupe.network.request(:put, path, resource_hash)
         rescue Dupe::UnprocessableEntity => e
-          mocked_response = {:error => e.message.to_s}.to_xml(:root => 'errors')
+          mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors' )
           error = true
         end
         ActiveResource::HttpMock.respond_to do |mock|
           if error
-            mock.put(path, {}, mocked_response, 422, "Content-Type" => 'application/xml')
+            mock.put(path, {}, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
           else
             mock.put(path, {}, mocked_response, 204)
           end

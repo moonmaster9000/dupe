@@ -401,7 +401,7 @@ Obviously, Dupe had no way of anticipating this possibility. However, you can cr
         </authors>
 
 
-The "Get" method requires a url pattern and a block. In most cases, your block will return a Dupe.find result. Internally, Dupe will transform that into XML. However, if your "Get" block returns a string, Dupe will use that as the response body and not attempt to do any transformations on it. 
+The "Get" method requires a url pattern and a block. In most cases, your block will return a Dupe.find result. Internally, Dupe will transform that into XML (or JSON). However, if your "Get" block returns a string, Dupe will use that as the response body and not attempt to do any transformations on it. 
 
 Suppose instead the service expected us to pass published as a query string parameter:
 
@@ -634,7 +634,3 @@ And also, as you might have guessed, you can override the default DELETE interce
 == More
 
 API docs available at: http://rdoc.info
-
-== TODO List
-
-* We need a rake task that will run your cucumber scenarios and create service documentation based on the dupe log output (i.e., example requests and example responses) that the programmers implementing the service can use as a reference. 

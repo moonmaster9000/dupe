@@ -1,3 +1,6 @@
+v1.1.0.rc1
+  JSON support!!! Thanks @cdmicacc! https://github.com/moonmaster9000/dupe/pull/25
+
 v1.0.1
   bug fix: correctly handle blank POST body (samsonw https://github.com/moonmaster9000/dupe/pull/24)
 

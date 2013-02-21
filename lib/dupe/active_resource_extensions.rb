@@ -11,7 +11,7 @@ module ActiveResource #:nodoc:
         response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
 
       # if the request threw an exception
-      rescue
+      rescue ActiveResource::InvalidRequestError
         mocked_response = Dupe.network.request(:get, path)
         ActiveResource::HttpMock.respond_to do |mock|
           mock.get(path, {}, mocked_response)
@@ -32,7 +32,7 @@ module ActiveResource #:nodoc:
         response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
 
       # if the request threw an exception
-      rescue
+      rescue ActiveResource::InvalidRequestError
         unless body.blank?
           resource_hash = Dupe.format.decode(body)      
         end
@@ -62,7 +62,7 @@ module ActiveResource #:nodoc:
         response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
 
       # if the request threw an exception
-      rescue
+      rescue ActiveResource::InvalidRequestError
         unless body.blank?
           resource_hash = Dupe.format.decode(body)
         end
@@ -90,15 +90,19 @@ module ActiveResource #:nodoc:
     end
 
     def delete(path, headers = {})
-      Dupe.network.request(:delete, path)
+      begin
+        response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
+      rescue ActiveResource::InvalidRequestError
+        Dupe.network.request(:delete, path)
 
-      ActiveResource::HttpMock.respond_to do |mock|
-        mock.delete(path, {}, nil, 200)
+        ActiveResource::HttpMock.respond_to do |mock|
+          mock.delete(path, {}, nil, 200)
+        end
+        response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
+
+        ActiveResource::HttpMock.delete_mock(:delete, path)
+        response
       end
-      response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
-
-      ActiveResource::HttpMock.delete_mock(:delete, path)
-      response
     end
   end
 end

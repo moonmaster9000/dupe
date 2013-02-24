@@ -13,7 +13,7 @@ module ActiveResource #:nodoc:
       # if the request threw an exception
       rescue ActiveResource::InvalidRequestError
         mocked_response = Dupe.network.request(:get, path)
-        ActiveResource::HttpMock.respond_to do |mock|
+        ActiveResource::HttpMock.respond_to(false) do |mock|
           mock.get(path, {}, mocked_response)
         end
         response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
@@ -44,7 +44,7 @@ module ActiveResource #:nodoc:
           mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors')
           error = true
         end
-        ActiveResource::HttpMock.respond_to do |mock|
+        ActiveResource::HttpMock.respond_to(false) do |mock|
           if error
             mock.post(path, {}, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
           else
@@ -76,7 +76,7 @@ module ActiveResource #:nodoc:
           mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors' )
           error = true
         end
-        ActiveResource::HttpMock.respond_to do |mock|
+        ActiveResource::HttpMock.respond_to(false) do |mock|
           if error
             mock.put(path, {}, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
           else
@@ -95,7 +95,7 @@ module ActiveResource #:nodoc:
       rescue ActiveResource::InvalidRequestError
         Dupe.network.request(:delete, path)
 
-        ActiveResource::HttpMock.respond_to do |mock|
+        ActiveResource::HttpMock.respond_to(false) do |mock|
           mock.delete(path, {}, nil, 200)
         end
         response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))

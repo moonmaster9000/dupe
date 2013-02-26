@@ -16,9 +16,11 @@ module ActiveResource #:nodoc:
         ActiveResource::HttpMock.respond_to(false) do |mock|
           mock.get(path, headers, mocked_response)
         end
-        response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
-      ensure
-        ActiveResource::HttpMock.delete_mock(:get, path)
+        begin
+          response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:get, path)
+        end
       end
 
       if ActiveResource::VERSION::MAJOR == 3 && ActiveResource::VERSION::MINOR >= 1
@@ -42,7 +44,14 @@ module ActiveResource #:nodoc:
           mocked_response, new_path = Dupe.network.request(:post, path, resource_hash)
           error = false
         rescue Dupe::UnprocessableEntity => e
-          mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors')
+          mocked_response =
+            case Dupe.format
+            when ActiveResource::Formats::JsonFormat
+              Dupe.format.encode( {errors: e.errors}, :root => 'errors')
+            else
+              Dupe.format.encode( {error: e.errors}, :root => 'errors')
+            end
+
           error = true
         end
         ActiveResource::HttpMock.respond_to(false) do |mock|
@@ -52,9 +61,11 @@ module ActiveResource #:nodoc:
             mock.post(path, headers, mocked_response, 201, "Location" => new_path)
           end
         end
-        response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
-      ensure
-        ActiveResource::HttpMock.delete_mock(:post, path)
+        begin
+          response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:post, path)
+        end
       end
       response
     end
@@ -75,7 +86,13 @@ module ActiveResource #:nodoc:
           error = false
           mocked_response, path = Dupe.network.request(:put, path, resource_hash)
         rescue Dupe::UnprocessableEntity => e
-          mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors' )
+          mocked_response =
+            case Dupe.format
+            when ActiveResource::Formats::JsonFormat
+              Dupe.format.encode( {errors: e.errors}, :root => 'errors')
+            else
+              Dupe.format.encode( {error: e.errors}, :root => 'errors')
+            end
           error = true
         end
         ActiveResource::HttpMock.respond_to(false) do |mock|
@@ -85,9 +102,11 @@ module ActiveResource #:nodoc:
             mock.put(path, headers, mocked_response, 204)
           end
         end
-        response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
-      ensure
-        ActiveResource::HttpMock.delete_mock(:put, path)
+        begin
+          response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:put, path)
+        end
       end
       response
     end
@@ -101,9 +120,11 @@ module ActiveResource #:nodoc:
         ActiveResource::HttpMock.respond_to(false) do |mock|
           mock.delete(path, headers, nil, 200)
         end
-        response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
-      ensure
-        ActiveResource::HttpMock.delete_mock(:delete, path)
+        begin
+          response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:delete, path)
+        end
       end
       response
     end

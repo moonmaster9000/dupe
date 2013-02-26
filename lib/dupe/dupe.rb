@@ -536,5 +536,33 @@ class Dupe
 end
 
 class Dupe
-  class UnprocessableEntity < StandardError; end
+  class UnprocessableEntity < StandardError
+    def initialize(message = "")
+      case message
+      when Hash
+        @errors = []
+        message.each do |k, v|
+          case v
+          when Array
+            v.each {|i| add_error(k, i) }
+          else
+            add_error(k, v)
+          end
+        end
+      when Array
+        @errors = message
+      else
+        super
+      end
+    end
+
+    def errors
+      @errors || [ self.messages ]
+    end
+
+    private
+    def add_error(field, message)
+      @errors << "#{field.to_s.humanize} #{message}"
+    end
+  end
 end

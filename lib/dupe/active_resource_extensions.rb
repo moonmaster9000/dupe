@@ -17,6 +17,7 @@ module ActiveResource #:nodoc:
           mock.get(path, headers, mocked_response)
         end
         response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
+      ensure
         ActiveResource::HttpMock.delete_mock(:get, path)
       end
 
@@ -52,6 +53,7 @@ module ActiveResource #:nodoc:
           end
         end
         response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
+      ensure
         ActiveResource::HttpMock.delete_mock(:post, path)
       end
       response
@@ -84,6 +86,7 @@ module ActiveResource #:nodoc:
           end
         end
         response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
+      ensure
         ActiveResource::HttpMock.delete_mock(:put, path)
       end
       response
@@ -99,10 +102,10 @@ module ActiveResource #:nodoc:
           mock.delete(path, headers, nil, 200)
         end
         response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
-
+      ensure
         ActiveResource::HttpMock.delete_mock(:delete, path)
-        response
       end
+      response
     end
   end
 end

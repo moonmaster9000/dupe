@@ -1,3 +1,5 @@
+This project is no longer maintained. If you'd like to take it over, please let me know!
+
 = Dupe 
 
 There are lots of great tools out there to ease the burden of prototyping ActiveRecord objects while cuking your application (e.g., thoughtbot's {"Factory Girl"}[http://www.thoughtbot.com/projects/factory_girl]).

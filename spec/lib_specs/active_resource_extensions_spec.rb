@@ -53,13 +53,14 @@ describe ActiveResource::Connection do
 
       it "should make ActiveResource throw an unprocessable entity exception if our Post mock throws a Dupe::UnprocessableEntity exception" do
         Post %r{/books\.xml} do |post_data|
-          raise Dupe::UnprocessableEntity.new(:title => "must be present.") unless post_data["title"]
+          raise Dupe::UnprocessableEntity.new(:title => "must be present.") if post_data["title"].blank?
           Dupe.create :book, post_data
         end
 
-        b = Book.create
+        b = Book.create(title: "")
         b.new?.should be_true
         b.errors.should_not be_empty
+        b.errors[:title].should_not be_empty
         b = Book.create(:title => "hello")
         b.new?.should be_false
         b.errors.should be_empty
@@ -142,13 +143,13 @@ describe ActiveResource::Connection do
 
       it "should make ActiveResource throw an unprocessable entity exception if our Put mock throws a Dupe::UnprocessableEntity exception" do
         Put %r{/books/(\d+)\.xml} do |id, put_data|
-          raise Dupe::UnprocessableEntity.new(:title => " must be present.") unless put_data[:title]
+          raise Dupe::UnprocessableEntity.new(:title => "must be present.") if put_data[:title].blank?
           Dupe.find(:book) {|b| b.id == id.to_i}.merge!(put_data)
         end
 
-        @ar_book.title = nil
+        @ar_book.title = ""
         @ar_book.save.should == false
-        @ar_book.errors[:base].should_not be_empty
+        @ar_book.errors[:title].should_not be_empty
 
         @ar_book.title = "Rails!"
         @ar_book.save.should == true
@@ -241,13 +242,14 @@ describe ActiveResource::Connection do
 
       it "should make ActiveResource throw an unprocessable entity exception if our Post mock throws a Dupe::UnprocessableEntity exception" do
         Post %r{/books\.json} do |post_data|
-          raise Dupe::UnprocessableEntity.new(:title => "must be present.") unless post_data["title"]
+          raise Dupe::UnprocessableEntity.new(:title => "must be present.") if post_data[:title].blank?
           Dupe.create :book, post_data
         end
 
-        b = Book.create
+        b = Book.create(title: "")
         b.new?.should be_true
-        b.should_not be_empty
+        b.errors.should_not be_empty
+        b.errors[:title].should_not be_empty
       end
 
       it "should handle request with blank body" do
@@ -327,13 +329,14 @@ describe ActiveResource::Connection do
 
       it "should make ActiveResource throw an unprocessable entity exception if our Put mock throws a Dupe::UnprocessableEntity exception" do
         Put %r{/books/(\d+)\.json} do |id, put_data|
-          raise Dupe::UnprocessableEntity.new(:title => " must be present.") unless put_data[:title]
+          raise Dupe::UnprocessableEntity.new(:title => "must be present.") if put_data[:title].blank?
           Dupe.find(:book) {|b| b.id == id.to_i}.merge!(put_data)
         end
 
         @ar_book.title = nil
         @ar_book.save.should == false
-        @ar_book.should_not be_empty
+        @ar_book.errors.should_not be_empty
+        @ar_book.errors[:title].should_not be_empty
 
         @ar_book.title = "Rails!"
         @ar_book.save.should == true

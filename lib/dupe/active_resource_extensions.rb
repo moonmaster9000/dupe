@@ -11,13 +11,16 @@ module ActiveResource #:nodoc:
         response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
 
       # if the request threw an exception
-      rescue
+      rescue ActiveResource::InvalidRequestError
         mocked_response = Dupe.network.request(:get, path)
-        ActiveResource::HttpMock.respond_to do |mock|
-          mock.get(path, {}, mocked_response)
+        ActiveResource::HttpMock.respond_to(false) do |mock|
+          mock.get(path, headers, mocked_response)
         end
-        response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
-        ActiveResource::HttpMock.delete_mock(:get, path)
+        begin
+          response = request(:get, path, build_request_headers(headers, :get, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:get, path)
+        end
       end
 
       if ActiveResource::VERSION::MAJOR == 3 && ActiveResource::VERSION::MINOR >= 1
@@ -32,27 +35,37 @@ module ActiveResource #:nodoc:
         response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
 
       # if the request threw an exception
-      rescue
+      rescue ActiveResource::InvalidRequestError
         unless body.blank?
-          resource_hash = Dupe.format.decode(body)      
+          resource_hash = Dupe.format.decode(body)
         end
         resource_hash = {} unless resource_hash.kind_of?(Hash)
         begin
           mocked_response, new_path = Dupe.network.request(:post, path, resource_hash)
           error = false
         rescue Dupe::UnprocessableEntity => e
-          mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors')
+          mocked_response =
+            case Dupe.format
+            when ActiveResource::Formats::JsonFormat
+              Dupe.format.encode( {errors: e.errors}, :root => 'errors')
+            else
+              Dupe.format.encode( {error: e.errors}, :root => 'errors')
+            end
+
           error = true
         end
-        ActiveResource::HttpMock.respond_to do |mock|
+        ActiveResource::HttpMock.respond_to(false) do |mock|
           if error
-            mock.post(path, {}, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
+            mock.post(path, headers, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
           else
-            mock.post(path, {}, mocked_response, 201, "Location" => new_path)
+            mock.post(path, headers, mocked_response, 201, "Location" => new_path)
           end
         end
-        response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
-        ActiveResource::HttpMock.delete_mock(:post, path)
+        begin
+          response = request(:post, path, body.to_s, build_request_headers(headers, :post, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:post, path)
+        end
       end
       response
     end
@@ -62,7 +75,7 @@ module ActiveResource #:nodoc:
         response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
 
       # if the request threw an exception
-      rescue
+      rescue ActiveResource::InvalidRequestError
         unless body.blank?
           resource_hash = Dupe.format.decode(body)
         end
@@ -73,31 +86,46 @@ module ActiveResource #:nodoc:
           error = false
           mocked_response, path = Dupe.network.request(:put, path, resource_hash)
         rescue Dupe::UnprocessableEntity => e
-          mocked_response = Dupe.format.encode( {:error => e.message.to_s}, :root => 'errors' )
+          mocked_response =
+            case Dupe.format
+            when ActiveResource::Formats::JsonFormat
+              Dupe.format.encode( {errors: e.errors}, :root => 'errors')
+            else
+              Dupe.format.encode( {error: e.errors}, :root => 'errors')
+            end
           error = true
         end
-        ActiveResource::HttpMock.respond_to do |mock|
+        ActiveResource::HttpMock.respond_to(false) do |mock|
           if error
-            mock.put(path, {}, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
+            mock.put(path, headers, mocked_response, 422, "Content-Type" => Dupe.format.mime_type)
           else
-            mock.put(path, {}, mocked_response, 204)
+            mock.put(path, headers, mocked_response, 204)
           end
         end
-        response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
-        ActiveResource::HttpMock.delete_mock(:put, path)
+        begin
+          response = request(:put, path, body.to_s, build_request_headers(headers, :put, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:put, path)
+        end
       end
       response
     end
 
     def delete(path, headers = {})
-      Dupe.network.request(:delete, path)
+      begin
+        response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
+      rescue ActiveResource::InvalidRequestError
+        Dupe.network.request(:delete, path)
 
-      ActiveResource::HttpMock.respond_to do |mock|
-        mock.delete(path, {}, nil, 200)
+        ActiveResource::HttpMock.respond_to(false) do |mock|
+          mock.delete(path, headers, nil, 200)
+        end
+        begin
+          response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
+        ensure
+          ActiveResource::HttpMock.delete_mock(:delete, path)
+        end
       end
-      response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
-
-      ActiveResource::HttpMock.delete_mock(:delete, path)
       response
     end
   end

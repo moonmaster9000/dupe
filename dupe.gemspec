@@ -10,6 +10,6 @@ Gem::Specification.new do |s|
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir["spec/**/*"]
   
-  s.add_dependency              "activeresource", "~> 3.0"
+  s.add_dependency              "activeresource", ">= 3", "< 6"
   s.add_development_dependency  "rspec"
 end
